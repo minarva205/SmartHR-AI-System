@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHR AI - Smart Resume Parser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        .ai-glow {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s infinite ease-in-out; }
+
+        @keyframes loading-bar {
+            0% { transform: translateX(-100%); width: 30%; }
+            50% { width: 65%; }
+            100% { transform: translateX(280%); width: 25%; }
+        }
+        .loading-bar-anim {
+            animation: loading-bar 1.6s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-white px-4">
+
+    <div class="text-center max-w-lg animate-pulse-slow">
+        <!-- Glowing icon -->
+        <div class="relative w-28 h-28 mx-auto mb-10 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-3xl flex items-center justify-center shadow-2xl ai-glow">
+            <i class="fas fa-file-waveform text-5xl text-white"></i>
+            <div class="absolute -inset-1.5 rounded-3xl bg-indigo-500/25 blur-sm -z-10 animate-ping"></div>
+        </div>
+
+        <h1 class="text-4xl font-black mb-3 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-300 to-violet-300">
+            Smart Resume Parser
+        </h1>
+        <p class="text-slate-400 text-sm mb-8 leading-relaxed">
+            AI is loading your personalized Resume Intelligence workspace.<br>
+            Detecting your access level and routing you securely...
+        </p>
+
+        <!-- Loading Bar -->
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mb-3 border border-slate-700">
+            <div class="bg-gradient-to-r from-indigo-500 to-violet-500 h-full rounded-full loading-bar-anim"></div>
+        </div>
+        <p id="statusText" class="text-[11px] font-mono text-slate-500 tracking-wider">[ SYS ] Verifying session credentials...</p>
+    </div>
+
+    <script>
+        const statusMessages = [
+            '[ SYS ] Verifying session credentials...',
+            '[ AI  ] Connecting to resume intelligence engine...',
+            '[ DB  ] Fetching candidate registry...',
+            '[ NLP ] Initializing skill extraction module...',
+            '[ SYS ] Routing to your workspace...'
+        ];
+        let msgIdx = 0;
+        const statusEl = document.getElementById('statusText');
+        const interval = setInterval(() => {
+            msgIdx = (msgIdx + 1) % statusMessages.length;
+            statusEl.textContent = statusMessages[msgIdx];
+        }, 600);
+
+        document.addEventListener('DOMContentLoaded', function () {
+            setTimeout(function () {
+                fetch('/api/current-user')
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        throw new Error('Unauthenticated');
+                    })
+                    .then(user => {
+                        clearInterval(interval);
+                        if (user.role === 'ADMIN') {
+                            window.location.href = 'resume-parser-admin.html';
+                        } else {
+                            window.location.href = 'resume-parser-employee.html';
+                        }
+                    })
+                    .catch(err => {
+                        clearInterval(interval);
+                        console.error('Redirecting to login:', err);
+                        window.location.href = 'login.html';
+                    });
+            }, 1800);
+        });
+    </script>
+</body>
+</html>

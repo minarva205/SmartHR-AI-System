@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+    <style>
+        .shimmer {
+            background: linear-gradient(90deg, #f8fafc 25%, #e2e8f0 50%, #f8fafc 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-glow { animation: aiGlow 3s infinite alternate; }
+        @keyframes aiGlow { 0%{box-shadow: 0 0 5px rgba(99,102,241,0.2);} 100%{box-shadow: 0 0 15px rgba(99,102,241,0.6);} }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-blue-600 to-indigo-700 min-h-screen flex items-center justify-center relative">
+
+    <a href="index.html"
+        class="absolute top-8 left-8 text-slate-600 hover:text-slate-900 transition-colors flex items-center font-bold bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+
+    <div class="w-full max-w-md z-10">
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-2xl">S</span>
+                </div>
+                <h1 class="text-3xl font-bold text-slate-800">SmartHR AI</h1>
+                <p class="text-slate-500 mt-2">Welcome back to your HR system</p>
+                
+                <!-- AI Daily Quote -->
+                <div class="mt-4 p-3 bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-100 rounded-xl ai-glow text-left">
+                    <p class="text-[10px] font-black text-indigo-500 uppercase tracking-wider mb-1 flex items-center gap-1"><i class="fas fa-sparkles"></i> AI Daily Motivation</p>
+                    <div id="aiQuoteLoader" class="shimmer h-4 w-3/4 rounded mt-1"></div>
+                    <p id="aiQuoteTxt" class="text-slate-600 text-xs italic font-medium hidden"></p>
+                </div>
+
+                <div id="loginError" class="hidden mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-semibold"></div>
+            </div>
+
+            <form action="/api/login" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Email Address</label>
+                    <input type="email" name="email" placeholder="your@email.com" required
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Password</label>
+                    <div class="relative">
+                        <input type="password" id="passwordField" name="password" placeholder="••••••••" required
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                        <button type="button" onclick="togglePassword()"
+                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                            <i class="fas fa-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-sm">
+                    <label class="flex items-center">
+                        <input type="checkbox" class="mr-2"> Remember me
+                    </label>
+                    <a href="forgot-password.html" class="text-blue-600 hover:text-blue-700 font-semibold">Forgot Password?</a>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-slate-700 font-semibold mb-2">Security Check</label>
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-slate-200 p-2 rounded-lg border border-slate-300 font-mono font-bold text-slate-800 tracking-widest text-center w-32 shadow-inner"
+                            id="captchaQuestion">
+                            ? + ? =
+                        </div>
+                        <input type="number" id="captchaAnswer" required placeholder="Answer"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <p id="captchaError" class="text-red-500 text-xs mt-1 hidden font-semibold">Incorrect CAPTCHA
+                        answer. Please try again.</p>
+                </div>
+                <button type="submit"
+                    class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-slate-600">Don't have an account? <a href="signup.html"
+                        class="text-blue-600 font-bold hover:underline">Get Started</a></p>
+            </div>
+        </div>
+    </div>
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('passwordField');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // CAPTCHA Logic
+        let captchaExpectedAnswer = 0;
+
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            captchaExpectedAnswer = num1 + num2;
+            document.getElementById('captchaQuestion').innerText = `${num1} + ${num2} =`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCaptcha();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const error = urlParams.get('error');
+            const success = urlParams.get('success');
+            const errorDiv = document.getElementById('loginError');
+            
+            if (error === 'true') {
+                errorDiv.textContent = 'Invalid email or password.';
+                errorDiv.className = 'mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm font-semibold';
+                errorDiv.classList.remove('hidden');
+            } else if (error === 'pending_approval') {
+                errorDiv.textContent = 'Your account is pending HR approval. Please wait for an Admin to verify your account.';
+                errorDiv.className = 'mt-4 p-3 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-semibold';
+                errorDiv.classList.remove('hidden');
+            }
+            
+            if (success === 'employee_pending') {
+                errorDiv.textContent = 'Account created successfully! Please wait for HR approval before you can log in.';
+                errorDiv.className = 'mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold';
+                errorDiv.classList.remove('hidden');
+            } else if (success === 'admin_registered') {
+                errorDiv.textContent = 'Admin account created successfully! You can now log in.';
+                errorDiv.className = 'mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-sm font-semibold';
+                errorDiv.classList.remove('hidden');
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            const userAnswer = parseInt(document.getElementById('captchaAnswer').value, 10);
+            if (userAnswer !== captchaExpectedAnswer) {
+                e.preventDefault();
+                document.getElementById('captchaError').classList.remove('hidden');
+                generateCaptcha();
+                document.getElementById('captchaAnswer').value = '';
+            } else {
+                document.getElementById('captchaError').classList.add('hidden');
+            }
+        });
+
+        // AI Feature
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key";
+        async function fetchAIQuote() {
+            const prompt = "Write a very short (1 sentence) motivational quote for an employee starting their workday.";
+            try {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`, {
+                    method: 'POST', headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({contents:[{parts:[{text: prompt}]}]})
+                });
+                const d = await r.json();
+                const quote = d.candidates[0].content.parts[0].text;
+                document.getElementById('aiQuoteLoader').classList.add('hidden');
+                document.getElementById('aiQuoteTxt').textContent = `"${quote.trim().replace(/"/g, '')}"`;
+                document.getElementById('aiQuoteTxt').classList.remove('hidden');
+            } catch(e) {
+                document.getElementById('aiQuoteLoader').classList.add('hidden');
+                document.getElementById('aiQuoteTxt').textContent = '"Success is not final; failure is not fatal: It is the courage to continue that counts."';
+                document.getElementById('aiQuoteTxt').classList.remove('hidden');
+            }
+        }
+        setTimeout(fetchAIQuote, 500);
+    </script>
+</body>
+
+</html>

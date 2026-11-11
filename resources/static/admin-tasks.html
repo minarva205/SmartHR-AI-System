@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Tasks Console | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="admin-dashboard.html"
+                    class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Task Allocation Center</h1>
+                <p class="text-xs text-slate-400 mt-1">Assign operational workloads and cross-examine priorities via AI
+                    validation checks</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200/70 h-fit">
+                <h3 class="font-bold text-base mb-4 text-slate-700"><i
+                        class="fas fa-tasks text-blue-600 mr-2"></i>Delegate Blueprint</h3>
+                <form id="taskForm" onsubmit="assignTask(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Target Employee</label>
+                        <select id="employeeSelect" required
+                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Task Title</label>
+                        <input type="text" id="title" required placeholder="e.g. Audit Quarter Reports"
+                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Target Timeline
+                            Boundary</label>
+                        <input type="date" id="dueDate" required
+                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Priority Weights</label>
+                        <select id="priority"
+                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none">
+                            <option value="Low">Low Priority</option>
+                            <option value="Medium" selected>Medium Priority</option>
+                            <option value="High">High Priority</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-1">Task Descriptions</label>
+                        <textarea id="description" rows="3" required
+                            placeholder="Detail specific deliverables clearly..."
+                            class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none"></textarea>
+                    </div>
+
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="runAiValidation()"
+                            class="w-1/3 bg-slate-800 text-white font-bold text-xs p-3 rounded-xl hover:bg-slate-700 transition flex items-center justify-center gap-1"><i
+                                class="fas fa-brain text-[10px]"></i> AI Check</button>
+                        <button type="submit" id="submitBtn"
+                            class="w-2/3 bg-blue-600 text-white font-bold text-xs p-3 rounded-xl hover:bg-blue-700 transition">Delegate
+                            Assignment</button>
+                    </div>
+                </form>
+
+                <div id="aiBox" class="mt-4 p-4 bg-purple-50 border border-purple-100 rounded-2xl hidden">
+                    <h4 class="text-[10px] font-black text-purple-800 uppercase tracking-wide mb-1"><i
+                            class="fas fa-robot mr-1"></i> AI Strategic Risk Review:</h4>
+                    <p id="aiTxt" class="text-slate-600 text-[11px] leading-relaxed font-medium">Analyzing parameters...
+                    </p>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/70">
+                <h3 class="font-bold text-base text-slate-700 mb-6">Active Task Assignments Ledger</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-3">
+                                <th class="pb-3">Task Owner</th>
+                                <th class="pb-3">Title Description</th>
+                                <th class="pb-3">Status</th>
+                                <th class="pb-3 text-right">Operation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:9090/api/tasks';
+
+        async function initDashboard() {
+            await loadEmployees();
+            await loadTasks();
+        }
+
+        async function loadEmployees() {
+            try {
+                const res = await fetch('http://localhost:9090/api/employees/all');
+                const list = await res.json();
+                const dropdown = document.getElementById('employeeSelect');
+                dropdown.innerHTML = '<option value="">Choose Staff Member</option>';
+                list.forEach(e => {
+                    dropdown.innerHTML += `<option value="${e.id}">${e.fullName} (${e.department || 'Staff'})</option>`;
+                });
+            } catch (err) { console.error(err); }
+        }
+
+        async function loadTasks() {
+            try {
+                const res = await fetch(`${API_URL}/all`);
+                const data = await res.json();
+                const tbody = document.getElementById('taskTableBody');
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 italic">No distributed assignments found.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(t => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-4 font-bold text-slate-800">${t.employee ? t.employee.fullName : 'System Entry'}</td>
+                            <td class="py-4">
+                                <div class="font-semibold text-slate-700">${t.title}</div>
+                                <div class="text-[11px] text-slate-400 max-w-xs truncate">${t.description || '-'}</div>
+                            </td>
+                            <td class="py-4"><span class="px-2 py-0.5 text-[10px] font-bold rounded-lg bg-blue-50 text-blue-600">${t.status}</span></td>
+                            <td class="py-4 text-right">
+                                <button onclick="deleteTask(${t.id})" class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 flex items-center justify-center text-xs transition inline-flex"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        /* ─── GEMINI AI VALIDATION ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key"; // 🔑 Replace with real Gemini key
+
+        async function runAiValidation() {
+            const title = document.getElementById('title').value.trim();
+            const desc = document.getElementById('description').value.trim();
+            const date = document.getElementById('dueDate').value;
+            const priority = document.getElementById('priority').value;
+
+            if (!title || !desc) {
+                alert("Please input task title and description first.");
+                return;
+            }
+
+            const box = document.getElementById('aiBox');
+            const txt = document.getElementById('aiTxt');
+            box.classList.remove('hidden');
+            txt.innerHTML = `<span class="flex items-center gap-2">
+                <svg class="animate-spin h-3 w-3 text-purple-600" viewBox="0 0 24 24" fill="none">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+                </svg>
+                AI is inspecting task priorities and deadline risk metrics...
+            </span>`;
+
+            const today = new Date().toISOString().split('T')[0];
+            const daysLeft = date ? Math.ceil((new Date(date) - new Date(today)) / (1000*60*60*24)) : null;
+
+            const prompt = `You are an AI HR Task Risk Analyzer for a company called SmartHR AI. Analyze this task assignment and provide a brief strategic review:
+
+Task Title: ${title}
+Description: ${desc}
+Priority: ${priority}
+Due Date: ${date || 'Not set'}
+Days Until Deadline: ${daysLeft !== null ? daysLeft + ' days' : 'No deadline set'}
+
+Provide a 2-3 sentence analysis covering:
+1. Task feasibility and priority assessment
+2. Deadline risk level (Low/Medium/High) and why
+3. One actionable recommendation for the admin
+
+Keep it concise, professional, and actionable.`;
+
+            try {
+                const resp = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    }
+                );
+
+                if (!resp.ok) throw new Error('API error');
+                const data = await resp.json();
+                const analysis = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                txt.innerText = analysis || getFallbackAnalysis(title, priority, daysLeft);
+
+            } catch (e) {
+                txt.innerText = getFallbackAnalysis(title, priority, daysLeft);
+            }
+        }
+
+        function getFallbackAnalysis(title, priority, daysLeft) {
+            let riskLevel = 'Low';
+            let riskNote = 'There is ample time to complete this task comfortably.';
+
+            if (daysLeft !== null) {
+                if (daysLeft < 0) {
+                    riskLevel = 'Critical';
+                    riskNote = 'The deadline has already passed — immediate escalation is required.';
+                } else if (daysLeft <= 2) {
+                    riskLevel = 'High';
+                    riskNote = 'Deadline is extremely close — prioritize immediately and monitor daily.';
+                } else if (daysLeft <= 7) {
+                    riskLevel = 'Medium';
+                    riskNote = 'Deadline is within a week — keep close oversight and check progress frequently.';
+                }
+            }
+
+            const priorityNote = priority === 'High'
+                ? 'This is a high-priority assignment that demands immediate attention.'
+                : priority === 'Medium'
+                ? 'This is a medium-priority task that should be tracked regularly.'
+                : 'This is a low-priority task that can be handled with standard workflow.';
+
+            return `📋 Task "${title}" — ${priorityNote} Deadline Risk: ${riskLevel}. ${riskNote} Recommendation: Assign to an available team member with relevant experience and set a mid-point check-in for timely delivery.`;
+        }
+
+        async function assignTask(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true; btn.innerText = "Processing...";
+
+            const payload = {
+                employee: { id: parseInt(document.getElementById('employeeSelect').value) },
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                dueDate: document.getElementById('dueDate').value,
+                priority: document.getElementById('priority').value,
+                status: 'Pending'
+            };
+
+            try {
+                const res = await fetch(`${API_URL}/assign`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    document.getElementById('taskForm').reset();
+                    document.getElementById('aiBox').classList.add('hidden');
+                    loadTasks();
+                }
+            } catch (err) { console.error(err); }
+            finally { btn.disabled = false; btn.innerText = "Delegate Assignment"; }
+        }
+
+        async function deleteTask(id) {
+            if (!confirm("Recall this task assignment blueprint?")) return;
+            try {
+                const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                if (res.ok) loadTasks();
+            } catch (e) { console.error(e); }
+        }
+
+        window.onload = initDashboard;
+    </script>
+</body>
+
+</html>

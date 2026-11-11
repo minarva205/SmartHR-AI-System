@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Top Performers Leaderboard | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,.25); }
+        .shimmer {
+            background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-950 text-slate-100 min-h-screen p-6 md:p-12">
+    <div class="max-w-4xl mx-auto">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-400 hover:text-blue-300 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-4xl font-black italic tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-cyan-500 uppercase">
+                    Top Performers
+                </h1>
+                <p class="text-slate-500 text-xs font-bold tracking-widest mt-1 uppercase">Recognition of workforce excellence</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs bg-cyan-950/80 text-cyan-300 border border-cyan-800/50 px-3.5 py-1.5 rounded-full font-bold uppercase tracking-wider hidden md:inline-block">
+                    Workforce Standings
+                </span>
+                <button type="button" onclick="aiCoachMotivation()"
+                    class="ai-btn flex items-center gap-2 text-xs font-black bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 rounded-xl ai-badge">
+                    <i class="fas fa-brain"></i> AI Performance Coach
+                </button>
+            </div>
+        </header>
+
+        <!-- AI Coach Box -->
+        <div id="aiCoachBox" class="hidden mb-8 p-6 bg-slate-900 border border-violet-500/30 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-violet-500 text-6xl transform rotate-12"><i class="fas fa-robot"></i></div>
+            <h3 class="text-sm font-black text-violet-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fas fa-bolt text-amber-400"></i> AI Motivational Insight
+            </h3>
+            <div id="aiCoachLoader" class="hidden shimmer h-12 w-full max-w-lg mb-2 rounded-xl"></div>
+            <div id="aiCoachTxt" class="text-slate-300 text-sm leading-relaxed font-medium relative z-10 whitespace-pre-line"></div>
+        </div>
+
+        <!-- Podium Top 3 (Conditional) -->
+        <div id="podiumContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            <!-- Dynamically populated top 3 card widgets -->
+        </div>
+
+        <!-- Leaderboard List -->
+        <div class="bg-slate-900/30 border border-white/5 rounded-[2rem] p-6 md:p-8">
+            <h3 class="text-lg font-bold mb-6 text-slate-400 flex items-center">
+                <i class="fas fa-list-ol text-blue-500 mr-2"></i>
+                Performance Rankings
+            </h3>
+            <div id="leaderboardList" class="space-y-4">
+                <div class="animate-pulse bg-slate-900/50 border border-white/5 h-20 rounded-[1.5rem]"></div>
+                <div class="animate-pulse bg-slate-900/50 border border-white/5 h-20 rounded-[1.5rem]"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(() => {
+                    loadLeaderboard();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function loadLeaderboard() {
+            try {
+                const res = await fetch('/api/leaderboard/top');
+                const data = await res.json();
+                
+                const podium = document.getElementById('podiumContainer');
+                const list = document.getElementById('leaderboardList');
+                
+                if (!data || data.length === 0) {
+                    podium.innerHTML = '';
+                    list.innerHTML = `
+                        <div class="py-12 text-center text-slate-500 italic">
+                            <i class="fas fa-trophy text-4xl mb-4 text-slate-600 block"></i>
+                            No performance scores compiled yet.
+                        </div>`;
+                    return;
+                }
+
+                // Render Podium
+                const top3 = data.slice(0, 3);
+                podium.innerHTML = top3.map((emp, index) => {
+                    const rank = index + 1;
+                    const trophyColor = rank === 1 ? 'text-yellow-400' : rank === 2 ? 'text-slate-300' : 'text-amber-600';
+                    const gradient = rank === 1 ? 'from-yellow-500/10 to-transparent border-yellow-500/30 shadow-yellow-500/5' :
+                                     rank === 2 ? 'from-slate-500/10 to-transparent border-slate-500/20' :
+                                     'from-amber-600/10 to-transparent border-amber-600/20';
+
+                    return `
+                        <div class="bg-gradient-to-b ${gradient} border p-6 rounded-[2rem] text-center relative overflow-hidden flex flex-col justify-between h-56">
+                            <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/5 rounded-full flex items-center justify-center rotate-12">
+                                <span class="text-3xl font-black text-white/5">#${rank}</span>
+                            </div>
+                            <div class="text-3xl ${trophyColor} mb-3">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-white text-lg truncate">${emp.fullName || 'Staff'}</h3>
+                                <p class="text-[9px] font-black uppercase text-slate-400 tracking-wider mt-1 truncate">${emp.designation || 'Specialist'}</p>
+                            </div>
+                            <div class="mt-4">
+                                <span class="text-2xl font-black text-blue-400">${emp.overallScore || '0.0'}</span>
+                                <span class="text-[9px] text-slate-500 font-bold block uppercase tracking-wider">Overall Score</span>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                // Render List of rest or all
+                list.innerHTML = data.map((emp, index) => {
+                    const rank = index + 1;
+                    let badgeClass = "text-slate-500";
+                    let trophyIcon = `#${rank}`;
+
+                    if (rank === 1) { badgeClass = "text-yellow-400 text-xl"; trophyIcon = '<i class="fas fa-trophy"></i>'; }
+                    else if (rank === 2) { badgeClass = "text-slate-300 text-xl"; trophyIcon = '<i class="fas fa-trophy"></i>'; }
+                    else if (rank === 3) { badgeClass = "text-amber-600 text-xl"; trophyIcon = '<i class="fas fa-trophy"></i>'; }
+
+                    return `
+                        <div class="flex items-center justify-between p-5 rounded-[1.5rem] bg-slate-950/40 border border-white/5 hover:border-slate-800 transition">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-900 border border-white/5 flex items-center justify-center font-black ${badgeClass}">
+                                    ${trophyIcon}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-200 text-base">${emp.fullName || 'Staff'}</h4>
+                                    <p class="text-[9px] font-black uppercase text-slate-500 tracking-widest mt-0.5">${emp.designation || 'Specialist'}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-xl font-black text-blue-400">${emp.overallScore || '0.0'}</div>
+                                <div class="text-[8px] font-bold text-slate-600 uppercase tracking-wider">Rating Score</div>
+                            </div>
+                        </div>`;
+                }).join('');
+
+            } catch (err) {
+                console.error("Error loading leaderboard:", err);
+                list.innerHTML = `<div class="p-6 text-center text-rose-400 font-bold bg-rose-950/20 border border-rose-900/35 rounded-2xl">Error displaying top performers standings.</div>`;
+            }
+        }
+
+        /* ─── GEMINI AI ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key";
+        let allLeaderboardData = [];
+        
+        // Hook into existing loadLeaderboard to store data
+        const originalLoadLeaderboard = loadLeaderboard;
+        loadLeaderboard = async function() {
+            await originalLoadLeaderboard();
+            try {
+                const res = await fetch('/api/leaderboard/top');
+                allLeaderboardData = await res.json();
+            } catch(e) {}
+        };
+
+        async function callGemini(prompt) {
+            const r = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                { method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+            );
+            if (!r.ok) throw new Error('API error');
+            const d = await r.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function aiCoachMotivation() {
+            const box = document.getElementById('aiCoachBox');
+            const loader = document.getElementById('aiCoachLoader');
+            const txt = document.getElementById('aiCoachTxt');
+
+            box.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            txt.textContent = '';
+
+            if (allLeaderboardData.length === 0) {
+                txt.textContent = "No data available for coaching.";
+                loader.classList.add('hidden');
+                return;
+            }
+
+            const prompt = `You are an AI Performance Coach for a company. Look at the top performer: ${allLeaderboardData[0]?.fullName} (Score: ${allLeaderboardData[0]?.overallScore}). Write a 2-sentence highly motivational message to encourage other employees to reach the top of the leaderboard.`;
+
+            try {
+                const motivation = await callGemini(prompt);
+                txt.innerHTML = motivation.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>').replace(/\n/g, '<br>');
+            } catch(e) {
+                txt.innerHTML = `<strong class="text-white">AI Coach:</strong><br>Success is the sum of small efforts repeated day in and day out. Let's aim for the top!`;
+            }
+
+            loader.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

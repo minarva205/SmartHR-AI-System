@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Company Announcements | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,.25); }
+        .shimmer {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 12px;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Company Announcements</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Stay up to date with the latest organization news, events, and policies</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider hidden md:inline-block">
+                    Notice Board
+                </span>
+                <button type="button" onclick="aiSummarizeBoard()"
+                    class="ai-btn flex items-center gap-2 text-xs font-black bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2 rounded-xl ai-badge">
+                    <i class="fas fa-wand-magic-sparkles"></i> AI Board Summary
+                </button>
+            </div>
+        </header>
+
+        <!-- AI Summary Box -->
+        <div id="aiSummaryBox" class="hidden mb-8 p-6 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-violet-500 text-6xl transform rotate-12"><i class="fas fa-robot"></i></div>
+            <h3 class="text-sm font-black text-violet-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fas fa-bolt text-amber-400"></i> AI Smart Summary
+            </h3>
+            <div id="aiSummaryLoader" class="hidden shimmer h-12 mb-2 w-full max-w-lg"></div>
+            <div id="aiSummaryTxt" class="text-slate-700 text-sm leading-relaxed font-medium relative z-10 whitespace-pre-line"></div>
+        </div>
+
+        <!-- Bulletins Grid -->
+        <div id="announcementGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="animate-pulse bg-white border border-slate-100 h-48 rounded-[2rem] shadow-sm"></div>
+            <div class="animate-pulse bg-white border border-slate-100 h-48 rounded-[2rem] shadow-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(() => {
+                    fetchAnnouncements();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function fetchAnnouncements() {
+            try {
+                const response = await fetch('/api/announcements/all');
+                const data = await response.json();
+
+                const grid = document.getElementById('announcementGrid');
+                if (!data || data.length === 0) {
+                    grid.innerHTML = `
+                        <div class="col-span-2 py-12 bg-white border border-slate-100 rounded-[2rem] text-center text-slate-400 italic">
+                            <i class="fas fa-bullhorn text-4xl mb-4 text-slate-300 block"></i>
+                            No official announcements have been published recently.
+                        </div>`;
+                    return;
+                }
+
+                grid.innerHTML = data.map(item => {
+                    const formattedDate = item.date ? new Date(item.date).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : 'Recent';
+                    
+                    return `
+                        <div class="bg-white border border-slate-100 p-8 rounded-[2rem] shadow-sm hover:shadow-md transition-all flex flex-col justify-between group">
+                            <div>
+                                <div class="flex justify-between items-center mb-5">
+                                    <span class="px-3.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${getCategoryClass(item.category)}">
+                                        ${item.category || 'General'}
+                                    </span>
+                                    <span class="text-slate-400 text-xs font-semibold">${formattedDate}</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-3 group-hover:text-blue-600 transition duration-150">${item.title}</h3>
+                                <p class="text-slate-500 text-sm leading-relaxed mb-6">${item.content}</p>
+                            </div>
+                            <div class="flex items-center text-slate-400 border-t pt-4 text-xs font-bold uppercase tracking-wider">
+                                <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 mr-2 text-[10px]">
+                                    ${item.postedBy ? item.postedBy[0].toUpperCase() : 'S'}
+                                </div>
+                                <span>Published By: ${item.postedBy || 'HR Admin'}</span>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (error) {
+                console.error("Error fetching announcements:", error);
+                document.getElementById('announcementGrid').innerHTML = `
+                    <div class="col-span-2 p-6 text-center text-rose-500 font-bold bg-rose-50 border rounded-2xl border-rose-100">
+                        Error fetching announcement bulletin from server.
+                    </div>`;
+            }
+        }
+
+        function getCategoryClass(cat) {
+            switch (cat) {
+                case 'Holiday': return 'bg-orange-50 text-orange-700 border border-orange-100';
+                case 'Event': return 'bg-purple-50 text-purple-700 border border-purple-100';
+                case 'Policy': return 'bg-blue-50 text-blue-700 border border-blue-100';
+                default: return 'bg-slate-50 text-slate-600 border border-slate-100';
+            }
+        }
+
+        /* ─── GEMINI AI ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key"; // 🔑 Replace with real key
+        async function callGemini(prompt) {
+            const r = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                { method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+            );
+            if (!r.ok) throw new Error('API error');
+            const d = await r.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function aiSummarizeBoard() {
+            const box = document.getElementById('aiSummaryBox');
+            const loader = document.getElementById('aiSummaryLoader');
+            const txt = document.getElementById('aiSummaryTxt');
+
+            box.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            txt.textContent = '';
+
+            try {
+                const response = await fetch('/api/announcements/all');
+                const data = await response.json();
+                
+                if (!data || data.length === 0) {
+                    txt.textContent = "There are currently no announcements to summarize.";
+                    loader.classList.add('hidden');
+                    return;
+                }
+
+                // Prepare context for AI
+                const announcementsText = data.map(a => `[${a.category}] ${a.title}: ${a.content}`).join('\n\n');
+                const prompt = `You are an AI HR Assistant. Summarize the following company announcements into a brief, easy-to-read daily bulletin digest for employees. Use bullet points and keep it short and professional:\n\n${announcementsText}`;
+
+                try {
+                    const summary = await callGemini(prompt);
+                    txt.innerHTML = summary.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+                } catch (e) {
+                    // Fallback if AI fails
+                    txt.innerHTML = `<strong>Quick Recap:</strong><br>- You have ${data.length} active announcements on the board.<br>- Recent categories include: ${[...new Set(data.map(d=>d.category))].join(', ')}.<br>- Please review the individual cards below for details.`;
+                }
+            } catch (e) {
+                txt.textContent = "Could not fetch announcements for summary.";
+            }
+            
+            loader.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

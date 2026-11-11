@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin LMS & Training Console | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="admin-dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">LMS Administration Console</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Design course curriculums, register learning assignments, and analyze workforce progress</p>
+            </div>
+            <div>
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                    LMS Coordinator Access
+                </span>
+            </div>
+        </header>
+
+        <!-- Video Learning Section -->
+        <div class="bg-slate-900 p-8 rounded-[2rem] shadow-2xl mb-8 border border-slate-800 text-white relative overflow-hidden hidden"
+            id="videoSection">
+            <div class="absolute top-0 right-0 p-8 opacity-10">
+                <i class="fas fa-play-circle text-9xl"></i>
+            </div>
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2">
+                    <h3 class="text-2xl font-bold mb-2 flex items-center text-blue-400">
+                        <i class="fas fa-video mr-3"></i> <span id="playingCourseName">Select a course to play</span>
+                    </h3>
+                    <p class="text-slate-400 mb-6 text-sm">Previewing the course video player.</p>
+                    <div class="rounded-2xl overflow-hidden bg-black shadow-2xl border-4 border-slate-800">
+                        <video id="courseVideo" class="w-full" controls ontimeupdate="trackVideoProgress(this)">
+                            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                            Your browser does not support HTML video.
+                        </video>
+                    </div>
+                </div>
+                <div class="flex flex-col justify-center">
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700">
+                        <h4 class="font-bold text-lg mb-4 text-white">Preview Progress</h4>
+                        <div class="text-center mb-2">
+                            <span class="text-5xl font-black text-blue-500" id="videoProgressText">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-700 rounded-full h-2.5 mb-6">
+                            <div class="bg-blue-500 h-2.5 rounded-full transition-all duration-300" id="videoProgressBar" style="width: 0%"></div>
+                        </div>
+                        <button onclick="closeVideo()"
+                            class="w-full mt-6 bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl transition-all">
+                            Close Player
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 1: Course Catalog & Management -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-10">
+            <!-- Create/Edit Course -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                    Register Course
+                </h3>
+
+                <!-- AI Course Curator Co-pilot panel -->
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-2xl border border-indigo-100 mb-6 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 opacity-10 text-indigo-500 text-6xl"><i class="fas fa-magic"></i></div>
+                    <h4 class="text-xs font-black text-indigo-800 flex items-center gap-2 mb-2">
+                        <i class="fas fa-wand-magic-sparkles text-indigo-600 animate-pulse"></i> AI Course Curator Co-pilot
+                    </h4>
+                    <p class="text-[11px] text-slate-500 mb-4">Enter any general topic or skill, and let our HR AI automatically design the full curriculum syllabus!</p>
+                    <div class="flex gap-2">
+                        <input id="aiTopicInput" type="text" placeholder="e.g. Advanced React state patterns" 
+                            class="flex-1 p-3 bg-white border border-indigo-200 rounded-xl text-xs outline-none focus:ring-2 focus:ring-indigo-500 font-medium">
+                        <button onclick="aiCurateCourse()" id="aiCurateBtn"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-3 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 whitespace-nowrap shadow-md shadow-indigo-100">
+                            <i class="fas fa-magic mr-1"></i> Curate
+                        </button>
+                    </div>
+                    <div id="aiCurateLoader" class="hidden mt-3 flex items-center gap-2 text-indigo-600 text-[11px] font-bold">
+                        <i class="fas fa-spinner fa-spin"></i> Generating syllabus chapters...
+                    </div>
+                </div>
+
+                <div class="space-y-4">
+                    <input type="hidden" id="courseId" value="">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Course Name *</label>
+                        <input id="courseName" type="text" placeholder="e.g. Kotlin Fundamentals" required
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Description *</label>
+                        <input id="courseDesc" type="text" placeholder="e.g. Master modern Android development concepts" required
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Category *</label>
+                            <input id="courseCat" type="text" placeholder="e.g. Mobile" required
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Duration *</label>
+                            <input id="courseDur" type="text" placeholder="e.g. 15 hours" required
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Syllabus Chapters</label>
+                        <textarea id="courseChapters" rows="4" placeholder="Chapter 1: Intro&#10;Chapter 2: Setup&#10;..." 
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-medium"></textarea>
+                    </div>
+                    
+                    <button onclick="saveCourse()" id="saveCourseBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-blue-100 mt-2">
+                        Add Course
+                    </button>
+                    <button onclick="resetCourseForm()" id="cancelCourseBtn"
+                        class="hidden w-full bg-slate-200 text-slate-600 font-bold py-3 rounded-xl hover:bg-slate-300 transition-all mt-2">
+                        Cancel Editing
+                    </button>
+                </div>
+            </div>
+
+            <!-- Courses Catalog Table -->
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-list-ul text-emerald-500 mr-2"></i>
+                    Published Courses
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-4">
+                                <th class="pb-4">Course Info</th>
+                                <th class="pb-4">Category</th>
+                                <th class="pb-4">Duration</th>
+                                <th class="pb-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="courseBody" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Assign Course & Workforce Progress -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <!-- Assign Training Form -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-link text-purple-500 mr-2"></i>
+                    Assign Module
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Select Employee *</label>
+                        <select id="empSelect"
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold">
+                            <option value="">Select Staff...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Select Target Course *</label>
+                        <select id="courseSelect"
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold">
+                            <option value="">Select Course...</option>
+                        </select>
+                    </div>
+                    
+                    <button onclick="assignCourse()"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-purple-100 mt-2">
+                        Delegate Assignment
+                    </button>
+                </div>
+            </div>
+
+            <!-- Workforce Progress Table -->
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-chart-bar text-amber-500 mr-2"></i>
+                    Workforce Training Ledger
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-4">
+                                <th class="pb-4">Employee</th>
+                                <th class="pb-4">Assigned Module</th>
+                                <th class="pb-4">Progress Tracker</th>
+                                <th class="pb-4">Status</th>
+                                <th class="pb-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="progressBody" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let coursesList = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check for admin
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admin privileges required.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    initLms();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function initLms() {
+            try {
+                // Populate Employee dropdown
+                const eRes = await fetch('/api/employees/all');
+                const emps = await eRes.json();
+                document.getElementById('empSelect').innerHTML = '<option value="">Select Staff...</option>' + 
+                    emps.map(e => `<option value="${e.id}">${e.fullName}</option>`).join('');
+
+                await loadCourses();
+                loadProgress();
+            } catch (err) {
+                console.error("Initialization failed", err);
+            }
+        }
+
+        async function loadCourses() {
+            try {
+                const res = await fetch('/api/lms/courses');
+                coursesList = await res.json();
+
+                // Populate course assignment dropdown
+                document.getElementById('courseSelect').innerHTML = '<option value="">Select Course...</option>' + 
+                    coursesList.map(c => `<option value="${c.id}">${c.courseName || 'Unnamed Course'}</option>`).join('');
+
+                // Render courses catalog table
+                const tbody = document.getElementById('courseBody');
+                if (!coursesList || coursesList.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">No courses registered.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = coursesList.map(c => `
+                    <tr class="border-b last:border-0 hover:bg-slate-50 transition duration-150">
+                        <td class="py-4">
+                            <div class="font-bold text-slate-800 flex items-center gap-2">
+                                ${c.courseName || 'Unnamed Course'}
+                                ${c.chapters ? `<span class="bg-indigo-50 text-indigo-600 border border-indigo-100 text-[9px] px-1.5 py-0.5 rounded-full font-black flex items-center gap-0.5" title="Syllabus AI generated"><i class="fas fa-wand-magic-sparkles text-[8px]"></i> AI Curated</span>` : ''}
+                            </div>
+                            <div class="text-[11px] text-slate-400 mt-1">${c.description || 'No description logged.'}</div>
+                            ${c.chapters ? `
+                            <details class="mt-2 text-xs text-slate-500 cursor-pointer">
+                                <summary class="font-bold text-[10px] text-indigo-600 hover:text-indigo-800 outline-none">View Curated Syllabus</summary>
+                                <div class="mt-1.5 pl-3 border-l-2 border-slate-200 text-[11px] leading-relaxed text-slate-600 whitespace-pre-line">${c.chapters}</div>
+                            </details>` : ''}
+                        </td>
+                        <td class="py-4 font-semibold text-slate-600 text-xs">${c.category || 'Tech'}</td>
+                        <td class="py-4 font-semibold text-slate-600 text-xs">${c.duration || 'N/A'}</td>
+                        <td class="py-4 text-right whitespace-nowrap space-x-2">
+                            <button onclick="editCourse(${c.id})" class="text-blue-500 hover:text-blue-700 transition p-1.5" title="Edit Course"><i class="fas fa-edit"></i></button>
+                            <button onclick="deleteCourse(${c.id})" class="text-slate-300 hover:text-rose-600 transition p-1.5" title="Delete Course"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('courseBody').innerHTML = `<tr><td colspan="4" class="py-6 text-center text-rose-500 bg-rose-50">Error connecting to catalog.</td></tr>`;
+            }
+        }
+
+        async function aiCurateCourse() {
+            const topic = document.getElementById('aiTopicInput').value.trim();
+            if (!topic) {
+                alert("Please enter a topic to curate.");
+                return;
+            }
+
+            const btn = document.getElementById('aiCurateBtn');
+            const loader = document.getElementById('aiCurateLoader');
+            btn.disabled = true;
+            loader.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/lms/ai/generate-course', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('courseName').value = data.courseName || '';
+                    document.getElementById('courseDesc').value = data.description || '';
+                    document.getElementById('courseCat').value = data.category || '';
+                    document.getElementById('courseDur').value = data.duration || '';
+                    document.getElementById('courseChapters').value = data.chapters || '';
+                    document.getElementById('aiTopicInput').value = '';
+                } else {
+                    alert("AI generation failed. Please fill manually.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection failed with AI service.");
+            } finally {
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            }
+        }
+
+        async function saveCourse() {
+            const id = document.getElementById('courseId').value;
+            const payload = {
+                courseName: document.getElementById('courseName').value,
+                description: document.getElementById('courseDesc').value,
+                category: document.getElementById('courseCat').value,
+                duration: document.getElementById('courseDur').value,
+                chapters: document.getElementById('courseChapters').value
+            };
+
+            if (!payload.courseName) {
+                alert("Course Name is required.");
+                return;
+            }
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/lms/courses/${id}` : '/api/lms/courses';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    resetCourseForm();
+                    await loadCourses();
+                    alert(id ? "Course details updated!" : "New course registered successfully!");
+                } else {
+                    alert("Failed to submit course data.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Course registration connection error.");
+            }
+        }
+
+        function editCourse(id) {
+            const c = coursesList.find(x => x.id === id);
+            if (c) {
+                document.getElementById('courseId').value = c.id;
+                document.getElementById('courseName').value = c.courseName || '';
+                document.getElementById('courseDesc').value = c.description || '';
+                document.getElementById('courseCat').value = c.category || '';
+                document.getElementById('courseDur').value = c.duration || '';
+                document.getElementById('courseChapters').value = c.chapters || '';
+
+                document.getElementById('saveCourseBtn').textContent = 'Update Course Details';
+                document.getElementById('cancelCourseBtn').classList.remove('hidden');
+            }
+        }
+
+        function resetCourseForm() {
+            document.getElementById('courseId').value = '';
+            document.getElementById('courseName').value = '';
+            document.getElementById('courseDesc').value = '';
+            document.getElementById('courseCat').value = '';
+            document.getElementById('courseDur').value = '';
+            document.getElementById('courseChapters').value = '';
+            document.getElementById('saveCourseBtn').textContent = 'Add Course';
+            document.getElementById('cancelCourseBtn').classList.add('hidden');
+        }
+
+        async function deleteCourse(id) {
+            if (!confirm("Are you sure you want to delete this course from the registry?")) return;
+            try {
+                const res = await fetch(`/api/lms/courses/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    await loadCourses();
+                    loadProgress();
+                } else {
+                    alert("Failed to delete course.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadProgress() {
+            try {
+                const res = await fetch('/api/lms/progress');
+                const data = await res.json();
+                
+                const tbody = document.getElementById('progressBody');
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400 italic">No modules delegated to employee profiles.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(p => {
+                    const cName = p.course ? (p.course.courseName || 'Unknown') : 'Unknown';
+                    const safeName = cName.replace(/'/g, "\\'");
+                    const status = p.status || 'Assigned';
+
+                    return `
+                    <tr class="border-b last:border-0 hover:bg-slate-50 transition duration-150">
+                        <td class="py-4">
+                            <div class="font-bold text-slate-800">${p.employee ? p.employee.fullName : 'Unknown'}</div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wide">${p.employee ? p.employee.department : '-'}</div>
+                        </td>
+                        <td class="py-4 font-semibold text-slate-700 text-xs">${cName}</td>
+                        <td class="py-4">
+                            <div class="w-full max-w-[120px]">
+                                <div class="flex justify-between mb-1 items-center">
+                                    <span class="text-[9px] font-black text-blue-600">Chapter ${Math.ceil(p.completionPercentage / 10) || 1}/10 (${p.completionPercentage}%)</span>
+                                    <div class="flex gap-1">
+                                        <button onclick="updateProgress(${p.id}, ${p.completionPercentage}, -10)" class="text-[8px] bg-slate-200 text-slate-600 px-1 rounded hover:bg-slate-300">-</button>
+                                        <button onclick="updateProgress(${p.id}, ${p.completionPercentage}, 10)" class="text-[8px] bg-slate-200 text-slate-600 px-1 rounded hover:bg-slate-300">+</button>
+                                    </div>
+                                </div>
+                                <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                    <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: ${p.completionPercentage}%"></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="py-4">
+                            <span class="px-2.5 py-1 text-[9px] font-black rounded-lg border uppercase tracking-wider ${
+                                status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                            }">
+                                ${status}
+                            </span>
+                        </td>
+                        <td class="py-4 text-right whitespace-nowrap space-x-2">
+                            <button onclick="playCourseVideo(${p.id}, '${safeName}', ${p.completionPercentage})" class="text-green-500 hover:text-green-700 transition p-1.5" title="Preview Video"><i class="fas fa-play-circle text-lg"></i></button>
+                            <button onclick="deleteProgress(${p.id})" class="text-slate-300 hover:text-rose-600 transition p-1.5" title="Unassign module"><i class="fas fa-unlink"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('progressBody').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500 bg-rose-50">Error fetching training progress log.</td></tr>`;
+            }
+        }
+
+        async function updateProgress(id, currentPct, change) {
+            let newPct = currentPct + change;
+            if (newPct < 0) newPct = 0;
+            if (newPct > 100) newPct = 100;
+
+            let newStatus = newPct === 100 ? 'Completed' : 'In Progress';
+            const payload = { completionPercentage: newPct, status: newStatus };
+
+            try {
+                const res = await fetch(`/api/lms/progress/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) loadProgress();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteProgress(id) {
+            if (!confirm("Are you sure you want to unassign this course from the employee's dashboard?")) return;
+            try {
+                const res = await fetch(`/api/lms/progress/${id}`, { method: 'DELETE' });
+                if (res.ok) loadProgress();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function assignCourse() {
+            const empId = document.getElementById('empSelect').value;
+            const courseId = document.getElementById('courseSelect').value;
+
+            if (!empId || !courseId) {
+                alert("Please select both Employee and Course.");
+                return;
+            }
+
+            const payload = {
+                employee: { id: parseInt(empId) },
+                course: { id: parseInt(courseId) }
+            };
+
+            try {
+                const res = await fetch('/api/lms/assign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Module successfully assigned to employee.");
+                    loadProgress();
+                } else {
+                    alert("Module already assigned or error delegating.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // --- Video Player Preview Logic ---
+        let activeProgressId = null;
+        let highestWatchedPercentage = 0;
+        let lastSavedPercentage = -1;
+
+        function playCourseVideo(progressId, courseName, currentProgress) {
+            document.getElementById('videoSection').classList.remove('hidden');
+            document.getElementById('playingCourseName').innerText = courseName;
+
+            activeProgressId = progressId;
+            highestWatchedPercentage = currentProgress || 0;
+            lastSavedPercentage = highestWatchedPercentage;
+
+            updateVisualProgress(highestWatchedPercentage);
+
+            const video = document.getElementById('courseVideo');
+            video.currentTime = 0;
+            video.play().catch(e => console.log('Auto-play blocked'));
+
+            document.getElementById('videoSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function closeVideo() {
+            const video = document.getElementById('courseVideo');
+            video.pause();
+            document.getElementById('videoSection').classList.add('hidden');
+            activeProgressId = null;
+        }
+
+        function trackVideoProgress(videoElement) {
+            if (!activeProgressId) return;
+
+            const duration = videoElement.duration;
+            const currentTime = videoElement.currentTime;
+
+            if (duration > 0) {
+                const pct = Math.floor((currentTime / duration) * 100);
+                if (pct > highestWatchedPercentage) {
+                    highestWatchedPercentage = pct;
+                    updateVisualProgress(highestWatchedPercentage);
+
+                    if (highestWatchedPercentage - lastSavedPercentage >= 10 || pct === 100) {
+                        lastSavedPercentage = highestWatchedPercentage;
+                        saveVideoProgress(activeProgressId, highestWatchedPercentage);
+                    }
+                }
+            }
+        }
+
+        function updateVisualProgress(pct) {
+            document.getElementById('videoProgressText').innerText = pct + '%';
+            document.getElementById('videoProgressBar').style.width = pct + '%';
+        }
+
+        async function saveVideoProgress(id, pct) {
+            let status = pct >= 100 ? 'Completed' : 'In Progress';
+            const payload = { completionPercentage: pct, status: status };
+
+            try {
+                await fetch(`/api/lms/progress/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                loadProgress();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+    </script>
+</body>
+
+</html>

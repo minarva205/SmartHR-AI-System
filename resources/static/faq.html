@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee FAQ Hub - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;850&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
+                <img src="assets/images/logo.png" alt="SmartHR" class="w-10 h-10 drop-shadow-md">
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-slate-400 cursor-pointer hover:text-blue-600 transition text-lg" title="Security Settings" onclick="window.location.href='security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="index.html" class="text-slate-500 hover:text-blue-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex items-center space-x-4 mb-10">
+            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl shadow-sm">
+                <i class="fas fa-circle-question"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <h1 class="text-3xl font-bold text-slate-800">Employee FAQ Hub</h1>
+                    <span class="bg-violet-100 text-violet-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1"><i class="fas fa-wand-magic-sparkles"></i> AI Enhanced</span>
+                </div>
+                <p class="text-slate-500">Quick answers to common questions about leave, attendance, and payroll</p>
+            </div>
+        </div>
+
+        <!-- FAQ Items -->
+        <div class="space-y-4">
+            
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>How do I submit a leave application?</span>
+                    <span class="transition group-open:rotate-180 text-blue-500"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Open the <strong>Leave Management</strong> module from your main dashboard, choose your leave type (Sick, Casual, Annual), specify target dates, provide a description, and click <em>Submit Request</em>. Your supervisor will be notified immediately.
+                </div>
+            </details>
+
+            <!-- AI FAQ Item -->
+            <details class="group bg-gradient-to-r from-violet-50 to-indigo-50 border border-violet-100 rounded-3xl p-6 shadow-sm shadow-violet-500/10 [&_summary::-webkit-details-marker]:hidden relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-violet-500/10 rounded-full blur-2xl"></div>
+                <summary class="flex justify-between items-center font-bold text-violet-900 cursor-pointer list-none relative z-10">
+                    <span class="flex items-center gap-2"><i class="fas fa-robot text-violet-500"></i> How do I use the new AI HR Assistant?</span>
+                    <span class="transition group-open:rotate-180 text-violet-500"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-violet-800/80 text-sm leading-relaxed border-t border-violet-200/50 pt-4 relative z-10">
+                    You can interact with your AI Assistant by clicking the purple floating <strong>"Ask AI"</strong> button on the bottom right of your screen. The AI can instantly draft leave requests, explain company policies, summarize your payroll, and analyze your weekly workload. All AI interactions are strictly confidential.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>What should I do if my geofence check-in fails?</span>
+                    <span class="transition group-open:rotate-180 text-blue-500"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Make sure GPS location is enabled on your device and you are within the designated workplace perimeter. If check-in errors persist, file a regularization request in the <strong>Attendance Tracker</strong> or reach out to the IT Help Desk.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>When are monthly salary slips published?</span>
+                    <span class="transition group-open:rotate-180 text-blue-500"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Monthly payslips are compiled and generated on the 1st of every month. You can download pdf copies at any time by visiting the <strong>Payroll & Slips</strong> link on the dashboard.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>How can I edit my personal profile photo?</span>
+                    <span class="transition group-open:rotate-180 text-blue-500"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Navigate to <strong>My Profile</strong> via the Self-Service navigation panel, select the profile icon, upload a new image (.jpg or .png format, max 2MB), and click save. Updates will apply instantly system-wide.
+                </div>
+            </details>
+
+        </div>
+
+        <!-- AI Ask Banner -->
+        <div class="mt-8 bg-slate-900 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden gap-6">
+            <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-violet-500/20 rounded-full blur-3xl"></div>
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-violet-500/20 flex items-center justify-center shrink-0">
+                    <i class="fas fa-brain text-violet-400 text-xl animate-pulse"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-bold text-lg">Can't find your answer?</h3>
+                    <p class="text-slate-400 text-sm">Ask our AI HR Assistant. It knows every policy inside out.</p>
+                </div>
+            </div>
+            <button class="relative z-10 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-violet-500/30 transition transform hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+                <i class="fas fa-sparkles"></i> Ask AI Assistant
+            </button>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role === 'ADMIN' || user.role === 'HR') {
+                        window.location.href = 'admin-faq.html';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+    </script>
+</body>
+
+</html>

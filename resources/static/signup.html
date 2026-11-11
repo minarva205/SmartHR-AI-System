@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Get Started - SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+    <style>
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,.25); }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-100 flex items-center justify-center min-h-screen relative">
+
+    <a href="index.html"
+        class="absolute top-8 left-8 text-slate-600 hover:text-slate-900 transition-colors flex items-center font-bold bg-white px-4 py-2 rounded-xl shadow-sm border border-slate-200">
+        <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+    </a>
+
+    <div class="bg-white p-8 rounded-3xl shadow-xl w-full max-w-md border border-slate-200 z-10">
+        <div class="text-center mb-8">
+            <div
+                class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-4">
+                <i class="fas fa-rocket"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-slate-800">Get Started Now</h1>
+            <p class="text-slate-500 text-sm">Setup your HR Organization account</p>
+        </div>
+
+        <form action="/register" method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+                <input type="text" name="fullName" required
+                    class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Role</label>
+                <select name="role" id="roleSelect" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="EMPLOYEE">Employee</option>
+                    <option value="ADMIN">HR/Admin</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Profile Picture</label>
+                    <input type="file" name="profileImage" accept="image/*"
+                        class="w-full p-2 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                </div>
+                <div id="resumeUploadContainer">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Upload Resume (CV)</label>
+                    <input type="file" name="resumeUpload" accept=".pdf,.doc,.docx"
+                        class="w-full p-2 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Work Email</label>
+                <input type="email" name="email" required
+                    class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Organization Name</label>
+                <input type="text" name="organization" required
+                    class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+                    <div class="flex">
+                        <select class="p-3 border rounded-l-xl bg-slate-50 border-r-0 outline-none w-24">
+                            <option>+91</option>
+                            <option>+1</option>
+                            <option>+44</option>
+                            <option>+61</option>
+                        </select>
+                        <input type="tel" name="phone" required placeholder="Mobile Number"
+                            class="w-full p-3 border rounded-r-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Highest Qualification</label>
+                    <select name="qualification" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <option value="B.Tech">B.Tech / B.E.</option>
+                        <option value="MCA">MCA</option>
+                        <option value="MBA">MBA</option>
+                        <option value="BCA">BCA / B.Sc</option>
+                        <option value="M.Tech">M.Tech</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Department</label>
+                <select name="department" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                    <option value="Engineering">Engineering & IT</option>
+                    <option value="Human Resources">Human Resources</option>
+                    <option value="Sales & Marketing">Sales & Marketing</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Country</label>
+                    <select name="country" required class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                        <option value="India">India</option>
+                        <option value="USA">United States</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="Canada">Canada</option>
+                        <option value="Australia">Australia</option>
+                        <option value="Germany">Germany</option>
+                        <option value="Japan">Japan</option>
+                        <option value="UAE">United Arab Emirates</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">City</label>
+                    <input type="text" name="city" required placeholder="e.g. Mumbai, New York"
+                        class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-1">
+                    <label class="block text-sm font-medium text-slate-700">Password</label>
+                    <button type="button" onclick="aiGeneratePassword()"
+                        class="ai-btn flex items-center gap-1 text-[10px] font-black bg-gradient-to-r from-violet-500 to-purple-600 text-white px-2.5 py-1 rounded-md ai-badge">
+                        <i class="fas fa-wand-magic-sparkles"></i> AI Auto-Gen Secure
+                    </button>
+                </div>
+                <div class="relative">
+                    <input type="password" id="passwordField" name="password" required
+                        class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition pr-10">
+                    <button type="button" onclick="togglePassword()"
+                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+                <!-- Password Strength Meter -->
+                <div class="mt-2 hidden" id="passwordStrengthContainer">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-semibold text-slate-500">Password Strength:</span>
+                        <span id="passwordStrengthText" class="text-xs font-bold">Weak</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-1.5">
+                        <div id="passwordStrengthBar" class="bg-red-500 h-1.5 rounded-full transition-all duration-300 w-1/4"></div>
+                    </div>
+                    <ul class="text-[10px] text-slate-500 mt-2 space-y-1">
+                        <li id="req-length" class="text-red-500"><i class="fas fa-times mr-1"></i> At least 8 characters</li>
+                        <li id="req-upper" class="text-red-500"><i class="fas fa-times mr-1"></i> 1 uppercase letter</li>
+                        <li id="req-lower" class="text-red-500"><i class="fas fa-times mr-1"></i> 1 lowercase letter</li>
+                        <li id="req-number" class="text-red-500"><i class="fas fa-times mr-1"></i> 1 number</li>
+                        <li id="req-special" class="text-red-500"><i class="fas fa-times mr-1"></i> 1 special character (@$!%*?&)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-slate-700 mb-1">Security Check</label>
+                <div class="flex items-center space-x-3">
+                    <div class="bg-slate-200 p-3 rounded-xl border border-slate-300 font-mono font-bold text-slate-800 tracking-widest text-center w-32 shadow-inner" id="captchaQuestion">
+                        ? + ? =
+                    </div>
+                    <input type="number" id="captchaAnswer" required placeholder="Answer"
+                        class="w-full p-3 border rounded-xl bg-slate-50 outline-none focus:ring-2 focus:ring-blue-500 transition">
+                </div>
+                <p id="captchaError" class="text-red-500 text-xs mt-1 hidden font-semibold">Incorrect CAPTCHA answer. Please try again.</p>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all">
+                Create My Account
+            </button>
+        </form>
+
+        <p class="text-center text-xs text-slate-400 mt-6">
+            By signing up, you agree to SmartHR AI Terms of Service.
+        </p>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('passwordField');
+            const toggleIcon = document.getElementById('toggleIcon');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // AI Password Generator
+        async function aiGeneratePassword() {
+            const pwdField = document.getElementById('passwordField');
+            pwdField.type = 'text'; // temporarily show it
+            
+            const words = ['Nebula', 'Quantum', 'Horizon', 'Velocity', 'Pinnacle', 'Apex', 'Zenith', 'Vertex'];
+            const special = ['@', '#', '$', '%', '&', '*'];
+            const w1 = words[Math.floor(Math.random()*words.length)];
+            const w2 = words[Math.floor(Math.random()*words.length)];
+            const num = Math.floor(Math.random()*99) + 10;
+            const spc = special[Math.floor(Math.random()*special.length)];
+            
+            const aiPwd = `${w1}${spc}${num}${w2}`;
+            
+            pwdField.value = '';
+            // animate typing
+            let i = 0;
+            const interval = setInterval(() => {
+                pwdField.value += aiPwd.charAt(i);
+                pwdField.dispatchEvent(new Event('input')); // trigger strength meter
+                i++;
+                if(i >= aiPwd.length) {
+                    clearInterval(interval);
+                    setTimeout(() => { if(document.getElementById('toggleIcon').classList.contains('fa-eye')) pwdField.type = 'password'; }, 1000);
+                }
+            }, 50);
+        }
+
+        // CAPTCHA Logic
+        let captchaExpectedAnswer = 0;
+        
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            captchaExpectedAnswer = num1 + num2;
+            document.getElementById('captchaQuestion').innerText = `${num1} + ${num2} =`;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            generateCaptcha();
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error') === 'weak_password') {
+                alert('Server rejected password: It must be strong (8+ chars, uppercase, lowercase, number, special char).');
+            }
+
+            // Role change listener to hide/show resume
+            const roleSelect = document.getElementById('roleSelect');
+            const resumeContainer = document.getElementById('resumeUploadContainer');
+            if(roleSelect) {
+                roleSelect.addEventListener('change', function() {
+                    if (this.value === 'ADMIN') {
+                        resumeContainer.style.display = 'none';
+                    } else {
+                        resumeContainer.style.display = 'block';
+                    }
+                });
+            }
+        });
+
+        // Password Strength Logic
+        const strengthContainer = document.getElementById('passwordStrengthContainer');
+        const strengthBar = document.getElementById('passwordStrengthBar');
+        const strengthText = document.getElementById('passwordStrengthText');
+        const pwdField = document.getElementById('passwordField');
+        
+        let isPasswordStrong = false;
+
+        pwdField.addEventListener('input', function() {
+            const val = this.value;
+            if (val.length > 0) {
+                strengthContainer.classList.remove('hidden');
+            } else {
+                strengthContainer.classList.add('hidden');
+            }
+            
+            const hasLength = val.length >= 8;
+            const hasUpper = /[A-Z]/.test(val);
+            const hasLower = /[a-z]/.test(val);
+            const hasNumber = /[0-9]/.test(val);
+            const hasSpecial = /[@$!%*?&]/.test(val);
+            
+            updateReq('req-length', hasLength, 'At least 8 characters');
+            updateReq('req-upper', hasUpper, '1 uppercase letter');
+            updateReq('req-lower', hasLower, '1 lowercase letter');
+            updateReq('req-number', hasNumber, '1 number');
+            updateReq('req-special', hasSpecial, '1 special character (@$!%*?&)');
+            
+            const reqsMet = [hasLength, hasUpper, hasLower, hasNumber, hasSpecial].filter(Boolean).length;
+            
+            if (reqsMet <= 2) {
+                strengthBar.className = 'bg-red-500 h-1.5 rounded-full transition-all duration-300 w-1/4';
+                strengthText.textContent = 'Weak';
+                strengthText.className = 'text-xs font-bold text-red-500';
+                isPasswordStrong = false;
+            } else if (reqsMet <= 4) {
+                strengthBar.className = 'bg-yellow-500 h-1.5 rounded-full transition-all duration-300 w-2/4';
+                strengthText.textContent = 'Medium';
+                strengthText.className = 'text-xs font-bold text-yellow-500';
+                isPasswordStrong = false;
+            } else {
+                strengthBar.className = 'bg-green-500 h-1.5 rounded-full transition-all duration-300 w-full';
+                strengthText.textContent = 'Strong';
+                strengthText.className = 'text-xs font-bold text-green-500';
+                isPasswordStrong = true;
+            }
+        });
+        
+        function updateReq(id, met, text) {
+            const el = document.getElementById(id);
+            if (met) {
+                el.className = 'text-green-600';
+                el.innerHTML = '<i class="fas fa-check mr-1"></i> ' + text;
+            } else {
+                el.className = 'text-red-500';
+                el.innerHTML = '<i class="fas fa-times mr-1"></i> ' + text;
+            }
+        }
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            if (!isPasswordStrong) {
+                e.preventDefault();
+                alert('Please create a strong password before continuing.');
+                return;
+            }
+
+            const userAnswer = parseInt(document.getElementById('captchaAnswer').value, 10);
+            if (userAnswer !== captchaExpectedAnswer) {
+                e.preventDefault();
+                document.getElementById('captchaError').classList.remove('hidden');
+                generateCaptcha();
+                document.getElementById('captchaAnswer').value = '';
+            } else {
+                document.getElementById('captchaError').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

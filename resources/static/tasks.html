@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Tasks | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html"
+                    class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">My Tasks</h1>
+                <p class="text-xs text-slate-400 mt-1">Track your performance milestones and utilize AI assistance
+                    strategy roadmaps</p>
+            </div>
+        </header>
+
+        <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-200/60">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 text-xs uppercase border-b border-slate-100">
+                            <th class="pb-4 font-semibold">Task Assignment</th>
+                            <th class="pb-4 font-semibold">Priority</th>
+                            <th class="pb-4 font-semibold">Deadline Limit</th>
+                            <th class="pb-4 font-semibold">AI Assistant</th>
+                            <th class="pb-4 font-semibold text-right">Progress Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="taskTableBody" class="text-sm divide-y divide-slate-100">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="aiModal"
+        class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div
+            class="bg-white rounded-[2rem] w-full max-w-lg shadow-xl p-8 border border-slate-100 transform scale-95 transition-all">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-black text-slate-800 inline-flex items-center gap-2">
+                    <i class="fas fa-robot text-blue-600 animate-pulse"></i> SmartHR AI Roadmap Strategy
+                </h3>
+                <button onclick="closeAiModal()"
+                    class="w-8 h-8 bg-slate-100 text-slate-500 rounded-full hover:bg-slate-200 transition text-sm"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div id="aiContent"
+                class="text-slate-600 text-xs font-medium leading-relaxed bg-slate-50 p-5 rounded-2xl border border-slate-200/60 max-h-60 overflow-y-auto whitespace-pre-line">
+                Processing automated framework...
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:9090/api/tasks';
+
+        async function loadMyTasks() {
+            let loggedInEmpId = null;
+            try {
+                const res = await fetch('/api/current-user');
+                if (res.status === 401) {
+                    window.location.href = "login.html";
+                    return;
+                }
+                const currentUser = await res.json();
+                loggedInEmpId = currentUser.id;
+            } catch (e) {
+                console.error("Session check failed", e);
+                window.location.href = "login.html";
+                return;
+            }
+
+            if (!loggedInEmpId) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_URL}/employee/${loggedInEmpId}`);
+                const tasks = await res.json();
+                const tbody = document.getElementById('taskTableBody');
+
+                if (!tasks || tasks.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">No project task blueprints designated to your desk.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = tasks.map(t => {
+                    let priorityBadge = t.priority === 'High' ? 'bg-rose-50 text-rose-600' : (t.priority === 'Medium' ? 'bg-amber-50 text-amber-600' : 'bg-slate-50 text-slate-500');
+                    return `
+                        <tr class="hover:bg-slate-50/60 transition">
+                            <td class="py-5">
+                                <div class="font-bold text-slate-800">${t.title}</div>
+                                <div class="text-xs text-slate-400 max-w-sm truncate mt-0.5">${t.description || '-'}</div>
+                            </td>
+                            <td class="py-5"><span class="px-2.5 py-1 text-[10px] font-bold rounded-lg uppercase tracking-wide ${priorityBadge}">${t.priority}</span></td>
+                            <td class="py-5 text-xs text-slate-500 font-medium">${t.dueDate || 'No Limit'}</td>
+                            <td class="py-5">
+                                <button onclick="triggerAiAssistance(${t.id})" class="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-xl border border-blue-200/40 inline-flex items-center gap-1.5 transition">
+                                    <i class="fas fa-brain text-[10px]"></i> AI Guide
+                                </button>
+                            </td>
+                            <td class="py-5 text-right">
+                                <select onchange="updateStatus(${t.id}, this.value)" class="text-xs font-bold bg-white border border-slate-200 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="Pending" ${t.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="In Progress" ${t.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="Completed" ${t.status === 'Completed' ? 'selected' : ''}>Completed</option>
+                                </select>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Failed to load tasks", err);
+                document.getElementById('taskTableBody').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500 font-bold bg-rose-50">Error fetching tasks.</td></tr>`;
+            }
+        }
+
+        async function triggerAiAssistance(id) {
+            document.getElementById('aiModal').classList.remove('hidden');
+            const content = document.getElementById('aiContent');
+            content.innerHTML = `<div class="flex items-center gap-2 text-slate-400 italic"><i class="fas fa-spinner java-spin animate-spin"></i> Brainstorming specific steps via SmartHR AI Engine...</div>`;
+            try {
+                const res = await fetch(`${API_URL}/${id}/ai-roadmap`);
+                const data = await res.json();
+                content.innerText = data.roadmap || "Unable to draft suggestions.";
+            } catch (e) {
+                content.innerText = "Error syncing with OpenAI cloud link layers.";
+            }
+        }
+
+        function closeAiModal() { document.getElementById('aiModal').classList.add('hidden'); }
+
+        async function updateStatus(taskId, newStatus) {
+            try {
+                const res = await fetch(`${API_URL}/${taskId}/status?status=${encodeURIComponent(newStatus)}`, { method: 'PUT' });
+                if (res.ok) loadMyTasks();
+            } catch (err) { console.error(err); }
+        }
+
+        window.onload = loadMyTasks;
+    </script>
+</body>
+
+</html>

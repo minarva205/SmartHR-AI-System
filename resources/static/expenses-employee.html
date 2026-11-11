@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Expense Claims | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 18%, #0d1224 0%, #090d1a 90%); }
+        .glass { background: rgba(30,41,59,.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.08); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        input,select,textarea { background: rgba(15,23,42,.6) !important; border: 1px solid rgba(255,255,255,.1) !important; color: #f8fafc !important; }
+        input:focus,select:focus,textarea:focus { border-color: #8b5cf6 !important; outline: none !important; }
+        ::placeholder { color: #64748b !important; }
+        .ai-badge-auto   { background: rgba(16,185,129,.15); color: #34d399; border:1px solid rgba(16,185,129,.3); }
+        .ai-badge-flag   { background: rgba(239,68,68,.15);  color: #f87171; border:1px solid rgba(239,68,68,.3); }
+        .ai-badge-manual { background: rgba(245,158,11,.15); color: #fbbf24; border:1px solid rgba(245,158,11,.3); }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen">
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div>
+            <a href="index.html" class="inline-flex items-center text-violet-400 hover:text-violet-300 font-bold mb-2 group transition-all">
+                <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Back to Dashboard
+            </a>
+            <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-violet-400 via-purple-400 to-indigo-300">
+                My Expense Claims AI
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">Submit receipts, track reimbursements, and get AI-powered policy guidance.</p>
+        </div>
+        <span class="text-xs bg-violet-600/20 text-violet-400 border border-violet-500/30 px-4 py-2 rounded-full font-black uppercase tracking-wider flex items-center shrink-0">
+            <i class="fas fa-user mr-2"></i> Employee Portal
+        </span>
+    </header>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Total Submitted</p>
+            <p class="text-4xl font-black text-violet-400" id="kpiTotal">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Pending</p>
+            <p class="text-4xl font-black text-amber-400" id="kpiPending">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Approved</p>
+            <p class="text-4xl font-black text-emerald-400" id="kpiApproved">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Total Reimbursed</p>
+            <p class="text-3xl font-black text-indigo-400">₹<span id="kpiAmount">0</span></p>
+        </div>
+    </div>
+
+    <!-- Split: Submit + List on left, Chatbot on right -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+        <!-- Left Column -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- Submit Form -->
+            <div class="glass p-7 rounded-3xl">
+                <h2 class="text-lg font-black text-slate-100 mb-5 flex items-center">
+                    <i class="fas fa-plus-circle text-violet-400 mr-3"></i> Submit New Expense Claim
+                </h2>
+                <form id="submitForm" onsubmit="submitClaim(event)" class="space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Category</label>
+                            <select id="fCategory" required class="w-full px-3 py-2.5 rounded-xl font-bold">
+                                <option value="TRAVEL">✈️ Travel</option>
+                                <option value="MEALS">🍽️ Meals</option>
+                                <option value="SOFTWARE">💻 Software / License</option>
+                                <option value="OFFICE_SUPPLIES">📦 Office Supplies</option>
+                                <option value="HEALTHCARE">🏥 Healthcare</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Amount (₹)</label>
+                            <input type="number" id="fAmount" placeholder="e.g. 2500" required min="1" class="w-full px-3 py-2.5 rounded-xl font-bold">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Description</label>
+                        <input type="text" id="fDesc" placeholder="Brief description of the expense…" required class="w-full px-3 py-2.5 rounded-xl font-bold">
+                    </div>
+                    <div id="submitMsg"></div>
+                    <button type="submit" id="submitBtn"
+                        class="w-full bg-gradient-to-r from-violet-600 to-indigo-500 hover:opacity-90 text-white font-black py-3 rounded-xl transition shadow-lg shadow-violet-950/20 uppercase tracking-wider text-xs flex items-center justify-center gap-2">
+                        <i class="fas fa-robot"></i> Submit & Run AI OCR Audit
+                    </button>
+                </form>
+            </div>
+
+            <!-- My Claims List -->
+            <div class="glass p-7 rounded-3xl">
+                <h2 class="text-lg font-black text-slate-100 mb-5 flex items-center">
+                    <i class="fas fa-list text-violet-400 mr-3"></i> My Claims History
+                </h2>
+                <div id="claimsList" class="space-y-4 max-h-[520px] overflow-y-auto pr-1 scrollbar-hide">
+                    <p class="text-slate-500 italic text-sm">Loading your claims…</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot (2/5) -->
+        <div class="lg:col-span-2">
+            <div class="glass rounded-3xl h-[760px] flex flex-col">
+                <div class="p-5 border-b border-slate-700 bg-gradient-to-r from-violet-950/50 to-indigo-950/40 rounded-t-3xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center shadow-lg text-white">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <p class="font-black text-sm text-slate-100">Expense Assistant</p>
+                        <p class="text-[10px] text-violet-400 font-bold uppercase tracking-wider flex items-center">
+                            <span class="w-2 h-2 bg-violet-400 rounded-full mr-1.5 animate-ping inline-block"></span>AI Powered
+                        </p>
+                    </div>
+                </div>
+                <div id="chatMessages" class="flex-1 p-5 space-y-4 text-xs overflow-y-auto scrollbar-hide">
+                    <div class="flex items-start gap-3">
+                        <div class="w-7 h-7 rounded-full bg-violet-950 border border-violet-700 text-violet-400 flex items-center justify-center text-xs shrink-0"><i class="fas fa-robot"></i></div>
+                        <div class="glass rounded-2xl p-3.5 text-slate-300 leading-relaxed max-w-[85%]">
+                            Hi! I'm your <strong>Expense Claim Assistant</strong>. I can help you:<br><br>
+                            • <em>"What is my claim status?"</em><br>
+                            • <em>"What are the policy limits?"</em><br>
+                            • <em>"How does OCR receipt scanning work?"</em>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-4 border-t border-slate-700 rounded-b-3xl">
+                    <form onsubmit="sendChat(event)" class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Ask about policies, claim status, OCR tips…" class="flex-1 px-4 py-2.5 rounded-xl text-xs font-medium">
+                        <button type="submit" class="bg-gradient-to-tr from-violet-600 to-indigo-500 hover:opacity-90 text-white px-4 py-2.5 rounded-xl transition">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/current-user').then(r => r.ok ? r.json() : Promise.reject())
+        .then(() => { loadStats(); loadClaims(); })
+        .catch(() => location.href = 'login.html');
+});
+
+async function loadStats() {
+    const r = await fetch('/api/expenses/stats');
+    if (!r.ok) return;
+    const s = await r.json();
+    document.getElementById('kpiTotal').innerText    = s.total;
+    document.getElementById('kpiPending').innerText  = s.pending;
+    document.getElementById('kpiApproved').innerText = s.approved;
+    document.getElementById('kpiAmount').innerText   = Number(s.totalApprovedAmount).toLocaleString('en-IN');
+}
+
+async function loadClaims() {
+    const r = await fetch('/api/expenses/employee/my-claims');
+    if (!r.ok) return;
+    const data = await r.json();
+    const el = document.getElementById('claimsList');
+
+    if (!data.length) {
+        el.innerHTML = `<div class="text-center py-12"><i class="fas fa-receipt text-5xl text-slate-700 mb-4 block"></i><p class="text-slate-500 italic">No claims yet. Submit your first expense above!</p></div>`;
+        return;
+    }
+
+    el.innerHTML = data.map(c => {
+        const aiClass = c.aiAuditStatus === 'AUTO_APPROVED' ? 'ai-badge-auto' :
+                        c.aiAuditStatus === 'FLAGGED_HIGH_RISK' ? 'ai-badge-flag' : 'ai-badge-manual';
+        const aiLabel = c.aiAuditStatus === 'AUTO_APPROVED' ? '✅ AI Auto-Approved' :
+                        c.aiAuditStatus === 'FLAGGED_HIGH_RISK' ? '🚨 Flagged — HR Review' : '⚠️ Manual Review';
+        const stColor = c.status === 'APPROVED' ? 'text-emerald-400' : c.status === 'REJECTED' ? 'text-red-400' : 'text-amber-400';
+        const stIcon  = c.status === 'APPROVED' ? 'fa-check-circle' : c.status === 'REJECTED' ? 'fa-times-circle' : 'fa-clock';
+        const catIcon = c.category === 'TRAVEL' ? '✈️' : c.category === 'MEALS' ? '🍽️' : c.category === 'SOFTWARE' ? '💻' : c.category === 'HEALTHCARE' ? '🏥' : '📦';
+
+        return `<div class="glass p-5 rounded-2xl hover:border-violet-500/40 transition">
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <p class="font-black text-slate-100 text-sm">${catIcon} ${c.category.replace('_',' ')}</p>
+                    <p class="text-[10px] text-slate-400 mt-0.5">${c.submittedDate || 'Recent'}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-black text-violet-300 text-lg">₹${Number(c.amount).toLocaleString('en-IN')}</p>
+                    <p class="text-[10px] font-bold ${stColor} mt-0.5"><i class="fas ${stIcon} mr-1"></i>${c.status}</p>
+                </div>
+            </div>
+            <p class="text-slate-400 text-xs mb-3 leading-relaxed">${c.description}</p>
+            <div class="flex flex-wrap gap-2 mb-3">
+                <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${aiClass}">${aiLabel}</span>
+                ${c.ocrMerchant ? `<span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700"><i class="fas fa-store mr-1"></i>${c.ocrMerchant}</span>` : ''}
+                ${c.ocrConfidence ? `<span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">OCR ${c.ocrConfidence}%</span>` : ''}
+            </div>
+            <!-- AI Reasoning Inline -->
+            <div class="bg-slate-900/60 border border-white/5 rounded-2xl p-3.5 text-[11px] text-slate-400 leading-relaxed flex items-start gap-2">
+                <i class="fas fa-brain text-violet-400 shrink-0 mt-0.5 animate-pulse"></i>
+                <span>${c.aiAuditReason || 'AI audit in progress…'}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function submitClaim(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('submitMsg');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Running OCR & AI Audit…';
+
+    const payload = {
+        category:    document.getElementById('fCategory').value,
+        amount:      parseFloat(document.getElementById('fAmount').value),
+        description: document.getElementById('fDesc').value
+    };
+
+    const r = await fetch('/api/expenses/employee/submit', {
+        method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+    });
+
+    if (r.ok) {
+        const c = await r.json();
+        const isAuto = c.aiAuditStatus === 'AUTO_APPROVED';
+        msg.innerHTML = `<div class="rounded-xl p-3 text-xs font-bold ${isAuto ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-800/30' : 'bg-amber-950/60 text-amber-400 border border-amber-800/30'}">
+            <i class="fas ${isAuto ? 'fa-check-circle' : 'fa-exclamation-triangle'} mr-2"></i>
+            ${isAuto ? 'Claim auto-approved by AI! Reimbursement will be processed in the next payroll cycle.' : 'Claim submitted. AI flagged for HR manual review — you will be notified.'}
+        </div>`;
+        document.getElementById('submitForm').reset();
+        loadStats(); loadClaims();
+    } else {
+        msg.innerHTML = `<div class="rounded-xl p-3 text-xs font-bold bg-red-950/60 text-red-400 border border-red-800/30"><i class="fas fa-times-circle mr-2"></i>Submission failed. Please try again.</div>`;
+    }
+
+    setTimeout(() => { msg.innerHTML = ''; }, 6000);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-robot mr-2"></i> Submit & Run AI OCR Audit';
+}
+
+async function sendChat(e) {
+    e.preventDefault();
+    const inp = document.getElementById('chatInput');
+    const msg = inp.value.trim(); if (!msg) return;
+    inp.value = '';
+    appendMsg(msg, true);
+    const r = await fetch('/api/expenses/ai-advisor', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d = await r.json();
+    appendMsg(d.response, false);
+}
+
+function appendMsg(text, isUser) {
+    const box = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'flex items-start gap-3' + (isUser ? ' justify-end' : '');
+    const fmt = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    div.innerHTML = isUser
+        ? `<div class="bg-gradient-to-tr from-violet-600 to-indigo-500 text-white rounded-2xl p-3.5 max-w-[85%] leading-relaxed">${fmt}</div>`
+        : `<div class="w-7 h-7 rounded-full bg-violet-950 border border-violet-700 text-violet-400 flex items-center justify-center text-xs shrink-0"><i class="fas fa-robot"></i></div>
+           <div class="glass rounded-2xl p-3.5 text-slate-300 leading-relaxed max-w-[85%]">${fmt}</div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+</script>
+</body>
+</html>

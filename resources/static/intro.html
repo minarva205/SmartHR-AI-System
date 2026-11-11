@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHR AI | System Boot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: radial-gradient(circle at center, #1e293b 0%, #020617 100%);
+            overflow: hidden;
+        }
+
+        /* Tech Ring Rotation */
+        .ring-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+        .outer-ring {
+            border: 2px dashed #38bdf8;
+            animation: spin 10s linear infinite;
+        }
+        .inner-ring {
+            border: 2px solid #1e40af;
+            border-top: 2px solid #fff;
+            animation: spin-reverse 3s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin-reverse { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+
+        /* Loading Progress Bar */
+        .progress-fill {
+            width: 0%;
+            animation: fillProgress 6s cubic-bezier(0.1, 0.5, 0.5, 1) forwards;
+        }
+        @keyframes fillProgress {
+            0% { width: 0%; }
+            30% { width: 45%; }
+            70% { width: 75%; }
+            100% { width: 100%; }
+        }
+
+        /* Glitch Text Effect */
+        .glitch {
+            text-shadow: 0.05em 0 0 #00fffc, -0.03em -0.04em 0 #fc00ff;
+            animation: glitch 1s infinite;
+        }
+        @keyframes glitch {
+            0% { text-shadow: 1px 0 #00fffc; }
+            50% { text-shadow: -1px -1px #fc00ff; }
+            100% { text-shadow: 1px 0 #00fffc; }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center justify-center h-screen text-white font-sans">
+
+    <div class="ring-container flex items-center justify-center mb-10">
+        <div class="outer-ring absolute w-48 h-48 rounded-full opacity-30"></div>
+        <div class="inner-ring absolute w-40 h-40 rounded-full opacity-60"></div>
+        
+        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="relative z-10">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M12 8v4M12 16h.01"/>
+        </svg>
+    </div>
+
+    <div class="text-center">
+        <h1 class="text-5xl font-black tracking-tighter mb-4 glitch italic">
+            SmartHR <span class="text-sky-400 not-italic">AI</span>
+        </h1>
+        
+        <div class="h-6 overflow-hidden mb-8">
+            <p id="status-text" class="text-sky-200/60 text-xs uppercase tracking-[0.4em] transition-all duration-500">
+                Establishing Secure Link...
+            </p>
+        </div>
+
+        <div class="w-80 h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10 p-[1px]">
+            <div class="h-full bg-gradient-to-r from-blue-600 via-sky-400 to-blue-600 progress-fill shadow-[0_0_15px_#38bdf8]"></div>
+        </div>
+        
+        <p id="counter" class="mt-4 text-[10px] font-mono text-gray-500">0%</p>
+    </div>
+
+    <script>
+        const statusText = document.getElementById('status-text');
+        const counter = document.getElementById('counter');
+        
+        const messages = [
+            "Connecting to Java Backend (9090)...",
+            "Initializing Python AI Engine...",
+            "Syncing MySQL Database Tables...",
+            "Loading Neural Network Models...",
+            "Optimizing SmartHR Dashboard...",
+            "System Ready. Redirecting..."
+        ];
+
+        let msgIndex = 0;
+        let count = 0;
+
+        // Status text update formula
+        const messageInterval = setInterval(() => {
+            if(msgIndex < messages.length - 1) {
+                msgIndex++;
+                statusText.innerText = messages[msgIndex];
+                statusText.style.opacity = '1';
+            }
+        }, 1000);
+
+        // Counter formula
+        const counterInterval = setInterval(() => {
+            if(count < 100) {
+                count++;
+                counter.innerText = count + "%";
+            } else {
+                clearInterval(counterInterval);
+                clearInterval(messageInterval);
+                // Total wait time: approx 6.5 seconds
+                setTimeout(() => {
+                    window.location.href = "index.html";
+                }, 500);
+            }
+        }, 60); // 60ms delay per 1%
+    </script>
+</body>
+</html>

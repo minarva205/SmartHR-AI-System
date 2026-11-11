@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Integration Center - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+
+        .integration-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .integration-card:hover { transform: translateY(-4px); box-shadow: 0 12px 20px -8px rgba(0,0,0,0.05); }
+
+        .toast { animation: slideIn 0.3s ease-out forwards; }
+        @keyframes slideIn {
+            from { transform: translateY(100%) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* ── AI Styles ── */
+        .ai-dark {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            position: relative; overflow: hidden;
+        }
+        .ai-dark::before {
+            content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            border-radius:50%;
+        }
+        .ai-dark::after {
+            content:''; position:absolute; bottom:-40px; left:-40px; width:160px; height:160px;
+            background: radial-gradient(circle, rgba(59,130,246,0.13) 0%, transparent 70%);
+            border-radius:50%;
+        }
+        .ai-orb {
+            width:38px; height:38px;
+            background: linear-gradient(135deg,#7c3aed,#3b82f6);
+            border-radius:50%; display:flex; align-items:center; justify-content:center;
+            animation: orbPulse 2.5s ease-in-out infinite; flex-shrink:0;
+        }
+        @keyframes orbPulse {
+            0%,100%{box-shadow:0 0 0 0 rgba(124,58,237,0.4);}
+            50%{box-shadow:0 0 0 8px rgba(124,58,237,0);}
+        }
+        .typing-dot {
+            width:6px; height:6px; background:#7c3aed; border-radius:50%;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2){animation-delay:0.2s;}
+        .typing-dot:nth-child(3){animation-delay:0.4s;}
+        @keyframes typingBounce {
+            0%,100%{transform:translateY(0);opacity:0.5;}
+            50%{transform:translateY(-5px);opacity:1;}
+        }
+        .ai-metric { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+        .ai-glow { background: linear-gradient(135deg,#7c3aed,#2563eb); box-shadow: 0 4px 16px rgba(124,58,237,0.35); transition:all 0.2s; }
+        .ai-glow:hover { box-shadow: 0 6px 24px rgba(124,58,237,0.5); transform:translateY(-1px); }
+        .ai-badge-pill { background: linear-gradient(90deg,rgba(124,58,237,0.12),rgba(59,130,246,0.1)); border:1px solid rgba(124,58,237,0.2); }
+        .score-bar { height:5px; border-radius:99px; transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+        #adminAiChat { scrollbar-width:thin; scrollbar-color:rgba(124,58,237,0.4) transparent; }
+        #adminAiChat::-webkit-scrollbar{width:4px;}
+        #adminAiChat::-webkit-scrollbar-thumb{background:rgba(124,58,237,0.4);border-radius:4px;}
+        .chat-ai { background:linear-gradient(135deg,rgba(124,58,237,0.15),rgba(59,130,246,0.1)); border:1px solid rgba(139,92,246,0.2); }
+        .chat-user { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.1); }
+        .ai-chip { background:rgba(124,58,237,0.1); border:1px solid rgba(139,92,246,0.25); cursor:pointer; transition:all 0.2s; }
+        .ai-chip:hover { background:rgba(124,58,237,0.22); border-color:rgba(139,92,246,0.5); transform:translateY(-1px); }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+        .animate-fade-up { animation: fadeUp 0.4s ease forwards; }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col space-y-3"></div>
+
+    <!-- Modal Background -->
+    <div id="configModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[90] hidden flex items-center justify-center">
+        <div class="bg-white rounded-3xl p-8 max-w-lg w-full mx-4 shadow-2xl border border-slate-100 relative">
+            <h3 class="text-xl font-bold text-slate-800 mb-2 flex items-center" id="modalTitle">
+                <i class="fas fa-cog text-emerald-500 mr-2"></i> Configure Integration
+            </h3>
+            <p class="text-xs text-slate-400 mb-6" id="modalSubtitle">Update configuration details.</p>
+            
+            <form id="configForm" onsubmit="saveConfiguration(event)">
+                <input type="hidden" id="modalIntegrationId">
+                <div class="space-y-4" id="modalFields">
+                    <!-- Dynamic fields go here -->
+                </div>
+                <div class="flex items-center justify-end space-x-3 mt-8">
+                    <button type="button" onclick="closeModal()" class="px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition shadow-md">Save Settings</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='admin-dashboard.html'">
+                <div class="w-10 h-10 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md">
+                    S
+                </div>
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-emerald-600 cursor-pointer text-lg" title="Security Settings" onclick="window.location.href='admin-security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="admin-dashboard.html" class="text-slate-500 hover:text-emerald-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-xl shadow-sm">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800">Global Integration Center</h1>
+                    <p class="text-slate-500">Configure corporate identity syncing, HR triggers, and enterprise database hooks</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="ai-badge-pill px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-violet-700 flex items-center gap-1.5">
+                    <i class="fas fa-wand-magic-sparkles text-violet-500"></i> AI-Powered
+                </span>
+                <button onclick="triggerSyncAll()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-full text-xs shadow-md transition flex items-center space-x-2">
+                    <i class="fas fa-rotate" id="syncAllIcon"></i>
+                    <span>Force Manual Sync</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ✦ AI INTEGRATION INTELLIGENCE PANEL ✦ -->
+        <div class="ai-dark rounded-[2rem] p-6 mb-8 relative z-10">
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+                <!-- Left: AI Metrics Grid -->
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="ai-orb"><i class="fas fa-brain text-white text-sm"></i></div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-white font-black text-base">AI Integration Intelligence</h2>
+                                <span class="text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider" style="background:linear-gradient(90deg,#7c3aed,#2563eb)">Live</span>
+                            </div>
+                            <p class="text-slate-400 text-xs font-semibold">Autonomous monitoring, anomaly detection & predictive optimization</p>
+                        </div>
+                        <button onclick="runAISystemScan()" id="aiScanBtn"
+                            class="ml-auto ai-glow text-white text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-2 flex-shrink-0">
+                            <i class="fas fa-radar"></i> Run AI Scan
+                        </button>
+                    </div>
+
+                    <!-- Metrics Row -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                        <div class="ai-metric rounded-xl px-4 py-3">
+                            <div class="text-violet-400 text-[9px] font-black uppercase tracking-wider mb-1">Active Integrations</div>
+                            <div class="text-white font-black text-xl" id="aiActiveCount">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold">of 4 configured</div>
+                        </div>
+                        <div class="ai-metric rounded-xl px-4 py-3">
+                            <div class="text-emerald-400 text-[9px] font-black uppercase tracking-wider mb-1">Sync Success Rate</div>
+                            <div class="text-white font-black text-xl" id="aiSuccessRate">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold" id="aiSuccessSub">analyzing...</div>
+                        </div>
+                        <div class="ai-metric rounded-xl px-4 py-3">
+                            <div class="text-amber-400 text-[9px] font-black uppercase tracking-wider mb-1">Anomalies Found</div>
+                            <div class="text-white font-black text-xl" id="aiAnomalyCount">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold">this week</div>
+                        </div>
+                        <div class="ai-metric rounded-xl px-4 py-3">
+                            <div class="text-blue-400 text-[9px] font-black uppercase tracking-wider mb-1">API Calls / Day</div>
+                            <div class="text-white font-black text-xl" id="aiApiCalls">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold">avg. 182k/week</div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Bars -->
+                    <div id="aiBars" style="display:none;" class="space-y-2.5">
+                        <p class="text-slate-500 text-[10px] font-black uppercase tracking-wider">Integration Performance</p>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300 text-[10px] font-bold">SSO / Okta</span><span class="text-emerald-400 text-[10px] font-black">99.8%</span></div>
+                            <div class="bg-white/10 rounded-full h-1.5"><div class="score-bar bg-gradient-to-r from-emerald-500 to-teal-400" style="width:0%" data-w="99.8%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300 text-[10px] font-bold">Slack Bot</span><span class="text-violet-400 text-[10px] font-black">96.2%</span></div>
+                            <div class="bg-white/10 rounded-full h-1.5"><div class="score-bar bg-gradient-to-r from-violet-500 to-purple-400" style="width:0%" data-w="96.2%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300 text-[10px] font-bold">ADP Payroll</span><span class="text-rose-400 text-[10px] font-black">71.4%</span></div>
+                            <div class="bg-white/10 rounded-full h-1.5"><div class="score-bar bg-gradient-to-r from-rose-500 to-orange-400" style="width:0%" data-w="71.4%"></div></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="text-slate-300 text-[10px] font-bold">Google Directory</span><span class="text-slate-400 text-[10px] font-black">N/A</span></div>
+                            <div class="bg-white/10 rounded-full h-1.5"><div class="score-bar bg-gradient-to-r from-slate-500 to-slate-400" style="width:0%" data-w="0%"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: AI Chat -->
+                <div class="w-full lg:w-80 flex-shrink-0">
+                    <p class="text-slate-400 text-[10px] font-black uppercase tracking-wider mb-2">AI Integration Consultant</p>
+                    <div id="adminAiChat" class="space-y-2.5 mb-3 max-h-40 overflow-y-auto pr-1">
+                        <div class="flex items-start gap-2">
+                            <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <i class="fas fa-robot text-white" style="font-size:7px"></i>
+                            </div>
+                            <div class="chat-ai rounded-2xl rounded-tl-none px-3 py-2">
+                                <p class="text-slate-200 text-[10px] font-semibold leading-relaxed">🧠 I monitor all your enterprise integrations in real time. Ask me about <span class="text-violet-300 font-bold">sync failures</span>, <span class="text-blue-300 font-bold">API limits</span>, or <span class="text-amber-300 font-bold">security risks</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 mb-3">
+                        <button onclick="sendAdminAI('Why did ADP sync fail?')" class="ai-chip text-slate-300 text-[9px] font-bold px-2.5 py-1.5 rounded-full">ADP sync failure?</button>
+                        <button onclick="sendAdminAI('Are there any security anomalies?')" class="ai-chip text-slate-300 text-[9px] font-bold px-2.5 py-1.5 rounded-full">Security anomalies?</button>
+                        <button onclick="sendAdminAI('How can I improve webhook reliability?')" class="ai-chip text-slate-300 text-[9px] font-bold px-2.5 py-1.5 rounded-full">Webhook reliability?</button>
+                    </div>
+                    <div class="flex gap-2">
+                        <input type="text" id="adminAiInput" placeholder="Ask AI..."
+                            class="flex-1 bg-white/10 border border-white/15 text-white placeholder-slate-500 text-[10px] font-semibold px-3 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/40 transition"
+                            onkeydown="if(event.key==='Enter') sendAdminAI()">
+                        <button onclick="sendAdminAI()" class="ai-glow text-white px-3 py-2.5 rounded-xl text-[10px] font-black">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendation Strip -->
+            <div id="aiAdminRec" style="display:none;" class="mt-5 pt-5 border-t border-white/8">
+                <div class="flex items-start gap-3 bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3">
+                    <i class="fas fa-triangle-exclamation text-amber-400 text-sm mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <p class="text-amber-300 text-[10px] font-black uppercase tracking-wider mb-0.5">AI Anomaly Alert</p>
+                        <p class="text-slate-300 text-xs font-semibold" id="aiRecText">Scanning integrations for anomalies...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Side: Integrations List -->
+            <div class="lg:col-span-2 space-y-10">
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-network-wired text-emerald-500 mr-2"></i> Corporate Integrations
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="integrationsGrid">
+                        <!-- Okta SSO -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="sso">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-600 text-xl">
+                                        <i class="fas fa-key"></i>
+                                    </div>
+                                    <span class="status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Active</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">SSO Login (Okta / Active Directory)</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6 font-medium">Enterprise Single Sign-On. Allow staff to log in with corporate credentials.</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="configureIntegration('sso')" class="flex-grow bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Configure
+                                </button>
+                                <button onclick="toggleIntegration('sso')" class="status-toggle-btn px-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-xl text-xs transition">
+                                    Disable
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Slack Bot -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="slack-bot">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-600 text-xl">
+                                        <i class="fab fa-slack"></i>
+                                    </div>
+                                    <span class="status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Active</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Corporate Slack Bot</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6 font-medium">Auto-posts announcements to designated channels and alerts managers about pending tasks.</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="configureIntegration('slack-bot')" class="flex-grow bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Configure
+                                </button>
+                                <button onclick="toggleIntegration('slack-bot')" class="status-toggle-btn px-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-xl text-xs transition">
+                                    Disable
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Google Workspace Directory Sync -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="google-sync">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 text-xl">
+                                        <i class="fab fa-google"></i>
+                                    </div>
+                                    <span class="status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Inactive</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Google Workspace Directory</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6 font-medium">Sync user directories and auto-create company emails for onboarded recruits.</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="configureIntegration('google-sync')" class="flex-grow bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Configure
+                                </button>
+                                <button onclick="toggleIntegration('google-sync')" class="status-toggle-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Enable
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- SAP / ADP Payroll Integration -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="payroll-sync">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center text-emerald-600 text-xl">
+                                        <i class="fas fa-file-invoice-dollar"></i>
+                                    </div>
+                                    <span class="status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Inactive</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">ADP Payroll Sync</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6 font-medium">Export salary calculations and tax documentation automatically into ADP systems.</p>
+                            </div>
+                            <div class="flex space-x-2">
+                                <button onclick="configureIntegration('payroll-sync')" class="flex-grow bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Configure
+                                </button>
+                                <button onclick="toggleIntegration('payroll-sync')" class="status-toggle-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                    Enable
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Webhooks -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-anchor text-emerald-500 mr-2"></i> Custom Outgoing Webhooks
+                    </h2>
+                    
+                    <form id="webhookForm" onsubmit="addWebhook(event)" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Payload URL</label>
+                            <input type="url" id="webhookUrl" placeholder="https://api.yourdomain.com/webhook" required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Secret Key</label>
+                            <input type="text" id="webhookSecret" placeholder="whsec_..." required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                        </div>
+                        <div class="md:col-span-3 flex items-center justify-between mt-2">
+                            <div class="flex items-center space-x-4 text-xs font-semibold text-slate-500">
+                                <label class="flex items-center space-x-1.5 cursor-pointer">
+                                    <input type="checkbox" id="triggerOnboard" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                    <span>Employee Joined</span>
+                                </label>
+                                <label class="flex items-center space-x-1.5 cursor-pointer">
+                                    <input type="checkbox" id="triggerLeave" checked class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                    <span>Leave Approval</span>
+                                </label>
+                                <label class="flex items-center space-x-1.5 cursor-pointer">
+                                    <input type="checkbox" id="triggerTask" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                                    <span>Task Completed</span>
+                                </label>
+                            </div>
+                            <button type="submit" class="bg-slate-800 hover:bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold transition shadow-sm">
+                                Create Webhook
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Target URL</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Triggers</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Status</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="webhookTable" class="divide-y divide-slate-100 text-slate-600">
+                                <!-- Webhooks go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Section: Sync Logs -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-history text-slate-400 mr-2"></i> Recent Synchronization Logs
+                    </h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Target Service</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Type</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Timestamp</th>
+                                    <th class="py-3 px-4 font-semibold text-xs uppercase">Result</th>
+                                </tr>
+                            </thead>
+                            <tbody id="syncLogsTable" class="divide-y divide-slate-100 text-slate-600">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Sidebar -->
+            <div class="space-y-6">
+                <!-- System Health Card -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm relative overflow-hidden">
+                    <div class="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full blur-2xl opacity-60"></div>
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center relative z-10">
+                        <i class="fas fa-server text-emerald-600 mr-2"></i> System Health
+                    </h2>
+                    <div class="space-y-4 relative z-10">
+                        <div class="flex justify-between items-center text-sm border-b pb-3 border-slate-50">
+                            <span class="text-slate-500 font-medium">SSO Engine</span>
+                            <span class="text-emerald-600 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span> ONLINE</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-b pb-3 border-slate-50">
+                            <span class="text-slate-500 font-medium">Webhook Gateway</span>
+                            <span class="text-emerald-600 font-bold flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1.5"></span> ACTIVE</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm border-b pb-3 border-slate-50">
+                            <span class="text-slate-500 font-medium">Sync Latency</span>
+                            <span class="font-mono text-xs text-slate-600">12 ms average</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-slate-500 font-medium">Weekly Requests</span>
+                            <span class="font-bold text-slate-800">182,491 calls</span>
+                        </div>
+                    </div>
+                    <!-- AI Health Badge -->
+                    <div class="mt-4 flex items-center gap-2 ai-badge-pill rounded-xl px-3 py-2">
+                        <i class="fas fa-wand-magic-sparkles text-violet-500 text-xs"></i>
+                        <p class="text-violet-700 text-[10px] font-bold">AI Score: <span class="font-black" id="sidebarAIScore">—</span> · System performing optimally</p>
+                    </div>
+                </div>
+
+                <!-- ✦ AI Smart Webhooks Panel ✦ -->
+                <div class="ai-dark rounded-3xl p-6 shadow-xl">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="ai-orb"><i class="fas fa-anchor text-white text-sm"></i></div>
+                        <div>
+                            <h2 class="text-white font-black text-sm">AI Webhook Intelligence</h2>
+                            <p class="text-slate-400 text-[10px] font-semibold">Smart trigger recommendations</p>
+                        </div>
+                    </div>
+                    <div class="space-y-2.5 mb-4">
+                        <div class="ai-metric rounded-xl px-3 py-2.5 flex items-start gap-2">
+                            <i class="fas fa-circle-check text-emerald-400 text-xs mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-slate-200 text-[10px] font-black">High-Value Trigger Detected</p>
+                                <p class="text-slate-400 text-[9px] font-semibold mt-0.5">AI recommends adding a <span class="text-violet-300">Payroll Processed</span> trigger for your ADP webhook to automate payslip notifications.</p>
+                            </div>
+                        </div>
+                        <div class="ai-metric rounded-xl px-3 py-2.5 flex items-start gap-2">
+                            <i class="fas fa-triangle-exclamation text-amber-400 text-xs mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-slate-200 text-[10px] font-black">Retry Policy Missing</p>
+                                <p class="text-slate-400 text-[9px] font-semibold mt-0.5">Your internal webhook has no retry policy. AI suggests enabling exponential backoff to prevent data loss on failure.</p>
+                            </div>
+                        </div>
+                        <div class="ai-metric rounded-xl px-3 py-2.5 flex items-start gap-2">
+                            <i class="fas fa-shield-halved text-blue-400 text-xs mt-0.5 flex-shrink-0"></i>
+                            <div>
+                                <p class="text-slate-200 text-[10px] font-black">HMAC Signature Verified</p>
+                                <p class="text-slate-400 text-[9px] font-semibold mt-0.5">All active webhooks are transmitting with valid HMAC-SHA256 signatures. No tampering detected.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="showWebhookAIReport()" class="w-full ai-glow text-white font-bold py-2.5 rounded-xl text-[10px] transition">
+                        <i class="fas fa-chart-bar mr-1"></i> View Full AI Report
+                    </button>
+                </div>
+
+                <!-- API Docs shortcut -->
+                <div class="bg-slate-900 text-white rounded-3xl p-8 shadow-xl relative overflow-hidden">
+                    <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
+                    <h2 class="text-lg font-bold mb-4 flex items-center">
+                        <i class="fas fa-book-open text-emerald-400 mr-2"></i> Developer API
+                    </h2>
+                    <p class="text-slate-400 text-xs mb-6 leading-relaxed">Access full REST API documentation to bind your internal custom applications directly with our central HR system.</p>
+                    <button onclick="alert('API Credentials generated: Client ID & Secret have been sent to your administrative email.')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-md">
+                        Generate Client Credentials
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        // ── AI Panel Logic ──────────────────────────────────────
+        const ADMIN_AI = {
+            'adp': "🚨 The **ADP Payroll Sync** failure from 1 hour ago was caused by an invalid OAuth token refresh. This is a known issue when the ADP API secret expires (every 90 days). AI Action: Rotate the ADP API credentials in the Configure modal and trigger a manual re-sync. Expected recovery: within 15 minutes.",
+            'anomaly': "🔍 AI Anomaly Detection completed scan: (1) **ADP Payroll** shows 28.6% failure rate — flagged as High Risk, (2) Webhook endpoint at api.internal-tool.com had 3 failed deliveries in the last 24 hours, (3) SSO login spike detected (220% above baseline) on Friday 6 PM — likely automated script or bot activity. Recommend reviewing access logs.",
+            'webhook': "⚙️ To improve **webhook reliability**: (1) Enable retry with exponential backoff (3 retries: 5s, 30s, 5min), (2) Add a dead-letter queue for failed payloads, (3) Validate HMAC signatures on your receiver endpoint, (4) Monitor webhook delivery rate in the AI dashboard — currently at 94.2%. Target is 99%+.",
+            'default': [
+                "🧠 Your integration ecosystem is processing ~182K API calls/week. AI has identified 1 integration at risk (ADP Payroll, 71.4% success rate). Recommend reviewing ADP credentials immediately.",
+                "🔒 Security posture: All SSO login attempts are verified via MFA. No unauthorized access detected in the last 7 days. Webhook HMAC signatures are valid for all active endpoints.",
+                "📊 AI Performance Tip: Enabling Google Directory Sync can reduce onboarding admin effort by ~60%. New employees' accounts can be auto-provisioned within minutes of HR approval."
+            ]
+        };
+
+        function getAdminAIResponse(q) {
+            const ql = q.toLowerCase();
+            if (ql.includes('adp') || ql.includes('payroll') || ql.includes('fail')) return ADMIN_AI.adp;
+            if (ql.includes('anomaly') || ql.includes('security') || ql.includes('risk')) return ADMIN_AI.anomaly;
+            if (ql.includes('webhook') || ql.includes('reliability') || ql.includes('retry')) return ADMIN_AI.webhook;
+            const d = ADMIN_AI.default;
+            return d[Math.floor(Math.random() * d.length)];
+        }
+
+        async function sendAdminAI(preset) {
+            const input = document.getElementById('adminAiInput');
+            const q = preset || input.value.trim();
+            if (!q) return;
+            input.value = '';
+            const box = document.getElementById('adminAiChat');
+
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex items-start gap-2 justify-end';
+            userDiv.innerHTML = `
+                <div class="chat-user rounded-2xl rounded-tr-none px-3 py-2 max-w-[180px]">
+                    <p class="text-slate-200 text-[10px] font-semibold">${q}</p>
+                </div>
+                <div class="w-5 h-5 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-user text-slate-300" style="font-size:7px"></i>
+                </div>`;
+            box.appendChild(userDiv);
+
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'flex items-start gap-2';
+            typingDiv.innerHTML = `
+                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white" style="font-size:7px"></i>
+                </div>
+                <div class="chat-ai rounded-2xl rounded-tl-none px-3 py-2.5 flex items-center gap-1.5">
+                    <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                </div>`;
+            box.appendChild(typingDiv);
+            box.scrollTop = box.scrollHeight;
+
+            await new Promise(r => setTimeout(r, 1400 + Math.random() * 700));
+            typingDiv.remove();
+
+            const resp = getAdminAIResponse(q);
+            const fmt = resp.replace(/\*\*(.*?)\*\*/g, '<span class="text-violet-300 font-bold">$1</span>');
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'flex items-start gap-2';
+            aiDiv.innerHTML = `
+                <div class="w-5 h-5 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white" style="font-size:7px"></i>
+                </div>
+                <div class="chat-ai rounded-2xl rounded-tl-none px-3 py-2">
+                    <p class="text-slate-200 text-[10px] font-semibold leading-relaxed">${fmt}</p>
+                </div>`;
+            box.appendChild(aiDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+
+        const AI_ALERTS = [
+            "ADP Payroll Sync shows a 28.6% failure rate this week — credentials may be expired. AI recommends rotating API keys immediately.",
+            "Unusual login spike detected via SSO on Friday evening (220% above baseline). AI flagged possible automated script activity. Review access logs.",
+            "Webhook endpoint api.internal-tool.com had 3 failed deliveries. AI recommends enabling retry logic with exponential backoff.",
+            "Google Directory integration is inactive. AI estimates 60% onboarding time reduction if enabled. Setup takes approximately 15 minutes."
+        ];
+
+        async function runAISystemScan() {
+            const btn = document.getElementById('aiScanBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Scanning...';
+            btn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 2200));
+
+            document.getElementById('aiActiveCount').textContent = '2';
+            document.getElementById('aiSuccessRate').textContent = '87%';
+            document.getElementById('aiSuccessSub').textContent = 'last 7 days';
+            document.getElementById('aiAnomalyCount').textContent = '3';
+            document.getElementById('aiApiCalls').textContent = '26K';
+            document.getElementById('sidebarAIScore').textContent = '87/100';
+
+            document.getElementById('aiBars').style.display = 'block';
+            setTimeout(() => {
+                document.querySelectorAll('.score-bar').forEach(b => b.style.width = b.dataset.w);
+            }, 100);
+
+            const rec = AI_ALERTS[Math.floor(Math.random() * AI_ALERTS.length)];
+            document.getElementById('aiRecText').textContent = rec;
+            document.getElementById('aiAdminRec').style.display = 'block';
+
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Scan Complete';
+            btn.disabled = false;
+            setTimeout(() => btn.innerHTML = '<i class="fas fa-radar"></i> Re-Scan', 3000);
+        }
+
+        function showWebhookAIReport() {
+            showToast('AI Webhook Report: 1 active endpoint, 94.2% delivery rate, 0 security violations. Full report emailed to admin.', 'success');
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN' && user.role !== 'HR') {
+                        alert("Access Restricted. Redirecting to employee integration portal.");
+                        window.location.href = 'integration.html';
+                        return;
+                    }
+                    
+                    // Load state from local storage or set defaults
+                    loadIntegrations();
+                    loadWebhooks();
+                    loadLogs();
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        // Initialize state
+        let integrations = {
+            'sso': true,
+            'slack-bot': true,
+            'google-sync': false,
+            'payroll-sync': false
+        };
+
+        let configurations = {
+            'sso': { 'domain': 'company.okta.com', 'client_id': '0oa8e4f1k9R6x' },
+            'slack-bot': { 'webhook': 'https://hooks.slack.com/services/T00/B00/X00' },
+            'google-sync': { 'domain': 'company.com' },
+            'payroll-sync': { 'vendor': 'ADP Run' }
+        };
+
+        let webhooks = [
+            { id: 1, url: 'https://api.internal-tool.com/hr-hook', triggers: ['Employee Joined', 'Leave Approval'], active: true }
+        ];
+
+        let logs = [
+            { target: 'Okta SSO', type: 'Directory Sync', timestamp: 'Just now', result: 'Success' },
+            { target: 'Slack Channel Notification', type: 'Webhook alert', timestamp: '12 mins ago', result: 'Success' },
+            { target: 'ADP Payroll Server', type: 'Monthly Sheets export', timestamp: '1 hour ago', result: 'Failed' }
+        ];
+
+        function loadIntegrations() {
+            const saved = localStorage.getItem('admin_integrations');
+            if (saved) integrations = JSON.parse(saved);
+            
+            const savedConfig = localStorage.getItem('admin_integration_configs');
+            if (savedConfig) configurations = JSON.parse(savedConfig);
+
+            updateUI();
+        }
+
+        function updateUI() {
+            for (const [key, enabled] of Object.entries(integrations)) {
+                const card = document.querySelector(`[data-integration="${key}"]`);
+                if (!card) continue;
+
+                const badge = card.querySelector('.status-badge');
+                const toggleBtn = card.querySelector('.status-toggle-btn');
+
+                if (enabled) {
+                    badge.className = "status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider";
+                    badge.innerText = "Active";
+                    toggleBtn.className = "status-toggle-btn px-4 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2 rounded-xl text-xs transition";
+                    toggleBtn.innerText = "Disable";
+                } else {
+                    badge.className = "status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider";
+                    badge.innerText = "Inactive";
+                    toggleBtn.className = "status-toggle-btn px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl text-xs transition";
+                    toggleBtn.innerText = "Enable";
+                }
+            }
+        }
+
+        function toggleIntegration(key) {
+            integrations[key] = !integrations[key];
+            localStorage.setItem('admin_integrations', JSON.stringify(integrations));
+            updateUI();
+            
+            const stateText = integrations[key] ? 'enabled' : 'disabled';
+            showToast(`Integration successfully ${stateText}!`, integrations[key] ? 'success' : 'info');
+            
+            // Add audit log
+            addAuditLog(key === 'sso' ? 'Okta SSO' : (key === 'slack-bot' ? 'Slack Bot' : (key === 'google-sync' ? 'Google Directory' : 'ADP Payroll')), 'Toggle Status', 'Just now', 'Success');
+        }
+
+        function configureIntegration(key) {
+            const config = configurations[key];
+            document.getElementById('modalIntegrationId').value = key;
+            
+            let title = '';
+            let subtitle = '';
+            let fieldsHtml = '';
+
+            if (key === 'sso') {
+                title = 'Configure Single Sign-On';
+                subtitle = 'Provide parameters for your corporate identity service.';
+                fieldsHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Okta Domain</label>
+                        <input type="text" id="ssoDomain" value="${config.domain || ''}" required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Client ID</label>
+                        <input type="text" id="ssoClientId" value="${config.client_id || ''}" required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                `;
+            } else if (key === 'slack-bot') {
+                title = 'Slack Bot webhook';
+                subtitle = 'Provide the webhook endpoint to let the application forward alerts.';
+                fieldsHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Webhook URL</label>
+                        <input type="url" id="slackWebhook" value="${config.webhook || ''}" required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                `;
+            } else if (key === 'google-sync') {
+                title = 'Google Workspace Directory';
+                subtitle = 'Enable email accounts sync and provisioning.';
+                fieldsHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Workspace Domain</label>
+                        <input type="text" id="googleDomain" value="${config.domain || ''}" required class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                    </div>
+                `;
+            } else if (key === 'payroll-sync') {
+                title = 'ADP / SAP Payroll Sync';
+                subtitle = 'Provide target vendor system configuration.';
+                fieldsHtml = `
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Payroll Vendor</label>
+                        <select id="payrollVendor" class="w-full px-4 py-2 text-sm border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white transition">
+                            <option value="ADP Run" ${config.vendor === 'ADP Run' ? 'selected' : ''}>ADP Run</option>
+                            <option value="SAP SuccessFactors" ${config.vendor === 'SAP SuccessFactors' ? 'selected' : ''}>SAP SuccessFactors</option>
+                            <option value="Workday Payroll" ${config.vendor === 'Workday Payroll' ? 'selected' : ''}>Workday Payroll</option>
+                        </select>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalSubtitle').innerText = subtitle;
+            document.getElementById('modalFields').innerHTML = fieldsHtml;
+            document.getElementById('configModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('configModal').classList.add('hidden');
+        }
+
+        function saveConfiguration(e) {
+            e.preventDefault();
+            const key = document.getElementById('modalIntegrationId').value;
+            
+            if (key === 'sso') {
+                configurations[key].domain = document.getElementById('ssoDomain').value;
+                configurations[key].client_id = document.getElementById('ssoClientId').value;
+            } else if (key === 'slack-bot') {
+                configurations[key].webhook = document.getElementById('slackWebhook').value;
+            } else if (key === 'google-sync') {
+                configurations[key].domain = document.getElementById('googleDomain').value;
+            } else if (key === 'payroll-sync') {
+                configurations[key].vendor = document.getElementById('payrollVendor').value;
+            }
+
+            localStorage.setItem('admin_integration_configs', JSON.stringify(configurations));
+            closeModal();
+            showToast("Configuration saved successfully!");
+        }
+
+        function loadWebhooks() {
+            const saved = localStorage.getItem('admin_webhooks');
+            if (saved) webhooks = JSON.parse(saved);
+            renderWebhooks();
+        }
+
+        function renderWebhooks() {
+            const tbody = document.getElementById('webhookTable');
+            if (webhooks.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-xs text-slate-400">No active webhooks configured.</td></tr>`;
+                return;
+            }
+            
+            tbody.innerHTML = webhooks.map(wh => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4 font-mono text-xs text-slate-600 max-w-[200px] overflow-hidden text-ellipsis">${wh.url}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${wh.triggers.map(t => `<span class="bg-slate-100 text-slate-600 text-[10px] px-2 py-0.5 rounded">${t}</span>`).join('')}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="${wh.active ? 'text-emerald-700 bg-emerald-50 border border-emerald-100' : 'text-slate-500 bg-slate-50 border border-slate-100'} text-[10px] font-bold px-2 py-0.5 rounded">
+                            ${wh.active ? 'Active' : 'Disabled'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="deleteWebhook(${wh.id})" class="text-rose-600 hover:text-rose-800 text-xs font-semibold">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addWebhook(e) {
+            e.preventDefault();
+            const url = document.getElementById('webhookUrl').value;
+            const secret = document.getElementById('webhookSecret').value;
+            
+            const triggers = [];
+            if (document.getElementById('triggerOnboard').checked) triggers.push('Employee Joined');
+            if (document.getElementById('triggerLeave').checked) triggers.push('Leave Approval');
+            if (document.getElementById('triggerTask').checked) triggers.push('Task Completed');
+
+            if (triggers.length === 0) {
+                alert("Please select at least one trigger event.");
+                return;
+            }
+
+            const newWh = {
+                id: Date.now(),
+                url,
+                triggers,
+                active: true
+            };
+
+            webhooks.push(newWh);
+            localStorage.setItem('admin_webhooks', JSON.stringify(webhooks));
+            renderWebhooks();
+            document.getElementById('webhookForm').reset();
+            showToast("Webhook endpoint added successfully!");
+        }
+
+        function deleteWebhook(id) {
+            webhooks = webhooks.filter(wh => wh.id !== id);
+            localStorage.setItem('admin_webhooks', JSON.stringify(webhooks));
+            renderWebhooks();
+            showToast("Webhook deleted.");
+        }
+
+        function loadLogs() {
+            const saved = localStorage.getItem('admin_sync_logs');
+            if (saved) logs = JSON.parse(saved);
+            renderLogs();
+        }
+
+        function renderLogs() {
+            const tbody = document.getElementById('syncLogsTable');
+            tbody.innerHTML = logs.map(l => `
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="py-3 px-4 font-bold text-slate-700">${l.target}</td>
+                    <td class="py-3 px-4 text-xs text-slate-500">${l.type}</td>
+                    <td class="py-3 px-4 text-xs text-slate-400">${l.timestamp}</td>
+                    <td class="py-3 px-4">
+                        <span class="${l.result === 'Success' ? 'text-emerald-700 bg-emerald-100' : 'text-red-700 bg-red-100'} text-[10px] font-bold px-2 py-1 rounded uppercase tracking-wide">
+                            ${l.result}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function addAuditLog(target, type, timestamp, result) {
+            logs.unshift({ target, type, timestamp, result });
+            if (logs.length > 8) logs.pop();
+            localStorage.setItem('admin_sync_logs', JSON.stringify(logs));
+            renderLogs();
+        }
+
+        function triggerSyncAll() {
+            const syncIcon = document.getElementById('syncAllIcon');
+            syncIcon.classList.add('animate-spin');
+            
+            setTimeout(() => {
+                syncIcon.classList.remove('animate-spin');
+                showToast("System-wide synchronization finished!", "success");
+                addAuditLog('All Directory Resources', 'Manual Force Sync', 'Just now', 'Success');
+            }, 1800);
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-slate-800 text-white";
+            let iconClass = "fa-info-circle text-blue-400";
+            if (type === 'success') {
+                bgClass = "bg-white text-slate-800 border border-slate-100 shadow-xl";
+                iconClass = "fa-circle-check text-emerald-500";
+            }
+            
+            toast.className = `toast ${bgClass} px-5 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold max-w-sm`;
+            toast.innerHTML = `
+                <i class="fas ${iconClass} text-base"></i>
+                <span class="flex-grow">${message}</span>
+                <i class="fas fa-times text-slate-400 hover:text-slate-600 cursor-pointer ml-3" onclick="this.parentElement.remove()"></i>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'none';
+                toast.classList.add('transition-all', 'duration-300', 'opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+</body>
+
+</html>

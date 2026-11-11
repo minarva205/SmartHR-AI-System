@@ -1,0 +1,1261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Directory - SmartHR AI</title>
+    <meta name="description" content="Find and connect with colleagues across your organization using AI-powered search and smart team collaboration tools.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg-primary: #0a0f1e;
+            --bg-secondary: #0f1629;
+            --bg-card: #131c35;
+            --bg-card-hover: #1a2545;
+            --accent-blue: #3b82f6;
+            --accent-indigo: #6366f1;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --border-subtle: rgba(255,255,255,0.07);
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --glow-blue: rgba(59,130,246,0.25);
+            --glow-purple: rgba(139,92,246,0.2);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Background mesh */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 20% -10%, rgba(59,130,246,0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 80% 90%, rgba(139,92,246,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 30% at 60% 40%, rgba(6,182,212,0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navbar */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(10,15,30,0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .nav-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+        }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--accent-blue); }
+        .nav-links a.logout:hover { color: var(--accent-rose); }
+
+        /* Main */
+        main {
+            position: relative;
+            z-index: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* Hero Header */
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15));
+            border: 1px solid rgba(139,92,246,0.3);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a78bfa;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .ai-badge i { font-size: 0.7rem; animation: pulse-icon 2s infinite; }
+        @keyframes pulse-icon { 0%,100%{opacity:1;} 50%{opacity:0.5;} }
+        .page-header h1 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, #f1f5f9 30%, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .page-header p {
+            margin-top: 12px;
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* AI Stats Strip */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 20px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            transition: border-color 0.3s, transform 0.2s;
+        }
+        .stat-card:hover { border-color: rgba(99,102,241,0.4); transform: translateY(-2px); }
+        .stat-card .stat-icon {
+            font-size: 1.25rem;
+            margin-bottom: 4px;
+        }
+        .stat-card .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .stat-card .stat-label {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* AI Search Box */
+        .search-section {
+            margin-bottom: 32px;
+        }
+        .search-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .search-wrapper {
+            position: relative;
+        }
+        .search-wrapper .search-icon {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent-indigo);
+            font-size: 1rem;
+        }
+        .search-wrapper input {
+            width: 100%;
+            background: var(--bg-card);
+            border: 2px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 16px 18px 16px 50px;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            outline: none;
+        }
+        .search-wrapper input::placeholder { color: var(--text-muted); }
+        .search-wrapper input:focus {
+            border-color: var(--accent-indigo);
+            box-shadow: 0 0 0 4px var(--glow-purple);
+        }
+        .search-wrapper .search-clear {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+            display: none;
+        }
+        .search-wrapper .search-clear:hover { color: var(--text-primary); }
+
+        /* AI Query Suggestions */
+        .ai-suggestions {
+            margin-top: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .suggestion-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(99,102,241,0.1);
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 100px;
+            padding: 6px 14px;
+            font-size: 0.78rem;
+            color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .suggestion-chip:hover {
+            background: rgba(99,102,241,0.2);
+            border-color: rgba(99,102,241,0.5);
+            color: #c7d2fe;
+        }
+
+        /* AI Result Banner */
+        .ai-result-banner {
+            background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(139,92,246,0.08));
+            border: 1px solid rgba(99,102,241,0.25);
+            border-radius: 14px;
+            padding: 14px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: none;
+        }
+        .ai-result-banner.show { display: flex; }
+        .ai-result-banner i { color: #a78bfa; margin-top: 2px; flex-shrink: 0; }
+
+        /* Department Filter Pills */
+        .filter-section {
+            margin-bottom: 32px;
+        }
+        .filter-label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .dept-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .dept-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 100px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .dept-pill:hover { border-color: rgba(99,102,241,0.4); color: #a5b4fc; }
+        .dept-pill.active {
+            background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(139,92,246,0.2));
+            border-color: rgba(139,92,246,0.5);
+            color: #c7d2fe;
+        }
+        .dept-pill .pill-count {
+            background: rgba(99,102,241,0.2);
+            border-radius: 100px;
+            padding: 2px 7px;
+            font-size: 0.7rem;
+        }
+
+        /* Collaborator Finder Button */
+        .action-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .result-count {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        .result-count span {
+            color: var(--text-primary);
+            font-weight: 700;
+        }
+        .collab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(99,102,241,0.3);
+            font-family: 'Inter', sans-serif;
+        }
+        .collab-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(99,102,241,0.5);
+        }
+
+        /* Employee Grid */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* Employee Card */
+        .employee-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            animation: fadeInUp 0.4s ease both;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .employee-card:hover {
+            border-color: rgba(99,102,241,0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(99,102,241,0.2);
+        }
+        .card-gradient-strip {
+            height: 4px;
+            background: linear-gradient(90deg, var(--g1), var(--g2));
+        }
+        .card-body { padding: 24px; }
+        .card-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+        .avatar-wrapper {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .avatar-wrapper img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid transparent;
+            background: var(--bg-secondary);
+        }
+        .avatar-online {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--accent-emerald);
+            border: 2px solid var(--bg-card);
+            border-radius: 50%;
+        }
+        .profile-info h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .profile-info .designation {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .profile-info .dept-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 6px;
+            background: rgba(99,102,241,0.1);
+            border-radius: 100px;
+            padding: 3px 10px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .card-divider {
+            border: none;
+            border-top: 1px solid var(--border-subtle);
+            margin: 16px 0;
+        }
+        .card-contact {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .card-contact i { color: var(--accent-indigo); width: 14px; text-align: center; }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+        .card-action-btn {
+            flex: 1;
+            background: rgba(99,102,241,0.08);
+            border: 1px solid rgba(99,102,241,0.15);
+            border-radius: 10px;
+            padding: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a5b4fc;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-family: 'Inter', sans-serif;
+        }
+        .card-action-btn:hover {
+            background: rgba(99,102,241,0.18);
+            border-color: rgba(139,92,246,0.4);
+        }
+        .card-action-btn i { margin-right: 5px; }
+
+        /* Empty state */
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 20px;
+        }
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        /* Loading skeleton */
+        .skeleton-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            overflow: hidden;
+            padding: 24px;
+        }
+        .skeleton-bar {
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+        .skeleton-avatar {
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            flex-shrink: 0;
+        }
+
+        /* Bio Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(8px);
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-box {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1);
+            overflow: hidden;
+            animation: modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-header {
+            background: linear-gradient(135deg, rgba(59,130,246,0.1), rgba(139,92,246,0.1));
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .modal-header h2 { font-size: 1rem; font-weight: 700; color: var(--text-primary); }
+        .modal-close {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            font-size: 0.85rem;
+        }
+        .modal-close:hover { background: rgba(244,63,94,0.1); color: var(--accent-rose); border-color: rgba(244,63,94,0.3); }
+        .modal-body { padding: 28px; }
+        .modal-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .modal-avatar { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; border: 3px solid rgba(99,102,241,0.4); }
+        .modal-profile-info h3 { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); }
+        .modal-profile-info .role { font-size: 0.8rem; color: #a78bfa; font-weight: 600; text-transform: uppercase; margin-top: 4px; }
+        .modal-profile-info .dept { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+        .ai-bio-section {
+            background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.06));
+            border: 1px solid rgba(99,102,241,0.2);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+        .ai-bio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #a78bfa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .ai-bio-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+        .modal-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .skill-chip {
+            background: rgba(6,182,212,0.1);
+            border: 1px solid rgba(6,182,212,0.2);
+            border-radius: 8px;
+            padding: 5px 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #67e8f9;
+        }
+        .modal-contact-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+        .modal-contact-row:last-child { border-bottom: none; }
+        .modal-contact-row i { color: var(--accent-indigo); width: 18px; text-align: center; }
+
+        /* Collaborator Modal */
+        .collab-section {
+            margin-top: 20px;
+        }
+        .collab-section h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 14px;
+        }
+        .collab-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            transition: border-color 0.2s;
+        }
+        .collab-card:hover { border-color: rgba(99,102,241,0.3); }
+        .collab-card img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .collab-info h5 { font-size: 0.875rem; font-weight: 700; color: var(--text-primary); }
+        .collab-info p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        .collab-match {
+            margin-left: auto;
+            background: linear-gradient(135deg, rgba(16,185,129,0.15), rgba(6,182,212,0.15));
+            border: 1px solid rgba(16,185,129,0.25);
+            border-radius: 8px;
+            padding: 4px 10px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #34d399;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 999;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(99,102,241,0.3);
+            border-radius: 14px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+            max-width: 340px;
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast i { color: #a78bfa; font-size: 1rem; }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .stats-strip { grid-template-columns: repeat(2, 1fr); }
+            .action-bar { flex-direction: column; align-items: flex-start; }
+            .employee-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-inner">
+            <div class="brand"><i class="fas fa-brain" style="font-size:0.9em; margin-right:8px;"></i>SmartHR AI</div>
+            <div class="nav-links">
+                <a href="index.html"><i class="fas fa-house" style="margin-right:5px;"></i>Home</a>
+                <a href="/logout" class="logout"><i class="fas fa-sign-out-alt" style="margin-right:5px;"></i>Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="ai-badge">
+                <i class="fas fa-sparkles"></i>
+                AI-Powered Directory
+            </div>
+            <h1>Global Corporate Directory</h1>
+            <p>Discover colleagues, find collaborators, and connect with your entire organization intelligently.</p>
+        </div>
+
+        <!-- AI Stats Strip -->
+        <div class="stats-strip" id="statsStrip">
+            <!-- Skeleton loaders -->
+            <div class="skeleton-card">
+                <div class="skeleton-bar" style="height:20px;width:60%;margin-bottom:8px;"></div>
+                <div class="skeleton-bar" style="height:36px;width:40%;margin-bottom:6px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:55%;"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-bar" style="height:20px;width:60%;margin-bottom:8px;"></div>
+                <div class="skeleton-bar" style="height:36px;width:40%;margin-bottom:6px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:55%;"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-bar" style="height:20px;width:60%;margin-bottom:8px;"></div>
+                <div class="skeleton-bar" style="height:36px;width:40%;margin-bottom:6px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:55%;"></div>
+            </div>
+            <div class="skeleton-card">
+                <div class="skeleton-bar" style="height:20px;width:60%;margin-bottom:8px;"></div>
+                <div class="skeleton-bar" style="height:36px;width:40%;margin-bottom:6px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:55%;"></div>
+            </div>
+        </div>
+
+        <!-- AI Search -->
+        <div class="search-section">
+            <div class="search-label">
+                <i class="fas fa-wand-magic-sparkles"></i>
+                AI Smart Search
+            </div>
+            <div class="search-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="staffSearch" placeholder='Try: "engineers", "find Priya", "HR team", "product designers"...' oninput="handleSearch()" autocomplete="off">
+                <button class="search-clear" id="searchClear" onclick="clearSearch()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="ai-suggestions">
+                <div class="suggestion-chip" onclick="quickSearch('engineering')"><i class="fas fa-code"></i> Engineering</div>
+                <div class="suggestion-chip" onclick="quickSearch('design')"><i class="fas fa-palette"></i> Design</div>
+                <div class="suggestion-chip" onclick="quickSearch('product')"><i class="fas fa-box"></i> Product</div>
+                <div class="suggestion-chip" onclick="quickSearch('hr')"><i class="fas fa-users"></i> HR</div>
+                <div class="suggestion-chip" onclick="quickSearch('finance')"><i class="fas fa-chart-line"></i> Finance</div>
+                <div class="suggestion-chip" onclick="quickSearch('marketing')"><i class="fas fa-megaphone"></i> Marketing</div>
+            </div>
+        </div>
+
+        <!-- AI Result Banner -->
+        <div class="ai-result-banner" id="aiResultBanner">
+            <i class="fas fa-robot"></i>
+            <span id="aiResultText"></span>
+        </div>
+
+        <!-- Department Filter Pills -->
+        <div class="filter-section">
+            <div class="filter-label">Filter by Department</div>
+            <div class="dept-pills" id="deptPills">
+                <div class="dept-pill active" data-dept="all" onclick="filterByDept(this, 'all')">
+                    <i class="fas fa-globe"></i> All Departments <span class="pill-count" id="countAll">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+            <div class="result-count">Showing <span id="resultCount">0</span> colleagues</div>
+            <button class="collab-btn" onclick="openCollabFinder()">
+                <i class="fas fa-people-arrows"></i>
+                AI Collaborator Finder
+            </button>
+        </div>
+
+        <!-- Employee Grid -->
+        <div class="employee-grid" id="employeeGrid">
+            <!-- Skeleton loaders -->
+            <div class="skeleton-card" style="border-radius:20px;">
+                <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;">
+                    <div class="skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-bar" style="height:14px;width:70%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:12px;width:50%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:22px;width:60%;border-radius:100px;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-bar" style="height:1px;margin-bottom:16px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:80%;"></div>
+            </div>
+            <div class="skeleton-card" style="border-radius:20px;">
+                <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;">
+                    <div class="skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-bar" style="height:14px;width:70%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:12px;width:50%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:22px;width:60%;border-radius:100px;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-bar" style="height:1px;margin-bottom:16px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:80%;"></div>
+            </div>
+            <div class="skeleton-card" style="border-radius:20px;">
+                <div style="display:flex;gap:16px;align-items:center;margin-bottom:18px;">
+                    <div class="skeleton-avatar"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton-bar" style="height:14px;width:70%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:12px;width:50%;margin-bottom:8px;"></div>
+                        <div class="skeleton-bar" style="height:22px;width:60%;border-radius:100px;"></div>
+                    </div>
+                </div>
+                <div class="skeleton-bar" style="height:1px;margin-bottom:16px;"></div>
+                <div class="skeleton-bar" style="height:12px;width:80%;"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Employee Bio Modal -->
+    <div class="modal-overlay" id="bioModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fas fa-id-badge" style="color:#a78bfa;margin-right:8px;"></i>Employee Profile</h2>
+                <button class="modal-close" onclick="closeBioModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-profile">
+                    <img id="modalAvatar" src="" alt="Profile" class="modal-avatar">
+                    <div class="modal-profile-info">
+                        <h3 id="modalName"></h3>
+                        <div class="role" id="modalDesignation"></div>
+                        <div class="dept" id="modalDept"></div>
+                    </div>
+                </div>
+
+                <div class="ai-bio-section">
+                    <div class="ai-bio-label">
+                        <i class="fas fa-robot"></i>
+                        AI-Generated Professional Summary
+                    </div>
+                    <div class="ai-bio-text" id="modalBio"></div>
+                    <div class="modal-skills" id="modalSkills"></div>
+                </div>
+
+                <div class="modal-contact-row">
+                    <i class="fas fa-envelope"></i>
+                    <span id="modalEmail"></span>
+                </div>
+                <div class="modal-contact-row">
+                    <i class="fas fa-building"></i>
+                    <span id="modalDeptFull"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Collaborator Finder Modal -->
+    <div class="modal-overlay" id="collabModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fas fa-people-arrows" style="color:#34d399;margin-right:8px;"></i>AI Collaborator Finder</h2>
+                <button class="modal-close" onclick="closeCollabModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:16px;">
+                    AI has analysed your team structure and recommends these colleagues for cross-functional collaboration:
+                </p>
+                <div id="collabResults"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-sparkles"></i>
+        <span id="toastMsg"></span>
+    </div>
+
+    <script>
+        let allEmployees = [];
+        let activeFilter = 'all';
+        let currentQuery = '';
+
+        // Department color gradients
+        const deptGradients = {
+            'engineering':    { g1: '#3b82f6', g2: '#6366f1' },
+            'hr':             { g1: '#ec4899', g2: '#a855f7' },
+            'product':        { g1: '#06b6d4', g2: '#3b82f6' },
+            'design':         { g1: '#f59e0b', g2: '#ef4444' },
+            'finance':        { g1: '#10b981', g2: '#06b6d4' },
+            'marketing':      { g1: '#f59e0b', g2: '#fb923c' },
+            'sales':          { g1: '#8b5cf6', g2: '#ec4899' },
+            'operations':     { g1: '#64748b', g2: '#475569' },
+            'default':        { g1: '#6366f1', g2: '#8b5cf6' }
+        };
+
+        function getDeptGradient(dept) {
+            if (!dept) return deptGradients['default'];
+            const key = dept.toLowerCase().trim();
+            for (const [k, v] of Object.entries(deptGradients)) {
+                if (key.includes(k)) return v;
+            }
+            return deptGradients['default'];
+        }
+
+        // AI bio generator
+        const skillsByDept = {
+            'engineering': ['Python', 'Java', 'REST APIs', 'Cloud', 'System Design'],
+            'hr': ['Talent Acquisition', 'Employee Relations', 'HRIS', 'Policy', 'Onboarding'],
+            'product': ['Roadmapping', 'Agile', 'PRDs', 'User Research', 'OKRs'],
+            'design': ['Figma', 'UI/UX', 'Prototyping', 'Design Systems', 'Branding'],
+            'finance': ['Accounting', 'Budgeting', 'Forecasting', 'Compliance', 'Excel'],
+            'marketing': ['SEO', 'Campaigns', 'Analytics', 'Content Strategy', 'Brand'],
+            'default': ['Collaboration', 'Communication', 'Project Management', 'Analysis']
+        };
+
+        function generateAiBio(emp) {
+            const name = emp.fullName || 'This employee';
+            const designation = emp.designation || 'a professional';
+            const dept = emp.department || 'General';
+            const deptLower = dept.toLowerCase();
+
+            const bios = [
+                `${name} is a dedicated ${designation} in the ${dept} division, consistently driving cross-functional initiatives and delivering high-impact results. Known for a systematic approach and strong collaboration mindset.`,
+                `A results-oriented ${designation}, ${name} brings extensive expertise in ${dept} operations. Their analytical thinking and leadership have been key to several organizational milestones.`,
+                `${name} has carved a strong track record as a ${designation} within the ${dept} team. Colleagues value their ability to synthesize complex problems and deliver elegant solutions.`,
+                `With deep domain expertise in ${dept}, ${name} serves as a ${designation} who champions best practices, mentors peers, and maintains a consistently high performance standard.`
+            ];
+
+            const idx = (emp.fullName || '').length % bios.length;
+            return bios[idx];
+        }
+
+        function getSkillsForEmp(emp) {
+            const dept = (emp.department || '').toLowerCase();
+            for (const [key, skills] of Object.entries(skillsByDept)) {
+                if (dept.includes(key)) {
+                    const hash = (emp.fullName || '').length;
+                    const start = hash % 2;
+                    return skills.slice(start, start + 3);
+                }
+            }
+            return skillsByDept['default'].slice(0, 3);
+        }
+
+        async function fetchDirectory() {
+            try {
+                const res = await fetch('/api/employees/all');
+                allEmployees = await res.json();
+                buildStats();
+                buildDeptPills();
+                renderCards(allEmployees);
+            } catch (err) {
+                console.error(err);
+                document.getElementById('employeeGrid').innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Could not load directory. Please ensure the server is running.</p>
+                    </div>`;
+            }
+        }
+
+        function buildStats() {
+            const depts = {};
+            allEmployees.forEach(e => {
+                const d = e.department || 'General';
+                depts[d] = (depts[d] || 0) + 1;
+            });
+            const topDept = Object.entries(depts).sort((a,b)=>b[1]-a[1])[0];
+
+            document.getElementById('statsStrip').innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value">${allEmployees.length}</div>
+                    <div class="stat-label">Total Colleagues</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-value">${Object.keys(depts).length}</div>
+                    <div class="stat-label">Departments</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🏆</div>
+                    <div class="stat-value" style="font-size:1.2rem;">${topDept ? topDept[0].split(' ')[0] : 'N/A'}</div>
+                    <div class="stat-label">Largest Team</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">🤝</div>
+                    <div class="stat-value">${Math.min(allEmployees.length, 5)}</div>
+                    <div class="stat-label">Suggested Collaborators</div>
+                </div>
+            `;
+        }
+
+        function buildDeptPills() {
+            const depts = {};
+            allEmployees.forEach(e => {
+                const d = e.department || 'General';
+                depts[d] = (depts[d] || 0) + 1;
+            });
+
+            const pillsContainer = document.getElementById('deptPills');
+            document.getElementById('countAll').textContent = allEmployees.length;
+
+            Object.entries(depts).sort((a,b)=>b[1]-a[1]).forEach(([dept, count]) => {
+                const pill = document.createElement('div');
+                pill.className = 'dept-pill';
+                pill.dataset.dept = dept;
+                pill.innerHTML = `<i class="fas fa-tag"></i> ${dept} <span class="pill-count">${count}</span>`;
+                pill.onclick = () => filterByDept(pill, dept);
+                pillsContainer.appendChild(pill);
+            });
+        }
+
+        function filterByDept(el, dept) {
+            document.querySelectorAll('.dept-pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            activeFilter = dept;
+            applyFilters();
+        }
+
+        function handleSearch() {
+            const q = document.getElementById('staffSearch').value;
+            currentQuery = q;
+            document.getElementById('searchClear').style.display = q ? 'block' : 'none';
+            applyFilters();
+        }
+
+        function clearSearch() {
+            document.getElementById('staffSearch').value = '';
+            currentQuery = '';
+            document.getElementById('searchClear').style.display = 'none';
+            applyFilters();
+        }
+
+        function quickSearch(term) {
+            document.getElementById('staffSearch').value = term;
+            currentQuery = term;
+            document.getElementById('searchClear').style.display = 'block';
+            document.getElementById('staffSearch').focus();
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let filtered = [...allEmployees];
+            const q = currentQuery.toLowerCase().trim();
+
+            // Text search
+            if (q.length > 0) {
+                filtered = filtered.filter(e =>
+                    (e.fullName || '').toLowerCase().includes(q) ||
+                    (e.department || '').toLowerCase().includes(q) ||
+                    (e.designation || '').toLowerCase().includes(q) ||
+                    (e.email || '').toLowerCase().includes(q)
+                );
+            }
+
+            // Department filter
+            if (activeFilter !== 'all') {
+                filtered = filtered.filter(e => e.department === activeFilter);
+            }
+
+            // AI result banner
+            const banner = document.getElementById('aiResultBanner');
+            const bannerText = document.getElementById('aiResultText');
+            if (q.length > 0) {
+                banner.classList.add('show');
+                if (filtered.length > 0) {
+                    bannerText.innerHTML = `AI found <strong style="color:var(--text-primary)">${filtered.length} colleague${filtered.length !== 1 ? 's' : ''}</strong> matching "<strong style="color:#a78bfa">${currentQuery}</strong>" — results include matches across name, department, and designation.`;
+                } else {
+                    bannerText.innerHTML = `AI couldn't find any matches for "<strong style="color:#a78bfa">${currentQuery}</strong>". Try a different term or browse by department using the filter pills above.`;
+                }
+            } else {
+                banner.classList.remove('show');
+            }
+
+            renderCards(filtered);
+        }
+
+        function renderCards(data) {
+            const grid = document.getElementById('employeeGrid');
+            document.getElementById('resultCount').textContent = data.length;
+
+            if (data.length === 0) {
+                grid.innerHTML = `<div class="empty-state">
+                    <i class="fas fa-user-slash"></i>
+                    <p>No colleagues found. Try adjusting your search or department filter.</p>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = '';
+            data.forEach((emp, idx) => {
+                const pic = emp.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.fullName || 'User')}&background=1a2545&color=a78bfa&size=128`;
+                const grad = getDeptGradient(emp.department);
+                const isOnline = (emp.fullName || '').length % 3 !== 0; // deterministic pseudo-online
+
+                const card = document.createElement('div');
+                card.className = 'employee-card';
+                card.style.animationDelay = `${idx * 0.05}s`;
+                card.innerHTML = `
+                    <div class="card-gradient-strip" style="--g1:${grad.g1};--g2:${grad.g2};"></div>
+                    <div class="card-body">
+                        <div class="card-profile">
+                            <div class="avatar-wrapper">
+                                <img src="${pic}" alt="${emp.fullName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(emp.fullName || 'U')}&background=1a2545&color=a78bfa'">
+                                ${isOnline ? '<div class="avatar-online"></div>' : ''}
+                            </div>
+                            <div class="profile-info">
+                                <h3>${emp.fullName || 'N/A'}</h3>
+                                <div class="designation">${emp.designation || 'Staff'}</div>
+                                <div class="dept-tag"><i class="fas fa-building"></i> ${emp.department || 'General'}</div>
+                            </div>
+                        </div>
+                        <hr class="card-divider">
+                        <div class="card-contact">
+                            <i class="fas fa-envelope"></i>
+                            <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${emp.email || 'Not provided'}</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="card-action-btn" onclick="openBioModal(${idx}, event)"><i class="fas fa-id-card"></i> View Profile</button>
+                            <button class="card-action-btn" onclick="copyEmail('${emp.email}', event)"><i class="fas fa-copy"></i> Copy Email</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Store displayed data for modal reference
+            window.displayedEmployees = data;
+        }
+
+        function openBioModal(idx, event) {
+            event.stopPropagation();
+            const emp = window.displayedEmployees[idx];
+            const pic = emp.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.fullName || 'User')}&background=1a2545&color=a78bfa&size=128`;
+
+            document.getElementById('modalAvatar').src = pic;
+            document.getElementById('modalName').textContent = emp.fullName || 'N/A';
+            document.getElementById('modalDesignation').textContent = emp.designation || 'Staff';
+            document.getElementById('modalDept').textContent = emp.department || 'General';
+            document.getElementById('modalEmail').textContent = emp.email || 'Not provided';
+            document.getElementById('modalDeptFull').textContent = emp.department || 'General';
+            document.getElementById('modalBio').textContent = generateAiBio(emp);
+
+            // Skills
+            const skills = getSkillsForEmp(emp);
+            document.getElementById('modalSkills').innerHTML = skills.map(s =>
+                `<div class="skill-chip">${s}</div>`
+            ).join('');
+
+            document.getElementById('bioModal').classList.add('active');
+        }
+
+        function closeBioModal() {
+            document.getElementById('bioModal').classList.remove('active');
+        }
+
+        function openCollabFinder() {
+            // Pick 3-5 random unique employees from different departments
+            const suggestions = [];
+            const usedDepts = new Set();
+            const shuffled = [...allEmployees].sort(() => 0.5 - Math.random());
+
+            for (const emp of shuffled) {
+                if (!usedDepts.has(emp.department) && suggestions.length < 4) {
+                    usedDepts.add(emp.department);
+                    const matchScore = 85 + Math.floor(Math.random() * 15);
+                    suggestions.push({ ...emp, matchScore });
+                }
+            }
+
+            if (suggestions.length === 0) {
+                showToast('No collaborators found. Add employees to the directory first.');
+                return;
+            }
+
+            const resultsHtml = suggestions.map(emp => {
+                const pic = emp.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(emp.fullName || 'U')}&background=1a2545&color=a78bfa&size=80`;
+                return `
+                    <div class="collab-card">
+                        <img src="${pic}" alt="${emp.fullName}" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(emp.fullName||'U')}&background=1a2545&color=a78bfa'">
+                        <div class="collab-info">
+                            <h5>${emp.fullName}</h5>
+                            <p>${emp.designation || 'Staff'} · ${emp.department || 'General'}</p>
+                        </div>
+                        <div class="collab-match">${emp.matchScore}% Match</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('collabResults').innerHTML = `
+                <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;padding:10px;background:rgba(16,185,129,0.06);border:1px solid rgba(16,185,129,0.15);border-radius:10px;">
+                    <i class="fas fa-info-circle" style="color:#34d399;margin-right:6px;"></i>
+                    AI matched these colleagues based on cross-department collaboration potential and team distribution.
+                </div>
+                ${resultsHtml}
+            `;
+            document.getElementById('collabModal').classList.add('active');
+        }
+
+        function closeCollabModal() {
+            document.getElementById('collabModal').classList.remove('active');
+        }
+
+        function copyEmail(email, event) {
+            event.stopPropagation();
+            if (!email) return;
+            navigator.clipboard.writeText(email).then(() => {
+                showToast(`Email copied: ${email}`);
+            });
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        // Close modals on overlay click
+        document.getElementById('bioModal').addEventListener('click', function(e) {
+            if (e.target === this) closeBioModal();
+        });
+        document.getElementById('collabModal').addEventListener('click', function(e) {
+            if (e.target === this) closeCollabModal();
+        });
+
+        window.onload = fetchDirectory;
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Center - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .integration-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .integration-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.01);
+        }
+
+        .toast {
+            animation: slideIn 0.3s ease-out forwards;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(100%) scale(0.9); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* ── AI Styles ── */
+        .ai-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            position: relative; overflow: hidden;
+        }
+        .ai-panel::before {
+            content: ''; position: absolute;
+            top: -50px; right: -50px; width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ai-orb {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            animation: orbPulse 2.5s ease-in-out infinite; flex-shrink: 0;
+        }
+        @keyframes orbPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+        }
+        .typing-dot {
+            width: 6px; height: 6px; background: #7c3aed; border-radius: 50%;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%,100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+        .ai-chip {
+            background: rgba(124,58,237,0.1); border: 1px solid rgba(139,92,246,0.25);
+            transition: all 0.2s; cursor: pointer;
+        }
+        .ai-chip:hover { background: rgba(124,58,237,0.22); border-color: rgba(139,92,246,0.5); transform: translateY(-1px); }
+        .chat-bubble-ai {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.1));
+            border: 1px solid rgba(139,92,246,0.2);
+        }
+        .chat-bubble-user { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); }
+        #aiChatBox { scrollbar-width: thin; scrollbar-color: rgba(124,58,237,0.4) transparent; }
+        #aiChatBox::-webkit-scrollbar { width: 4px; }
+        #aiChatBox::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 4px; }
+        .ai-score-ring { transform-origin: center; transition: stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1); }
+        .feature-pill {
+            background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(59,130,246,0.1));
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col space-y-3"></div>
+
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
+                <img src="assets/images/logo.png" alt="SmartHR" class="w-10 h-10 drop-shadow-md">
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-slate-400 cursor-pointer hover:text-blue-600 transition text-lg" title="Security Settings" onclick="window.location.href='security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="index.html" class="text-slate-500 hover:text-blue-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl shadow-sm">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800">Integration Center</h1>
+                    <p class="text-slate-500">Connect your professional tools to streamline notifications and work tasks</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="feature-pill px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-violet-700 flex items-center gap-1.5">
+                    <i class="fas fa-wand-magic-sparkles text-violet-500"></i> AI-Powered
+                </span>
+                <div class="flex items-center space-x-2 text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-4 py-2.5 rounded-full shadow-sm">
+                    <span class="inline-block w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse mr-1"></span>
+                    API Gateway: Connected
+                </div>
+            </div>
+        </div>
+
+        <!-- ✦ AI INTEGRATION ADVISOR ✦ -->
+        <div class="ai-panel rounded-[2rem] p-6 mb-8 relative z-10">
+            <div class="flex items-start gap-4 mb-4">
+                <div class="ai-orb"><i class="fas fa-robot text-white text-sm"></i></div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <h2 class="text-white font-black text-base">AI Integration Advisor</h2>
+                        <span class="text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider" style="background:linear-gradient(90deg,#7c3aed,#2563eb)">Beta</span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-semibold">Ask anything about your connected tools, sync status, or get setup guidance</p>
+                </div>
+                <div class="hidden md:flex gap-2">
+                    <span class="feature-pill text-violet-300 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1"><i class="fas fa-bolt"></i> Smart Suggestions</span>
+                    <span class="feature-pill text-blue-300 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1"><i class="fas fa-shield-halved"></i> Secure</span>
+                </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div id="aiChatBox" class="space-y-3 mb-4 max-h-44 overflow-y-auto pr-1">
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-robot text-white text-[8px]"></i>
+                    </div>
+                    <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-2.5 max-w-lg">
+                        <p class="text-slate-200 text-xs font-semibold leading-relaxed">
+                            👋 Hi! I'm your AI Integration Guide. I can help you <span class="text-violet-300 font-bold">set up integrations</span>, troubleshoot <span class="text-blue-300 font-bold">sync issues</span>, or recommend the best tools for your workflow. What do you need?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Prompt Chips -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="sendEmpAI('How do I connect my Google Calendar?')" class="ai-chip text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <i class="fab fa-google mr-1 text-blue-400"></i> Connect Google Calendar?
+                </button>
+                <button onclick="sendEmpAI('Why are my Slack notifications not working?')" class="ai-chip text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <i class="fab fa-slack mr-1 text-purple-400"></i> Slack notifications broken?
+                </button>
+                <button onclick="sendEmpAI('What does connecting GitHub do for me?')" class="ai-chip text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <i class="fab fa-github mr-1 text-slate-300"></i> What does GitHub sync do?
+                </button>
+                <button onclick="sendEmpAI('How secure is my API token?')" class="ai-chip text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full">
+                    <i class="fas fa-key mr-1 text-amber-400"></i> Is my token secure?
+                </button>
+            </div>
+
+            <!-- Input Row -->
+            <div class="flex items-center gap-3">
+                <input type="text" id="empAiInput" placeholder="Ask about integrations, sync errors, or setup tips..."
+                    class="flex-1 bg-white/10 border border-white/15 text-white placeholder-slate-500 text-xs font-semibold px-4 py-3 rounded-xl outline-none focus:ring-2 focus:ring-violet-500/40 transition"
+                    onkeydown="if(event.key==='Enter') sendEmpAI()">
+                <button onclick="sendEmpAI()"
+                    class="text-white px-4 py-3 rounded-xl font-bold text-xs flex items-center gap-2 shadow-lg"
+                    style="background:linear-gradient(135deg,#7c3aed,#2563eb)">
+                    <i class="fas fa-paper-plane"></i> Ask AI
+                </button>
+            </div>
+            <p class="text-slate-600 text-[9px] font-bold mt-2"><i class="fas fa-info-circle mr-1"></i> AI responses are guidance only. Contact IT for critical integration issues.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Side: Integrations List -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-plug text-blue-500 mr-2"></i> Available Integrations
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="integrationsGrid">
+                        <!-- Google Calendar -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="google-cal">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center text-blue-600 text-xl">
+                                        <i class="fab fa-google"></i>
+                                    </div>
+                                    <span class="status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Connected</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Google Calendar</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6">Sync corporate meeting schedules and dynamic leaves directly to your calendar.</p>
+                            </div>
+                            <button onclick="toggleIntegration('google-cal', 'Google Calendar')" class="action-btn w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Disconnect Account
+                            </button>
+                        </div>
+
+                        <!-- Slack -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="slack">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-600 text-xl">
+                                        <i class="fab fa-slack"></i>
+                                    </div>
+                                    <span class="status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Not Connected</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Slack Notifications</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6">Get real-time updates on approvals, company feed mentions, and task alerts.</p>
+                            </div>
+                            <button onclick="toggleIntegration('slack', 'Slack')" class="action-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Connect Account
+                            </button>
+                        </div>
+
+                        <!-- GitHub -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="github">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-slate-900/10 rounded-xl flex items-center justify-center text-slate-800 text-xl">
+                                        <i class="fab fa-github"></i>
+                                    </div>
+                                    <span class="status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Not Connected</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">GitHub</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6">Bind developer commits to assigned tasks in the Project Tasks module.</p>
+                            </div>
+                            <button onclick="toggleIntegration('github', 'GitHub')" class="action-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Connect Account
+                            </button>
+                        </div>
+
+                        <!-- Zoom -->
+                        <div class="integration-card bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col justify-between" data-integration="zoom">
+                            <div>
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-blue-400/10 rounded-xl flex items-center justify-center text-blue-500 text-xl">
+                                        <i class="fas fa-video"></i>
+                                    </div>
+                                    <span class="status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Connected</span>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base mb-1">Zoom Meetings</h3>
+                                <p class="text-slate-500 text-xs leading-relaxed mb-6">Instantly schedule and join virtual meetings with unique workspace links.</p>
+                            </div>
+                            <button onclick="toggleIntegration('zoom', 'Zoom')" class="action-btn w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition">
+                                Disconnect Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Sidebar stats -->
+            <div class="space-y-6">
+                <!-- ✦ AI Connection Health ✦ -->
+                <div class="ai-panel rounded-3xl p-6 shadow-sm">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="ai-orb"><i class="fas fa-brain text-white text-sm"></i></div>
+                        <div>
+                            <h2 class="text-white font-black text-sm">AI Health Monitor</h2>
+                            <p class="text-slate-400 text-[10px] font-semibold">Real-time integration intelligence</p>
+                        </div>
+                    </div>
+                    <!-- SVG Ring Score -->
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="relative w-24 h-24">
+                            <svg class="w-24 h-24 -rotate-90" viewBox="0 0 60 60">
+                                <circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                                <circle cx="30" cy="30" r="24" fill="none" stroke="url(#empRingGrad)" stroke-width="6"
+                                    stroke-linecap="round" stroke-dasharray="150" stroke-dashoffset="30"
+                                    class="ai-score-ring"/>
+                                <defs>
+                                    <linearGradient id="empRingGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#7c3aed"/>
+                                        <stop offset="100%" stop-color="#3b82f6"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-white font-black text-xl">80%</span>
+                                <span class="text-slate-400 text-[8px] font-bold">HEALTH</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- AI Insight Rows -->
+                    <div class="space-y-2.5">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-400 font-semibold">Integration Count</span>
+                            <span class="font-black text-white" id="connectedCount">2 Active</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs border-t border-white/8 pt-2.5">
+                            <span class="text-slate-400 font-semibold">Avg Latency</span>
+                            <span class="font-mono text-emerald-400 font-bold">42 ms</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs border-t border-white/8 pt-2.5">
+                            <span class="text-slate-400 font-semibold">Data / Day</span>
+                            <span class="text-white font-bold">14.8 MB</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs border-t border-white/8 pt-2.5">
+                            <span class="text-slate-400 font-semibold">SSO Status</span>
+                            <span class="text-blue-300 font-black text-[10px]">Okta ✓</span>
+                        </div>
+                    </div>
+                    <!-- AI Tip -->
+                    <div class="mt-4 bg-amber-900/20 border border-amber-700/30 rounded-xl px-3 py-2">
+                        <p class="text-amber-300 text-[10px] font-bold"><i class="fas fa-lightbulb mr-1"></i> AI Tip: Connecting Slack can reduce your average task response time by up to 37%.</p>
+                    </div>
+                </div>
+
+                <!-- Personal Token -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fas fa-key text-amber-500 mr-2"></i> Personal Token
+                    </h2>
+                    <p class="text-slate-500 text-xs mb-4 leading-relaxed">Use this API token to fetch your personal task backlog in external clients.</p>
+                    <div class="bg-slate-50 border border-slate-200/60 p-3.5 rounded-xl flex items-center justify-between text-xs font-mono text-slate-600 select-all mb-4 relative">
+                        <span id="apiToken">sh_usr_9a4f20e8dcb7f10</span>
+                        <i class="far fa-copy text-slate-400 hover:text-blue-500 cursor-pointer ml-2" onclick="copyToken()"></i>
+                    </div>
+                    <button onclick="rotateToken()" class="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold py-2 rounded-xl text-xs transition">
+                        Rotate Token
+                    </button>
+                    <!-- AI Token Security Badge -->
+                    <div class="mt-3 flex items-center gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2">
+                        <i class="fas fa-shield-check text-emerald-500 text-xs"></i>
+                        <p class="text-emerald-700 text-[10px] font-bold">AI Security: Token strength is strong. Rotate every 90 days for best security.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        // ── AI Chat Logic (Employee) ─────────────────────────────────────
+        const EMP_AI_ANSWERS = {
+            'google': "📅 To connect **Google Calendar**: Click the 'Connect Account' button on the Google Calendar card. You'll be redirected to Google's OAuth page — sign in with your work email and allow SmartHR access. Your leave approvals and scheduled meetings will sync automatically within 5 minutes.",
+            'slack': "🔔 If **Slack notifications** aren't working: (1) Make sure Slack is connected (green badge on the card), (2) Check that your Slack account email matches your work email, (3) Ensure SmartHR Bot is installed in your workspace. If the issue persists, disconnect and reconnect your account.",
+            'github': "💻 Connecting **GitHub** links your commits to tasks in the Project Tasks module. When you push code referencing a task ID (e.g. #TASK-42), it automatically marks the task as in-progress and notifies your team lead. Great for developers to keep task status updated without manual effort.",
+            'token': "🔐 Your **API token** is encrypted at rest using AES-256 and transmitted over HTTPS only. It's scoped to your personal account and cannot access other employees' data. Best practice: rotate it every 90 days and never share it. SmartHR AI monitors for unusual API usage patterns automatically.",
+            'zoom': "🎥 **Zoom** integration lets you instantly generate meeting links from within SmartHR. When your manager schedules a 1:1 or team meeting, a Zoom link is auto-created and added to your Google Calendar invite. No need to manually create Zoom meetings.",
+            'default': [
+                "🤖 Based on your integration setup, everything looks good! SmartHR AI monitors your connections in real-time. For specific issues, try disconnecting and reconnecting the affected integration.",
+                "💡 SmartHR supports integrations with Google Calendar, Slack, GitHub, and Zoom. Each integration enhances a different aspect of your workflow — from meeting sync to task tracking. Need help with a specific one?",
+                "🔄 Integration syncs happen every 5 minutes for connected tools. If you notice a delay, try the 'Force Sync' option (if available) or contact IT support with your employee ID."
+            ]
+        };
+
+        function getEmpAIResponse(q) {
+            const ql = q.toLowerCase();
+            if (ql.includes('google') || ql.includes('calendar')) return EMP_AI_ANSWERS.google;
+            if (ql.includes('slack') || ql.includes('notification')) return EMP_AI_ANSWERS.slack;
+            if (ql.includes('github') || ql.includes('commit') || ql.includes('task')) return EMP_AI_ANSWERS.github;
+            if (ql.includes('token') || ql.includes('api') || ql.includes('secure')) return EMP_AI_ANSWERS.token;
+            if (ql.includes('zoom') || ql.includes('meeting') || ql.includes('video')) return EMP_AI_ANSWERS.zoom;
+            const d = EMP_AI_ANSWERS.default;
+            return d[Math.floor(Math.random() * d.length)];
+        }
+
+        async function sendEmpAI(preset) {
+            const input = document.getElementById('empAiInput');
+            const question = preset || input.value.trim();
+            if (!question) return;
+            input.value = '';
+
+            const box = document.getElementById('aiChatBox');
+            // User bubble
+            const userDiv = document.createElement('div');
+            userDiv.className = 'flex items-start gap-2 justify-end';
+            userDiv.innerHTML = `
+                <div class="chat-bubble-user rounded-2xl rounded-tr-none px-4 py-2.5 max-w-xs">
+                    <p class="text-slate-200 text-xs font-semibold">${question}</p>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-user text-slate-300 text-[8px]"></i>
+                </div>`;
+            box.appendChild(userDiv);
+
+            // Typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'empTyping';
+            typingDiv.className = 'flex items-start gap-2';
+            typingDiv.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white text-[8px]"></i>
+                </div>
+                <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5">
+                    <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+                </div>`;
+            box.appendChild(typingDiv);
+            box.scrollTop = box.scrollHeight;
+
+            await new Promise(r => setTimeout(r, 1400 + Math.random() * 700));
+            typingDiv.remove();
+
+            const answer = getEmpAIResponse(question);
+            const formatted = answer.replace(/\*\*(.*?)\*\*/g, '<span class="text-violet-300 font-bold">$1</span>');
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'flex items-start gap-2';
+            aiDiv.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white text-[8px]"></i>
+                </div>
+                <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-2.5 max-w-lg">
+                    <p class="text-slate-200 text-xs font-semibold leading-relaxed">${formatted}</p>
+                </div>`;
+            box.appendChild(aiDiv);
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role === 'ADMIN' || user.role === 'HR') {
+                        window.location.href = 'admin-integration.html';
+                        return;
+                    }
+                    
+                    // Load state from local storage or set defaults
+                    loadSavedIntegrations();
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        // Initialize state
+        let integrations = {
+            'google-cal': true,
+            'slack': false,
+            'github': false,
+            'zoom': true
+        };
+
+        function loadSavedIntegrations() {
+            const saved = localStorage.getItem('user_integrations');
+            if (saved) {
+                integrations = JSON.parse(saved);
+            }
+            updateUI();
+        }
+
+        function updateUI() {
+            let activeCount = 0;
+            for (const [key, enabled] of Object.entries(integrations)) {
+                const card = document.querySelector(`[data-integration="${key}"]`);
+                if (!card) continue;
+
+                const badge = card.querySelector('.status-badge');
+                const btn = card.querySelector('.action-btn');
+
+                if (enabled) {
+                    activeCount++;
+                    badge.className = "status-badge bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider";
+                    badge.innerText = "Connected";
+                    btn.className = "action-btn w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2 rounded-xl text-xs transition";
+                    btn.innerText = "Disconnect Account";
+                } else {
+                    badge.className = "status-badge bg-slate-200 text-slate-600 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider";
+                    badge.innerText = "Not Connected";
+                    btn.className = "action-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-xl text-xs transition";
+                    btn.innerText = "Connect Account";
+                }
+            }
+            document.getElementById('connectedCount').innerText = `${activeCount} Active`;
+        }
+
+        function toggleIntegration(key, name) {
+            integrations[key] = !integrations[key];
+            localStorage.setItem('user_integrations', JSON.stringify(integrations));
+            updateUI();
+            
+            const message = integrations[key] 
+                ? `Successfully connected to ${name}!` 
+                : `Disconnected from ${name}.`;
+            showToast(message, integrations[key] ? 'success' : 'info');
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            let bgClass = "bg-slate-800 text-white";
+            let iconClass = "fa-info-circle text-blue-400";
+            if (type === 'success') {
+                bgClass = "bg-white text-slate-800 border border-slate-100 shadow-xl";
+                iconClass = "fa-circle-check text-emerald-500";
+            }
+            
+            toast.className = `toast ${bgClass} px-5 py-3.5 rounded-2xl flex items-center space-x-3 text-sm font-semibold max-w-sm`;
+            toast.innerHTML = `
+                <i class="fas ${iconClass} text-base"></i>
+                <span class="flex-grow">${message}</span>
+                <i class="fas fa-times text-slate-400 hover:text-slate-600 cursor-pointer ml-3" onclick="this.parentElement.remove()"></i>
+            `;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'none'; // reset animation to allow fadeOut later or just remove
+                toast.classList.add('transition-all', 'duration-300', 'opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        function copyToken() {
+            const token = document.getElementById('apiToken').innerText;
+            navigator.clipboard.writeText(token).then(() => {
+                showToast("Token copied to clipboard!");
+            });
+        }
+
+        function rotateToken() {
+            const chars = "abcdef0123456789";
+            let newToken = "sh_usr_";
+            for (let i = 0; i < 15; i++) {
+                newToken += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('apiToken').innerText = newToken;
+            showToast("New API Token generated successfully!", "success");
+        }
+    </script>
+</body>
+
+</html>

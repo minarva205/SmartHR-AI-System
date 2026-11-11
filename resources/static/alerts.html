@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHR AI - Redirecting...</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b1329 0%, #1c2541 100%);
+        }
+        .ai-glow {
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.4);
+        }
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+        .animate-pulse-slow {
+            animation: pulse-slow 3s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center text-white px-4">
+
+    <div class="text-center max-w-md animate-pulse-slow">
+        <!-- AI Glowing Logo container -->
+        <div class="relative w-24 h-24 mx-auto mb-8 bg-gradient-to-tr from-red-600 to-amber-500 rounded-3xl flex items-center justify-center shadow-2xl ai-glow">
+            <i class="fas fa-bell text-4xl text-white"></i>
+            <div class="absolute -inset-1 rounded-3xl bg-red-500/30 blur-sm -z-10 animate-ping"></div>
+        </div>
+
+        <h1 class="text-3xl font-black mb-2 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-amber-300">
+            SmartHR Alert Engine
+        </h1>
+        <p class="text-slate-400 text-sm mb-6">Analyzing enterprise telemetry & loading custom compliance center...</p>
+
+        <!-- Loading Bar -->
+        <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden mb-6 border border-slate-700">
+            <div class="bg-gradient-to-r from-red-500 to-amber-500 h-full rounded-full animate-[loading_1.5s_infinite_ease-in-out]" style="width: 45%;"></div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes loading {
+            0% { transform: translateX(-100%); width: 30%; }
+            50% { width: 60%; }
+            100% { transform: translateX(250%); width: 30%; }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                fetch('/api/current-user')
+                    .then(res => {
+                        if (res.ok) return res.json();
+                        throw new Error('Unauthenticated');
+                    })
+                    .then(user => {
+                        if (user.role === 'ADMIN') {
+                            window.location.href = 'alerts-admin.html';
+                        } else {
+                            window.location.href = 'alerts-employee.html';
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Redirecting to login:', err);
+                        window.location.href = 'login.html';
+                    });
+            }, 800); // Small delay to show the nice micro-animation
+        });
+    </script>
+</body>
+</html>

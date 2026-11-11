@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Policy Dashboard | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* AI Styles */
+        .ai-dark-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-dark-panel::before {
+            content: '';
+            position: absolute;
+            top: -50px; right: -50px;
+            width: 180px; height: 180px;
+            background: radial-gradient(circle, rgba(139,92,246,0.2) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ai-dark-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -30px; left: -30px;
+            width: 140px; height: 140px;
+            background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ai-orb {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            animation: orbPulse 2.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes orbPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+        }
+        .ai-badge {
+            background: linear-gradient(90deg, #7c3aed, #2563eb);
+        }
+        .score-bar-fill {
+            height: 6px;
+            border-radius: 99px;
+            transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .typing-dot {
+            width: 6px; height: 6px;
+            background: #7c3aed;
+            border-radius: 50%;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+        .insight-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.2s;
+        }
+        .insight-card:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(139,92,246,0.3);
+        }
+        .ai-glow-btn {
+            background: linear-gradient(135deg, #7c3aed, #2563eb);
+            box-shadow: 0 4px 20px rgba(124,58,237,0.35);
+            transition: all 0.2s;
+        }
+        .ai-glow-btn:hover {
+            box-shadow: 0 6px 28px rgba(124,58,237,0.5);
+            transform: translateY(-1px);
+        }
+        .draft-loader {
+            display: none;
+        }
+        .draft-loader.active {
+            display: flex;
+        }
+        .feature-pill {
+            background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(59,130,246,0.1));
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+        .health-ring {
+            transform-origin: center;
+            stroke-dasharray: 163;
+            stroke-dashoffset: 163;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .alert-banner {
+            background: linear-gradient(90deg, rgba(251,191,36,0.1), rgba(245,158,11,0.06));
+            border: 1px solid rgba(251,191,36,0.25);
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-slide-in { animation: slideIn 0.4s ease forwards; }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <a href="admin-dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Policy Management</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Publish handbook regulations, update legal compliance texts, and manage corporate PDF links</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="feature-pill px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-violet-700 flex items-center gap-1.5">
+                    <i class="fas fa-wand-magic-sparkles text-violet-500"></i> AI-Powered
+                </span>
+                <button onclick="openAddModal()"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-lg shadow-blue-500/10">
+                    + Publish Policy Doc
+                </button>
+            </div>
+        </header>
+
+        <!-- ✦ AI INSIGHTS BANNER ✦ -->
+        <div class="ai-dark-panel rounded-[2rem] p-6 mb-6 relative z-10">
+            <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+                <!-- Left: Health Score Ring -->
+                <div class="flex flex-col items-center justify-center flex-shrink-0">
+                    <div class="relative w-28 h-28">
+                        <svg class="w-28 h-28 -rotate-90" viewBox="0 0 60 60">
+                            <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                            <circle id="healthRing" cx="30" cy="30" r="26" fill="none"
+                                stroke="url(#ringGrad)" stroke-width="6"
+                                stroke-linecap="round"
+                                stroke-dasharray="163" stroke-dashoffset="163"
+                                class="health-ring"/>
+                            <defs>
+                                <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stop-color="#7c3aed"/>
+                                    <stop offset="100%" stop-color="#3b82f6"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-white font-black text-2xl" id="healthScore">—</span>
+                            <span class="text-slate-400 text-[9px] font-bold uppercase tracking-wider">Health</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-400 text-[9px] font-bold mt-2 uppercase tracking-wider">Policy Score</p>
+                </div>
+
+                <!-- Center: AI Insights Grid -->
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="ai-orb">
+                            <i class="fas fa-brain text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h2 class="text-white font-black text-base">AI Policy Intelligence</h2>
+                                <span class="ai-badge text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Live Analysis</span>
+                            </div>
+                            <p class="text-slate-400 text-xs font-semibold">Real-time compliance monitoring & smart recommendations</p>
+                        </div>
+                        <button onclick="runAIAnalysis()" id="analyzeBtn"
+                            class="ml-auto ai-glow-btn text-white text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-2 flex-shrink-0">
+                            <i class="fas fa-rotate id="analyzeIcon""></i> Analyze Now
+                        </button>
+                    </div>
+
+                    <!-- Insight Cards Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3" id="insightCards">
+                        <div class="insight-card rounded-xl px-4 py-3">
+                            <div class="text-violet-400 text-[9px] font-black uppercase tracking-wider mb-1">Coverage Gaps</div>
+                            <div class="text-white font-black text-xl" id="gapCount">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold mt-0.5">policies need update</div>
+                        </div>
+                        <div class="insight-card rounded-xl px-4 py-3">
+                            <div class="text-blue-400 text-[9px] font-black uppercase tracking-wider mb-1">Compliance Risk</div>
+                            <div class="text-white font-black text-xl" id="riskLevel">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold mt-0.5" id="riskSub">scanning...</div>
+                        </div>
+                        <div class="insight-card rounded-xl px-4 py-3">
+                            <div class="text-emerald-400 text-[9px] font-black uppercase tracking-wider mb-1">AI Suggestions</div>
+                            <div class="text-white font-black text-xl" id="suggCount">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold mt-0.5">improvement ideas</div>
+                        </div>
+                        <div class="insight-card rounded-xl px-4 py-3">
+                            <div class="text-amber-400 text-[9px] font-black uppercase tracking-wider mb-1">Expiring Soon</div>
+                            <div class="text-white font-black text-xl" id="expiryCount">—</div>
+                            <div class="text-slate-500 text-[10px] font-bold mt-0.5">docs within 30 days</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Category Coverage Bars -->
+            <div class="mt-5 pt-5 border-t border-white/8" id="coverageBars" style="display:none;">
+                <p class="text-slate-400 text-[10px] font-black uppercase tracking-wider mb-3">Category Coverage Analysis</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <span class="text-slate-300 text-[10px] font-bold">Leave</span>
+                            <span class="text-indigo-400 text-[10px] font-black">94%</span>
+                        </div>
+                        <div class="bg-white/10 rounded-full h-1.5">
+                            <div class="score-bar-fill bg-gradient-to-r from-indigo-500 to-violet-500" style="width:0%" data-width="94%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <span class="text-slate-300 text-[10px] font-bold">Security</span>
+                            <span class="text-orange-400 text-[10px] font-black">78%</span>
+                        </div>
+                        <div class="bg-white/10 rounded-full h-1.5">
+                            <div class="score-bar-fill bg-gradient-to-r from-orange-500 to-amber-500" style="width:0%" data-width="78%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <span class="text-slate-300 text-[10px] font-bold">Conduct</span>
+                            <span class="text-emerald-400 text-[10px] font-black">91%</span>
+                        </div>
+                        <div class="bg-white/10 rounded-full h-1.5">
+                            <div class="score-bar-fill bg-gradient-to-r from-emerald-500 to-teal-500" style="width:0%" data-width="91%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1.5">
+                            <span class="text-slate-300 text-[10px] font-bold">Finance</span>
+                            <span class="text-blue-400 text-[10px] font-black">85%</span>
+                        </div>
+                        <div class="bg-white/10 rounded-full h-1.5">
+                            <div class="score-bar-fill bg-gradient-to-r from-blue-500 to-cyan-500" style="width:0%" data-width="85%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Recommendations Strip -->
+            <div id="aiRecsStrip" class="mt-4" style="display:none;">
+                <div class="alert-banner rounded-xl px-4 py-3 flex items-start gap-3">
+                    <i class="fas fa-lightbulb text-amber-400 text-sm mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <p class="text-amber-300 text-[10px] font-black uppercase tracking-wider mb-0.5">AI Recommendation</p>
+                        <p class="text-slate-300 text-xs font-semibold" id="aiRecText">Analyzing your policy library...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Policies Ledger -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="text-base font-bold text-slate-700">
+                    <i class="fas fa-file-contract text-blue-500 mr-2"></i>
+                    Active Policy Ledger
+                </h3>
+                <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-black text-slate-400 bg-slate-100 px-3 py-1 rounded-full" id="policyCountBadge">Loading...</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/20 text-slate-400 text-[10px] uppercase font-black tracking-wider border-b border-slate-100">
+                            <th class="py-4 px-8">Policy Title</th>
+                            <th class="py-4 px-8">Classification</th>
+                            <th class="py-4 px-8">Effective Date</th>
+                            <th class="py-4 px-8">AI Risk Score</th>
+                            <th class="py-4 px-8 text-right">Oversight</th>
+                        </tr>
+                    </thead>
+                    <tbody id="policiesTableBody" class="divide-y divide-slate-100 text-sm text-slate-600 font-semibold">
+                        <tr>
+                            <td colspan="5" class="py-12 text-center text-slate-400 italic">
+                                Loading policy guidelines...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Publish Policy Modal -->
+    <div id="addModal"
+        class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white p-8 rounded-[2.5rem] w-full max-w-lg shadow-2xl border border-slate-100">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                    <i class="fas fa-file-invoice text-blue-500 mr-2"></i>
+                    Publish Policy
+                </h2>
+                <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600 transition">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+            <form id="policyForm" onsubmit="submitPolicy(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Policy Title *</label>
+                    <input type="text" id="pTitle" placeholder="e.g. Conduct & Ethics Guidelines" required
+                        class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Category *</label>
+                        <select id="pCategory" required
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                            <option value="Leave">Leave</option>
+                            <option value="Security">Security</option>
+                            <option value="Conduct" selected>Conduct</option>
+                            <option value="Finance">Finance</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Effective Date *</label>
+                        <input type="date" id="pDate" required
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Document URL / PDF Link</label>
+                    <input type="text" id="pLink" placeholder="e.g. /docs/ethics-handbook.pdf"
+                        class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                </div>
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-bold text-slate-400 uppercase">Description / Abstract *</label>
+                        <!-- ✦ AI DRAFT BUTTON ✦ -->
+                        <button type="button" onclick="generateAIDraft()"
+                            class="ai-glow-btn text-white text-[10px] font-black px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                            <i class="fas fa-wand-magic-sparkles text-[9px]"></i> AI Draft
+                        </button>
+                    </div>
+                    <!-- AI Draft Loader -->
+                    <div class="draft-loader items-center gap-2 mb-2 bg-violet-50 border border-violet-200 rounded-xl px-3 py-2" id="draftLoader">
+                        <div class="flex gap-1">
+                            <div class="typing-dot" style="background:#7c3aed"></div>
+                            <div class="typing-dot" style="background:#7c3aed"></div>
+                            <div class="typing-dot" style="background:#7c3aed"></div>
+                        </div>
+                        <span class="text-violet-600 text-[10px] font-bold">AI is drafting a description...</span>
+                    </div>
+                    <!-- AI Draft Result Banner -->
+                    <div id="aiDraftBanner" class="hidden mb-2 bg-violet-50 border border-violet-200 rounded-xl px-3 py-2 flex items-start gap-2">
+                        <i class="fas fa-wand-magic-sparkles text-violet-500 text-xs mt-0.5"></i>
+                        <div>
+                            <p class="text-violet-700 text-[10px] font-black">AI-Generated Draft</p>
+                            <p class="text-violet-600 text-[10px] font-semibold">Review and edit before publishing</p>
+                        </div>
+                    </div>
+                    <textarea id="pDesc" placeholder="Summary of terms, rules, and scope..." required rows="3"
+                        class="w-full p-4 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"></textarea>
+                </div>
+
+                <!-- AI Compliance Check -->
+                <div id="aiComplianceCheck" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-shield-check text-emerald-500 text-sm"></i>
+                        <p class="text-emerald-700 text-[10px] font-black uppercase tracking-wider">AI Compliance Pre-check</p>
+                    </div>
+                    <div class="space-y-1.5" id="complianceItems"></div>
+                </div>
+
+                <div class="flex gap-4 mt-6">
+                    <button type="submit" id="submitBtn"
+                        class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-md shadow-blue-100">
+                        Publish
+                    </button>
+                    <button type="button" onclick="closeAddModal()"
+                        class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-3.5 rounded-xl transition">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ─── AI Draft Generator ─────────────────────────────────────────────
+        const AI_DRAFTS = {
+            'Leave': "This policy defines the leave entitlement, application process, and approval hierarchy for all full-time and part-time employees. It covers casual leave, sick leave, maternity/paternity leave, and emergency leave provisions, ensuring compliance with local labor laws and company HR guidelines.",
+            'Security': "This policy establishes mandatory data security standards for all employees, including password management, device encryption, VPN usage, incident reporting protocols, and consequences for non-compliance. Employees must complete annual security awareness training as a condition of employment.",
+            'Conduct': "This Code of Conduct outlines the behavioral standards expected of all employees, including professional ethics, anti-harassment measures, conflict of interest disclosures, social media guidelines, and whistleblower protections. Violations may result in disciplinary action up to termination.",
+            'Finance': "This policy governs employee expense reimbursements, corporate card usage, approval thresholds, receipt submission requirements, and audit procedures. All claims must be submitted within 30 days with proper documentation and adhere to the Finance Department's expense categorization framework."
+        };
+
+        async function generateAIDraft() {
+            const category = document.getElementById('pCategory').value;
+            const title = document.getElementById('pTitle').value;
+
+            document.getElementById('draftLoader').classList.add('active');
+            document.getElementById('aiDraftBanner').classList.add('hidden');
+            document.getElementById('aiComplianceCheck').classList.add('hidden');
+            document.getElementById('pDesc').value = '';
+
+            await new Promise(r => setTimeout(r, 2000));
+
+            document.getElementById('draftLoader').classList.remove('active');
+
+            const base = AI_DRAFTS[category] || AI_DRAFTS['Conduct'];
+            const titlePrefix = title ? `As part of the "${title}" framework: ` : '';
+            document.getElementById('pDesc').value = titlePrefix + base;
+
+            document.getElementById('aiDraftBanner').classList.remove('hidden');
+
+            // Run compliance check
+            await new Promise(r => setTimeout(r, 600));
+            runComplianceCheck(category);
+        }
+
+        function runComplianceCheck(category) {
+            const checks = {
+                'Leave': ['Labor Law Alignment', 'Equal Opportunity Clause', 'Grievance Mechanism Included'],
+                'Security': ['GDPR/Data Privacy Clause', 'Incident Response Defined', 'Access Control Mentioned'],
+                'Conduct': ['Anti-Harassment Statement', 'Whistleblower Protection', 'Non-Discrimination Policy'],
+                'Finance': ['Audit Trail Requirements', 'Approval Hierarchy Defined', 'Receipt Policy Compliant']
+            };
+            const items = checks[category] || checks['Conduct'];
+            document.getElementById('complianceItems').innerHTML = items.map(item => `
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-circle-check text-emerald-500 text-xs"></i>
+                    <span class="text-emerald-700 text-[10px] font-semibold">${item}</span>
+                </div>`).join('');
+            document.getElementById('aiComplianceCheck').classList.remove('hidden');
+        }
+
+        // ─── AI Policy Analysis ─────────────────────────────────────────────
+        const AI_RECOMMENDATIONS = [
+            "Security policy has not been updated in over 12 months. AI recommends scheduling a review to align with current cybersecurity standards (ISO 27001).",
+            "3 policy documents lack an official PDF link. Employees may face difficulty accessing these. AI suggests uploading PDFs to the company document repository.",
+            "Your Leave policy coverage is strong (94%), but no Bereavement Leave clause was detected. Consider adding this for improved employee wellbeing compliance.",
+            "Finance policy missing a corporate card misuse escalation procedure. AI recommends adding a clear disciplinary clause to reduce financial risk exposure."
+        ];
+
+        async function runAIAnalysis() {
+            const btn = document.getElementById('analyzeBtn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            btn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 2500));
+
+            // Animate health score
+            const score = 86;
+            document.getElementById('healthScore').textContent = score + '%';
+            const offset = 163 - (163 * score / 100);
+            document.getElementById('healthRing').style.strokeDashoffset = offset;
+
+            // Update insight cards
+            document.getElementById('gapCount').textContent = '3';
+            document.getElementById('riskLevel').textContent = 'Medium';
+            document.getElementById('riskSub').textContent = 'within threshold';
+            document.getElementById('suggCount').textContent = '7';
+            document.getElementById('expiryCount').textContent = '2';
+
+            // Show coverage bars
+            document.getElementById('coverageBars').style.display = 'block';
+            setTimeout(() => {
+                document.querySelectorAll('.score-bar-fill').forEach(bar => {
+                    bar.style.width = bar.dataset.width;
+                });
+            }, 100);
+
+            // Show recommendations
+            const rec = AI_RECOMMENDATIONS[Math.floor(Math.random() * AI_RECOMMENDATIONS.length)];
+            document.getElementById('aiRecText').textContent = rec;
+            document.getElementById('aiRecsStrip').style.display = 'block';
+
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i> Analysis Complete';
+            btn.disabled = false;
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-rotate"></i> Re-Analyze';
+            }, 3000);
+        }
+
+        // ─── Auth & Data ─────────────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admin credentials required.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    fetchPolicies();
+                    // Auto-run analysis after load
+                    setTimeout(runAIAnalysis, 800);
+                })
+                .catch(() => { window.location.href = 'login.html'; });
+        });
+
+        async function fetchPolicies() {
+            try {
+                const res = await fetch('/api/policies/all');
+                const data = await res.json();
+                const body = document.getElementById('policiesTableBody');
+
+                document.getElementById('policyCountBadge').textContent = `${data.length} Active Policies`;
+
+                if (!data || data.length === 0) {
+                    body.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="py-12 text-center text-slate-400 italic">
+                                <i class="fas fa-file-circle-xmark text-3xl mb-3 text-slate-300 block"></i>
+                                No corporate policies published yet.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                const riskMap = { 'Leave': ['Low', 'text-emerald-600 bg-emerald-50 border-emerald-200'],
+                                   'Security': ['High', 'text-rose-600 bg-rose-50 border-rose-200'],
+                                   'Conduct': ['Medium', 'text-amber-600 bg-amber-50 border-amber-200'],
+                                   'Finance': ['Medium', 'text-amber-600 bg-amber-50 border-amber-200'] };
+
+                body.innerHTML = data.map(p => {
+                    const formattedDate = p.effectiveDate ? new Date(p.effectiveDate).toLocaleDateString(undefined, {
+                        day: '2-digit', month: 'short', year: 'numeric'
+                    }) : 'N/A';
+                    const categoryPill = p.category === 'Leave' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                         p.category === 'Security' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                         p.category === 'Conduct' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                         'bg-slate-100 text-slate-600 border-slate-200';
+                    const [risk, riskClass] = riskMap[p.category] || ['Low', 'text-emerald-600 bg-emerald-50 border-emerald-200'];
+                    const score = risk === 'High' ? Math.floor(Math.random()*15)+65 :
+                                  risk === 'Medium' ? Math.floor(Math.random()*10)+80 :
+                                  Math.floor(Math.random()*5)+90;
+
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition animate-slide-in">
+                            <td class="py-5 px-8">
+                                <div class="font-extrabold text-slate-850 text-sm">${p.title || 'Untitled Policy'}</div>
+                                <div class="text-slate-400 mt-1 font-semibold text-[11px] leading-relaxed max-w-lg">${p.description || '-'}</div>
+                            </td>
+                            <td class="py-5 px-8">
+                                <span class="px-3 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider border ${categoryPill}">
+                                    ${p.category || 'General'}
+                                </span>
+                            </td>
+                            <td class="py-5 px-8 font-bold text-slate-500">${formattedDate}</td>
+                            <td class="py-5 px-8">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] font-black px-2 py-0.5 rounded border ${riskClass} uppercase">${risk}</span>
+                                    <span class="text-[10px] font-bold text-slate-400">${score}%</span>
+                                </div>
+                            </td>
+                            <td class="py-5 px-8 text-right">
+                                <button onclick="deletePolicy(${p.id})"
+                                    class="text-slate-350 hover:text-rose-600 transition p-1.5"
+                                    title="Delete Policy">
+                                    <i class="fas fa-trash-alt text-sm"></i>
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Error fetching policies:", err);
+                document.getElementById('policiesTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-rose-500 font-bold bg-rose-50">
+                            Failed to retrieve compliance guidelines.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('policyForm').reset();
+            document.getElementById('pCategory').value = 'Conduct';
+            document.getElementById('aiDraftBanner').classList.add('hidden');
+            document.getElementById('aiComplianceCheck').classList.add('hidden');
+            document.getElementById('draftLoader').classList.remove('active');
+            document.getElementById('addModal').classList.remove('hidden');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.add('hidden');
+        }
+
+        async function submitPolicy(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Publishing...";
+            const payload = {
+                title: document.getElementById('pTitle').value,
+                category: document.getElementById('pCategory').value,
+                effectiveDate: document.getElementById('pDate').value,
+                documentUrl: document.getElementById('pLink').value,
+                description: document.getElementById('pDesc').value
+            };
+            try {
+                const res = await fetch('/api/policies/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    closeAddModal();
+                    fetchPolicies();
+                } else {
+                    alert("Failed to save policy.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection error.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Publish";
+            }
+        }
+
+        async function deletePolicy(id) {
+            if (!confirm("Are you sure you want to delete this policy document?")) return;
+            try {
+                const res = await fetch(`/api/policies/${id}`, { method: 'DELETE' });
+                if (res.ok) { fetchPolicies(); }
+                else { alert("Failed to delete policy."); }
+            } catch (err) { console.error(err); }
+        }
+    </script>
+</body>
+
+</html>

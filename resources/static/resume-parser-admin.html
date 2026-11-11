@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Resume Parser - HR Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+        .glass-dark { background: rgba(30,41,59,0.85); backdrop-filter: blur(14px); border: 1px solid rgba(255,255,255,0.06); }
+        .ai-glow-indigo { box-shadow: 0 0 28px rgba(99,102,241,0.18); }
+        .ai-glow-violet { box-shadow: 0 0 28px rgba(139,92,246,0.25); }
+        .hover-lift { transition: all 0.3s cubic-bezier(0.16,1,0.3,1); }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 14px 28px -8px rgba(0,0,0,0.25); }
+        .skill-pill { display: inline-block; margin: 2px; padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- NAV -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="admin-dashboard.html" class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-xl text-white shadow-lg">
+                        <i class="fas fa-file-waveform text-xl"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-300">SmartHR AI</span>
+                </a>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="admin-dashboard.html" class="text-slate-400 hover:text-white font-semibold text-sm transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+                <span class="text-xs font-semibold px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full">ADMIN · NLP INTELLIGENCE</span>
+                <div id="userInfo" class="flex items-center space-x-3 border-l border-slate-800 pl-6"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="hero-gradient py-12 px-4 border-b border-slate-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.07),transparent_45%)]"></div>
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2 block">Enterprise Hiring Intelligence</span>
+                <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight leading-tight">
+                    Smart Resume <span class="text-indigo-400 font-extrabold">Parser AI</span>
+                </h1>
+                <p class="text-slate-400 mt-2 text-sm md:text-base max-w-2xl">
+                    NLP engine extracts skills, experience & qualifications from applicant resumes. AI match scoring maps each candidate to open positions in real-time.
+                </p>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="refreshData()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-bold shadow-md transition border border-slate-700 flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i> Refresh Registry
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+
+        <!-- METRIC CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-dark p-6 rounded-2xl hover-lift ai-glow-indigo relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-indigo-400"><i class="fas fa-users"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Total Parsed</p>
+                <h3 id="totalParsed" class="text-4xl font-extrabold text-white mt-2">0</h3>
+                <p class="text-xs text-slate-500 mt-3">Candidates in registry</p>
+            </div>
+            <div class="glass-dark p-6 rounded-2xl hover-lift ai-glow-violet relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-violet-400"><i class="fas fa-star"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Excellent Fit</p>
+                <h3 id="excellentCount" class="text-4xl font-extrabold text-violet-400 mt-2">0</h3>
+                <p class="text-xs text-slate-500 mt-3">Top-rated candidates</p>
+            </div>
+            <div class="glass-dark p-6 rounded-2xl hover-lift relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-indigo-400"><i class="fas fa-briefcase"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Avg. Experience</p>
+                <h3 id="avgExp" class="text-4xl font-extrabold text-indigo-300 mt-2">0 yrs</h3>
+                <p class="text-xs text-slate-500 mt-3">Across all candidates</p>
+            </div>
+            <div class="glass-dark p-6 rounded-2xl hover-lift relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-emerald-400"><i class="fas fa-bullseye"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Avg. Match Score</p>
+                <h3 id="avgMatch" class="text-4xl font-extrabold text-emerald-400 mt-2">0%</h3>
+                <p class="text-xs text-slate-500 mt-3">AI skill fit index</p>
+            </div>
+        </div>
+
+        <!-- CHARTS + QUICK INSIGHTS -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <div class="lg:col-span-1 glass-dark p-6 rounded-3xl">
+                <h3 class="font-bold text-base text-slate-200 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-indigo-500"></i> Fit Rating Breakdown
+                </h3>
+                <div class="h-64 flex items-center justify-center">
+                    <canvas id="fitChart"></canvas>
+                </div>
+            </div>
+            <div class="lg:col-span-2 glass-dark p-6 rounded-3xl">
+                <h3 class="font-bold text-base text-slate-200 mb-2 flex items-center gap-2">
+                    <i class="fas fa-code text-violet-400"></i> Most In-Demand Skills Found
+                </h3>
+                <p class="text-xs text-slate-400 mb-5">Aggregated across all parsed resumes in current registry.</p>
+                <div id="skillBars" class="space-y-3"></div>
+            </div>
+        </div>
+
+        <!-- CANDIDATE REGISTRY TABLE -->
+        <div class="glass-dark rounded-3xl overflow-hidden border border-slate-800 mb-14 shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/40">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-200"><i class="fas fa-list text-indigo-500 mr-2"></i>Candidate Registry Matrix</h2>
+                    <p class="text-xs text-slate-400 mt-1">Real-time NLP-extracted data for all applicant resumes</p>
+                </div>
+                <div class="flex gap-2">
+                    <input id="searchInput" oninput="filterTable()" type="text" placeholder="Search name, skill, role..."
+                        class="px-4 py-2 bg-slate-800 text-slate-200 border border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none w-64">
+                    <select id="filterRating" onchange="filterTable()" class="px-3 py-2 bg-slate-800 text-slate-300 border border-slate-700 rounded-xl text-xs focus:outline-none">
+                        <option value="">All Ratings</option>
+                        <option value="Excellent">Excellent</option>
+                        <option value="Good">Good</option>
+                        <option value="Fair">Fair</option>
+                        <option value="Needs Review">Needs Review</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/30 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-800">
+                            <th class="py-4 px-6">Candidate</th>
+                            <th class="py-4 px-6">Role & Education</th>
+                            <th class="py-4 px-6">Skills Extracted</th>
+                            <th class="py-4 px-6 text-center">Exp.</th>
+                            <th class="py-4 px-6 text-center">Match Score</th>
+                            <th class="py-4 px-6 text-center">Fit Rating</th>
+                            <th class="py-4 px-6 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registryTableBody" class="divide-y divide-slate-800/60 text-sm"></tbody>
+                </table>
+                <div id="emptyState" class="hidden py-16 text-center text-slate-500">
+                    <i class="fas fa-folder-open text-4xl mb-3"></i>
+                    <p class="font-bold text-base text-slate-400">No candidates match this filter.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- AI SCREENING REPORT MODAL -->
+    <div id="reportModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2.5 rounded-xl"><i class="fas fa-wand-magic-sparkles text-xl"></i></div>
+                    <div>
+                        <h3 class="font-extrabold text-lg">AI Screening Match Report</h3>
+                        <p class="text-[10px] text-indigo-200 font-semibold uppercase">NLP Skill Intelligence · Candidate Analysis</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+            <div id="modalReportContent" class="flex-1 p-6 overflow-y-auto space-y-3 text-xs leading-relaxed text-slate-300"></div>
+            <div class="p-4 bg-slate-900 border-t border-slate-700/60 flex justify-end gap-3">
+                <button onclick="copyReport()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i class="fas fa-copy"></i> Copy Report
+                </button>
+                <button onclick="closeModal()" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RESUMEBOT CHAT DRAWER -->
+    <div id="chatDrawer" class="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        <div id="chatWindow" class="hidden w-96 h-[500px] bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-4">
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-xl"><i class="fas fa-robot text-lg"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">ResumeBot AI</h4>
+                        <span class="text-[10px] text-indigo-200 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Hiring Intelligence Mode
+                        </span>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="chatBody" class="flex-1 p-4 overflow-y-auto space-y-4 text-xs no-scrollbar">
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">AI</div>
+                    <div class="bg-slate-700 p-3 rounded-2xl max-w-[80%] rounded-tl-none text-slate-200 leading-relaxed">
+                        Hello! I am <strong>ResumeBot AI</strong> — your hiring intelligence strategist. Ask me who the top candidates are, get shortlist recommendations, or request interview question sets!
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 border-t border-slate-700/60 bg-slate-900/30 flex gap-1.5 overflow-x-auto whitespace-nowrap text-[10px] no-scrollbar">
+                <button onclick="sendQuick('Who is the best candidate?')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Best candidate?</button>
+                <button onclick="sendQuick('Show me shortlisted profiles')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Shortlist</button>
+                <button onclick="sendQuick('Give me interview questions')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Interview Q's</button>
+                <button onclick="sendQuick('How many candidates total?')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Count</button>
+            </div>
+            <div class="p-3 bg-slate-900/60 border-t border-slate-700 flex gap-2">
+                <input id="chatInput" type="text" placeholder="Ask ResumeBot AI..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500" onkeydown="if(event.key==='Enter') sendMessage()">
+                <button onclick="sendMessage()" class="p-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+        <button onclick="toggleChat()" class="w-16 h-16 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all relative group ring-4 ring-indigo-500/10">
+            <i class="fas fa-robot text-2xl"></i>
+            <span class="absolute right-20 bg-slate-800 border border-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Ask ResumeBot AI</span>
+        </button>
+    </div>
+
+    <script>
+        let allRecords = [];
+        let fitChart = null;
+
+        // Color palettes for skill pills
+        const pillColors = [
+            'bg-indigo-500/15 border border-indigo-500/30 text-indigo-300',
+            'bg-violet-500/15 border border-violet-500/30 text-violet-300',
+            'bg-blue-500/15 border border-blue-500/30 text-blue-300',
+            'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300',
+            'bg-amber-500/15 border border-amber-500/30 text-amber-300',
+            'bg-rose-500/15 border border-rose-500/30 text-rose-300',
+        ];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/api/current-user')
+                .then(res => { if (res.ok) return res.json(); window.location.href = 'login.html'; })
+                .then(user => {
+                    if (user.role !== 'ADMIN') { alert('Admins only.'); window.location.href = 'index.html'; return; }
+                    const pic = user.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.fullName || 'Admin'));
+                    document.getElementById('userInfo').innerHTML = `
+                        <img src="${pic}" class="w-9 h-9 rounded-full border border-slate-700 object-cover">
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-xs font-bold text-slate-200 leading-tight">${user.fullName}</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider">${user.role}</span>
+                        </div>
+                        <a href="/logout" class="text-slate-500 hover:text-red-400 text-xs font-bold ml-2 transition">Logout</a>
+                    `;
+                    loadRegistry();
+                })
+                .catch(() => window.location.href = 'login.html');
+        });
+
+        function loadRegistry() {
+            fetch('/api/resume-parser/admin/records')
+                .then(res => res.json())
+                .then(data => {
+                    allRecords = data;
+                    renderMetrics();
+                    renderTable(data);
+                    renderFitChart();
+                    renderSkillBars();
+                })
+                .catch(err => console.error('Error loading registry:', err));
+        }
+
+        function renderMetrics() {
+            const total = allRecords.length;
+            document.getElementById('totalParsed').textContent = total;
+            const excellent = allRecords.filter(r => r.fitRating === 'Excellent').length;
+            document.getElementById('excellentCount').textContent = excellent;
+            const avgExp = total > 0 ? (allRecords.reduce((s, r) => s + (r.experienceYears || 0), 0) / total).toFixed(1) : 0;
+            document.getElementById('avgExp').textContent = avgExp + ' yrs';
+            const avgMatch = total > 0 ? Math.round(allRecords.reduce((s, r) => s + parseInt((r.skillMatchPercent || '0').replace('%', '')), 0) / total) : 0;
+            document.getElementById('avgMatch').textContent = avgMatch + '%';
+        }
+
+        function renderTable(records) {
+            const body = document.getElementById('registryTableBody');
+            const empty = document.getElementById('emptyState');
+            body.innerHTML = '';
+            if (records.length === 0) { empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
+
+            records.forEach((r, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-800/20 transition-all border-b border-slate-800/40 align-middle';
+
+                const skillList = (r.skills || '').split(',').map((s, i) => {
+                    const color = pillColors[i % pillColors.length];
+                    return `<span class="skill-pill ${color}">${s.trim()}</span>`;
+                }).join('');
+
+                let ratingBadge = '';
+                if (r.fitRating === 'Excellent') ratingBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-violet-500/10 border border-violet-500/20 text-violet-400">EXCELLENT</span>';
+                else if (r.fitRating === 'Good') ratingBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">GOOD</span>';
+                else if (r.fitRating === 'Fair') ratingBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-400">FAIR</span>';
+                else ratingBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-black bg-slate-500/10 border border-slate-500/20 text-slate-400">NEEDS REVIEW</span>';
+
+                const matchPct = parseInt((r.skillMatchPercent || '0').replace('%', ''));
+                const barColor = matchPct >= 85 ? 'bg-violet-500' : matchPct >= 70 ? 'bg-indigo-500' : matchPct >= 55 ? 'bg-amber-500' : 'bg-rose-500';
+                const avatarUrl = `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(r.fullName || 'C')}&size=80`;
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6">
+                        <div class="flex items-center space-x-3">
+                            <img src="${avatarUrl}" class="w-10 h-10 rounded-full object-cover border border-slate-700 flex-shrink-0">
+                            <div>
+                                <span class="font-extrabold text-slate-100 block leading-tight">${r.fullName || 'Unknown'}</span>
+                                <span class="text-[10px] text-slate-400">${r.email || ''}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 max-w-[160px]">
+                        <span class="font-bold text-slate-200 block text-xs leading-tight">${r.currentRole || 'N/A'}</span>
+                        <span class="text-[10px] text-slate-500 block mt-0.5">${r.education || ''}</span>
+                    </td>
+                    <td class="py-4 px-6 max-w-[220px]">
+                        <div class="flex flex-wrap">${skillList}</div>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <span class="font-black text-indigo-300">${r.experienceYears || 0}y</span>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex flex-col items-center gap-1">
+                            <span class="font-black text-sm text-slate-200">${r.skillMatchPercent || '0%'}</span>
+                            <div class="w-16 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                <div class="${barColor} h-full rounded-full" style="width:${matchPct}%"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-center">${ratingBadge}</td>
+                    <td class="py-4 px-6 text-right">
+                        <button onclick="generateReport(${r.id})" class="px-3 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-lg text-xs font-bold shadow-md transition inline-flex items-center gap-1.5">
+                            <i class="fas fa-wand-magic-sparkles"></i> AI Report
+                        </button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const rating = document.getElementById('filterRating').value;
+            const filtered = allRecords.filter(r => {
+                const matchText = !search ||
+                    (r.fullName || '').toLowerCase().includes(search) ||
+                    (r.skills || '').toLowerCase().includes(search) ||
+                    (r.currentRole || '').toLowerCase().includes(search) ||
+                    (r.email || '').toLowerCase().includes(search);
+                const matchRating = !rating || r.fitRating === rating;
+                return matchText && matchRating;
+            });
+            renderTable(filtered);
+        }
+
+        function renderFitChart() {
+            const counts = { Excellent: 0, Good: 0, Fair: 0, 'Needs Review': 0 };
+            allRecords.forEach(r => { if (counts[r.fitRating] !== undefined) counts[r.fitRating]++; });
+            if (fitChart) fitChart.destroy();
+            const ctx = document.getElementById('fitChart').getContext('2d');
+            fitChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Excellent', 'Good', 'Fair', 'Needs Review'],
+                    datasets: [{ data: Object.values(counts), backgroundColor: ['#8b5cf6', '#6366f1', '#f59e0b', '#94a3b8'], borderWidth: 2, borderColor: '#1e293b' }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#94a3b8', font: { size: 10, weight: 'bold' }, boxWidth: 10 }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+
+        function renderSkillBars() {
+            const freq = {};
+            allRecords.forEach(r => {
+                (r.skills || '').split(',').forEach(s => {
+                    const sk = s.trim();
+                    if (sk) freq[sk] = (freq[sk] || 0) + 1;
+                });
+            });
+            const sorted = Object.entries(freq).sort((a, b) => b[1] - a[1]).slice(0, 6);
+            const max = sorted[0] ? sorted[0][1] : 1;
+            const container = document.getElementById('skillBars');
+            const colors = ['bg-indigo-500', 'bg-violet-500', 'bg-blue-500', 'bg-emerald-500', 'bg-amber-500', 'bg-rose-500'];
+            container.innerHTML = sorted.map(([skill, count], i) => `
+                <div>
+                    <div class="flex justify-between text-xs font-bold mb-1">
+                        <span class="text-slate-300">${skill}</span>
+                        <span class="text-slate-500">${count} candidate${count > 1 ? 's' : ''}</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                        <div class="${colors[i]} h-full rounded-full transition-all duration-700" style="width:${Math.round((count / max) * 100)}%"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function generateReport(resumeId) {
+            const modal = document.getElementById('reportModal');
+            const content = document.getElementById('modalReportContent');
+            content.innerHTML = `<div class="flex items-center gap-3 text-indigo-400"><i class="fas fa-spinner fa-spin text-xl"></i><span class="font-bold">AI is generating screening report...</span></div>`;
+            modal.classList.remove('hidden');
+
+            fetch('/api/resume-parser/admin/match-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ resumeId: resumeId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                let html = data.report
+                    .replace(/\n\n/g, '<br><br>')
+                    .replace(/### (.*)/g, '<h3 class="text-lg font-black text-white mt-4">$1</h3>')
+                    .replace(/#### (.*)/g, '<h4 class="text-sm font-bold text-indigo-400 mt-5 mb-2 flex items-center gap-2"><i class="fas fa-bookmark text-xs"></i>$1</h4>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                    .replace(/✅ /g, '')
+                    .replace(/⚠️ /g, '')
+                    .replace(/💬 /g, '')
+                    .replace(/- (.*)/g, '<div class="flex items-start gap-2 mt-1.5"><i class="fas fa-check-circle text-indigo-500 mt-0.5 flex-shrink-0"></i><span>$1</span></div>');
+                content.innerHTML = html;
+            });
+        }
+
+        function closeModal() { document.getElementById('reportModal').classList.add('hidden'); }
+        function copyReport() {
+            navigator.clipboard.writeText(document.getElementById('modalReportContent').innerText)
+                .then(() => alert('Report copied to clipboard!'));
+        }
+
+        function refreshData() { loadRegistry(); }
+
+        function toggleChat() { document.getElementById('chatWindow').classList.toggle('hidden'); }
+        function sendQuick(text) { document.getElementById('chatInput').value = text; sendMessage(); }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+            appendChat(text, 'user');
+            fetch('/api/resume-parser/ai-assistant', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            }).then(r => r.json()).then(d => appendChat(d.response, 'ai'));
+        }
+
+        function appendChat(text, sender) {
+            const body = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2' + (sender === 'user' ? ' justify-end' : '');
+            const bubble = sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-slate-700 text-slate-200 rounded-tl-none';
+            const av = sender === 'user' ? 'HR' : 'AI';
+            const avBg = sender === 'user' ? 'bg-indigo-500' : 'bg-violet-700';
+            const formatted = text.replace(/\n/g, '<br>').replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>').replace(/- (.*)/g, '<div class="flex items-start gap-1.5 mt-1">• <span>$1</span></div>');
+            div.innerHTML = `
+                ${sender !== 'user' ? `<div class="w-8 h-8 rounded-full ${avBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${av}</div>` : ''}
+                <div class="${bubble} p-3 rounded-2xl max-w-[80%] leading-relaxed text-xs">${formatted}</div>
+                ${sender === 'user' ? `<div class="w-8 h-8 rounded-full ${avBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${av}</div>` : ''}
+            `;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+    </script>
+</body>
+</html>

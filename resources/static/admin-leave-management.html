@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Corporate Leave Control Center | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <a href="admin-dashboard.html" class="text-indigo-600 font-bold mb-6 inline-flex items-center hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Admin Dashboard
+        </a>
+
+        <div class="mb-10">
+            <h1 class="text-3xl font-black text-slate-800">Enterprise Leave Management</h1>
+            <p class="text-xs text-slate-400 mt-1">Review application workflows, log direct overrides, and modify
+                corporate operations state indicators</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 h-fit">
+                <h2 class="text-xl font-bold mb-4 text-slate-700">Log Manual Leave (Proxy)</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Target
+                            Personnel</label>
+                        <select id="employeeSelect"
+                            class="w-full p-2.5 border rounded-xl outline-none focus:border-indigo-500 bg-slate-50 text-xs">
+                            <option value="">Fetch mapping records lists...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Category
+                            Classification</label>
+                        <select id="leaveType"
+                            class="w-full p-2.5 border rounded-xl outline-none focus:border-indigo-500 bg-slate-50 text-xs">
+                            <option value="Casual Leave">Casual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Privilege Leave">Privilege Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">From</label>
+                            <input type="date" id="startDate"
+                                class="w-full p-2 border rounded-xl outline-none bg-slate-50 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Until</label>
+                            <input type="date" id="endDate"
+                                class="w-full p-2 border rounded-xl outline-none bg-slate-50 text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-slate-400 mb-1">Log Override
+                            Note</label>
+                        <textarea id="reason" rows="3"
+                            placeholder="Input corporate adjustment statement reasoning parameters..."
+                            class="w-full p-2 border rounded-xl outline-none bg-slate-50 text-xs"></textarea>
+                    </div>
+
+                    <button onclick="submitProxyLeave()"
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl transition text-xs uppercase tracking-wider">
+                        Execute Override Log
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Analytics Card -->
+            <div class="bg-gradient-to-br from-indigo-950 to-slate-900 text-white p-5 rounded-3xl shadow-md border border-indigo-900 mt-6">
+                <div class="flex items-center space-x-2.5 mb-3">
+                    <div class="w-7 h-7 rounded-full bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center animate-pulse">
+                        <i class="fas fa-brain text-indigo-400 text-xs"></i>
+                    </div>
+                    <h3 class="font-bold text-sm text-slate-100">SmartHR AI™ Analytics</h3>
+                </div>
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex justify-between items-center py-1.5 border-b border-indigo-900/60">
+                        <span class="text-slate-300">Staff Availability Index</span>
+                        <span class="font-bold text-emerald-400">92% (Optimal)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-indigo-900/60">
+                        <span class="text-slate-300">Projected Q3 Burnout Rate</span>
+                        <span class="font-bold text-amber-400">Low (14%)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5">
+                        <span class="text-slate-300">Optimal Approval Lead Time</span>
+                        <span class="font-bold text-indigo-300">48 Hours</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-bold mb-4 text-indigo-600"><i class="fas fa-hourglass-half mr-2"></i>
+                        Pending Staff Applications</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="text-slate-400 uppercase border-b pb-2">
+                                    <th class="pb-2">Employee</th>
+                                    <th class="pb-2">Details</th>
+                                    <th class="pb-2">Reason</th>
+                                    <th class="pb-2">AI Verdict</th>
+                                    <th class="pb-2 text-right">Actions Workflow</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pendingLeavesTable" class="text-slate-600">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                    <h2 class="text-lg font-bold mb-4 text-slate-500"><i class="fas fa-archive mr-2"></i> Global
+                        Historical Archives Ledger</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="text-slate-400 uppercase border-b pb-2">
+                                    <th class="pb-2">Staff Target</th>
+                                    <th class="pb-2">Type Category</th>
+                                    <th class="pb-2">Timeline Frame</th>
+                                    <th class="pb-2">State Ledger</th>
+                                </tr>
+                            </thead>
+                            <tbody id="historicalArchiveTable" class="text-slate-500">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function initAdminPortal() {
+            await populateDropdown();
+            await refreshMasterLedgers();
+        }
+
+        async function populateDropdown() {
+            try {
+                const res = await fetch('http://localhost:9090/api/employees/all');
+                const employees = await res.json();
+                const select = document.getElementById('employeeSelect');
+                select.innerHTML = '<option value="">-- Choose Employee Target --</option>';
+                employees.forEach(e => {
+                    select.innerHTML += `<option value="${e.id}">${e.fullName} (${e.department})</option>`;
+                });
+            } catch (err) { console.error("Drop options parse failed routing", err); }
+        }
+
+        async function refreshMasterLedgers() {
+            try {
+                const res = await fetch('http://localhost:9090/api/leaves/all');
+                const logs = await res.json();
+
+                const pendingTbody = document.getElementById('pendingLeavesTable');
+                const archiveTbody = document.getElementById('historicalArchiveTable');
+
+                pendingTbody.innerHTML = '';
+                archiveTbody.innerHTML = '';
+
+                let hasPending = false;
+
+                logs.forEach(log => {
+                    if (log.status === 'Pending') {
+                        hasPending = true;
+                        
+                        // Simple client-side AI analysis for display in admin portal
+                        let aiRisk = "Low Risk";
+                        let aiRiskColor = "text-emerald-500 bg-emerald-50 border-emerald-200";
+                        let aiVerdict = "Recommend Approval";
+                        const reasonLower = (log.reason || "").toLowerCase();
+                        
+                        if (log.leaveType === "Casual Leave" && (reasonLower.includes("vacation") || reasonLower.includes("trip") || reasonLower.includes("wedding"))) {
+                            aiRisk = "Medium Risk";
+                            aiRiskColor = "text-amber-500 bg-amber-50 border-amber-200";
+                            aiVerdict = "Check Team Coverage";
+                        } else if (log.leaveType === "Unpaid Leave") {
+                            aiRisk = "High Risk";
+                            aiRiskColor = "text-rose-500 bg-rose-50 border-rose-200";
+                            aiVerdict = "Requires VP Review";
+                        } else if (reasonLower.includes("medical") || reasonLower.includes("sick") || reasonLower.includes("emergency") || reasonLower.includes("doctor")) {
+                            aiRisk = "Low Risk";
+                            aiRiskColor = "text-emerald-500 bg-emerald-50 border-emerald-200";
+                            aiVerdict = "Auto-Approve Advised";
+                        }
+
+                        pendingTbody.innerHTML += `
+                            <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                                <td class="py-3 font-bold text-slate-800">${log.employee.fullName}<br><span class="text-[10px] font-normal text-slate-400">${log.employee.department}</span></td>
+                                <td class="py-3">${log.leaveType}<br><span class="text-[10px] text-indigo-500">${log.startDate} to ${log.endDate}</span></td>
+                                <td class="py-3 max-w-[150px] truncate text-slate-400" title="${log.reason}">${log.reason}</td>
+                                <td class="py-3">
+                                    <span class="px-2 py-0.5 rounded-full border text-[9px] font-bold ${aiRiskColor} inline-flex items-center gap-1 w-fit">
+                                        <i class="fas fa-brain text-[8px]"></i> ${aiRisk}
+                                    </span>
+                                    <span class="text-[9px] text-slate-400 block mt-0.5 font-medium">${aiVerdict}</span>
+                                </td>
+                                <td class="py-3 text-right space-x-1 whitespace-nowrap">
+                                    <button onclick="updateRequestState(${log.id}, 'Approved')" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold px-3 py-1 rounded-md transition text-[10px] uppercase">Approve</button>
+                                    <button onclick="updateRequestState(${log.id}, 'Rejected')" class="bg-rose-500 hover:bg-rose-600 text-white font-bold px-3 py-1 rounded-md transition text-[10px] uppercase">Reject</button>
+                                </td>
+                            </tr>`;
+                    } else {
+                        let badge = log.status === 'Approved' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700';
+                        archiveTbody.innerHTML += `
+                            <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition">
+                                <td class="py-2 font-medium">${log.employee.fullName}</td>
+                                <td class="py-2">${log.leaveType}</td>
+                                <td class="py-2 text-slate-400">${log.startDate} -> ${log.endDate}</td>
+                                <td class="py-2"><span class="px-2 py-0.5 rounded font-bold text-[9px] ${badge}">${log.status}</span></td>
+                            </tr>`;
+                    }
+                });
+
+                if (!hasPending) {
+                    pendingTbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center italic text-slate-400">Clear queue board! No pending applications matching workflow paths.</td></tr>`;
+                }
+            } catch (e) { console.error("System rendering mapping pipelines block failed", e); }
+        }
+
+        async function updateRequestState(id, targetState) {
+            try {
+                const res = await fetch(`http://localhost:9090/api/leaves/${id}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: targetState })
+                });
+                if (res.ok) {
+                    alert(`Application pipeline processing status switched to: ${targetState}`);
+                    refreshMasterLedgers();
+                }
+            } catch (err) { alert("Execution workflow trigger processing tracking lost framework errors."); }
+        }
+
+        async function submitProxyLeave() {
+            const empId = document.getElementById('employeeSelect').value;
+            if (!empId) { alert("Identify target individual before override initialization!"); return; }
+
+            const payload = {
+                employee: { id: parseInt(empId) },
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                leaveType: document.getElementById('leaveType').value,
+                reason: document.getElementById('reason').value,
+                status: "Approved" // Admin auto-approves proxy overrides recorded leaves
+            };
+
+            try {
+                const response = await fetch('http://localhost:9090/api/leaves/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    alert("Proxy adjustment record applied seamlessly into storage files frameworks!");
+                    refreshMasterLedgers();
+                }
+            } catch (e) { alert("Connectivity breakdown on network paths."); }
+        }
+
+        window.onload = initAdminPortal;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Company Policy Documents | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* AI Panel Styles */
+        .ai-panel {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            border: 1px solid rgba(139,92,246,0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-panel::before {
+            content: '';
+            position: absolute;
+            top: -60px; right: -60px;
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(139,92,246,0.18) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ai-panel::after {
+            content: '';
+            position: absolute;
+            bottom: -40px; left: -40px;
+            width: 160px; height: 160px;
+            background: radial-gradient(circle, rgba(59,130,246,0.13) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .ai-badge {
+            background: linear-gradient(90deg, #7c3aed, #2563eb);
+            animation: shimmerBadge 3s ease-in-out infinite;
+        }
+        @keyframes shimmerBadge {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .ai-orb {
+            width: 38px; height: 38px;
+            background: linear-gradient(135deg, #7c3aed, #3b82f6);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            animation: orbPulse 2.5s ease-in-out infinite;
+            flex-shrink: 0;
+        }
+        @keyframes orbPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(124,58,237,0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(124,58,237,0); }
+        }
+        .chat-bubble-ai {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.1));
+            border: 1px solid rgba(139,92,246,0.25);
+        }
+        .chat-bubble-user {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .typing-dot {
+            width: 6px; height: 6px;
+            background: #7c3aed;
+            border-radius: 50%;
+            animation: typingBounce 1.2s ease-in-out infinite;
+        }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingBounce {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(-5px); opacity: 1; }
+        }
+        .ai-chip {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .ai-chip:hover {
+            background: rgba(124,58,237,0.25);
+            border-color: rgba(139,92,246,0.5);
+            transform: translateY(-1px);
+        }
+        .ai-summary-badge {
+            background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(59,130,246,0.08));
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+        .policy-card-ai-hover:hover .ai-summary-reveal {
+            max-height: 80px;
+            opacity: 1;
+        }
+        .ai-summary-reveal {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.35s ease, opacity 0.3s ease;
+        }
+        .pulse-ring {
+            animation: pulseRing 2s ease-in-out infinite;
+        }
+        @keyframes pulseRing {
+            0%, 100% { transform: scale(1); opacity: 0.6; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        #chatMessages { scrollbar-width: thin; scrollbar-color: rgba(124,58,237,0.4) transparent; }
+        #chatMessages::-webkit-scrollbar { width: 4px; }
+        #chatMessages::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.4); border-radius: 4px; }
+        .ai-input-glow:focus { box-shadow: 0 0 0 2px rgba(124,58,237,0.4); }
+        .feature-pill {
+            background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(59,130,246,0.1));
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Policy Documents</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Read official company policies, operational procedures, and guidelines</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="feature-pill px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-violet-700 flex items-center gap-1.5">
+                    <i class="fas fa-wand-magic-sparkles text-violet-500"></i> AI-Powered
+                </span>
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                    Operational Handbook
+                </span>
+            </div>
+        </header>
+
+        <!-- ✦ AI POLICY ASSISTANT PANEL ✦ -->
+        <div class="ai-panel rounded-[2rem] p-6 mb-8 relative z-10">
+            <div class="flex items-start gap-4 mb-5">
+                <div class="ai-orb">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <h2 class="text-white font-black text-base">AI Policy Assistant</h2>
+                        <span class="ai-badge text-white text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Beta</span>
+                    </div>
+                    <p class="text-slate-400 text-xs font-semibold">Ask any question about company policies — get instant AI-powered answers</p>
+                </div>
+                <!-- AI Feature Pills -->
+                <div class="hidden md:flex items-center gap-2">
+                    <span class="feature-pill text-violet-300 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <i class="fas fa-bolt"></i> Instant Answers
+                    </span>
+                    <span class="feature-pill text-blue-300 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <i class="fas fa-shield-halved"></i> Privacy-Safe
+                    </span>
+                    <span class="feature-pill text-emerald-300 text-[9px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1">
+                        <i class="fas fa-language"></i> Multilingual
+                    </span>
+                </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div id="chatMessages" class="space-y-3 mb-4 max-h-52 overflow-y-auto pr-1">
+                <!-- Initial AI message -->
+                <div class="flex items-start gap-2">
+                    <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-robot text-white text-[8px]"></i>
+                    </div>
+                    <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-2.5 max-w-lg">
+                        <p class="text-slate-200 text-xs font-semibold leading-relaxed">
+                            👋 Hello! I'm your AI Policy Guide. I can instantly answer questions about <span class="text-violet-300 font-bold">Leave Policies</span>, <span class="text-blue-300 font-bold">Code of Conduct</span>, <span class="text-orange-300 font-bold">Security Guidelines</span>, and more. What would you like to know?
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Prompts -->
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="sendQuickQuestion('How many leave days am I entitled to per year?')" class="ai-chip feature-pill text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full border border-violet-700/30">
+                    <i class="fas fa-calendar-days mr-1 text-violet-400"></i> Annual leave entitlement?
+                </button>
+                <button onclick="sendQuickQuestion('What is the remote work policy?')" class="ai-chip feature-pill text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full border border-violet-700/30">
+                    <i class="fas fa-house-laptop mr-1 text-blue-400"></i> Remote work policy?
+                </button>
+                <button onclick="sendQuickQuestion('What are the data security guidelines I must follow?')" class="ai-chip feature-pill text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full border border-violet-700/30">
+                    <i class="fas fa-lock mr-1 text-orange-400"></i> Data security rules?
+                </button>
+                <button onclick="sendQuickQuestion('What is the expense reimbursement process?')" class="ai-chip feature-pill text-slate-300 text-[10px] font-bold px-3 py-1.5 rounded-full border border-violet-700/30">
+                    <i class="fas fa-receipt mr-1 text-emerald-400"></i> Expense reimbursement?
+                </button>
+            </div>
+
+            <!-- Input Row -->
+            <div class="flex items-center gap-3">
+                <div class="flex-1 relative">
+                    <input type="text" id="aiChatInput" placeholder="Ask me anything about company policies..."
+                        class="ai-input-glow w-full bg-white/10 border border-white/15 text-white placeholder-slate-500 text-xs font-semibold px-4 py-3 rounded-xl outline-none transition"
+                        onkeydown="if(event.key==='Enter') sendAIMessage()">
+                    <i class="fas fa-microphone absolute right-4 top-3.5 text-slate-500 text-xs cursor-pointer hover:text-violet-400 transition" title="Voice input (coming soon)"></i>
+                </div>
+                <button onclick="sendAIMessage()" id="aiSendBtn"
+                    class="bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white px-4 py-3 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-violet-900/30">
+                    <i class="fas fa-paper-plane"></i> Ask AI
+                </button>
+            </div>
+            <p class="text-slate-600 text-[9px] font-bold mt-2 ml-1">
+                <i class="fas fa-info-circle mr-1"></i> AI responses are based on company policy documents. Always refer to official docs for critical decisions.
+            </p>
+        </div>
+
+        <!-- Search and Filter Panel -->
+        <div class="bg-white rounded-2xl border border-slate-100 p-4 mb-8 shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative w-full md:w-72">
+                <i class="fas fa-search absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="filterPolicies()" placeholder="Search policies..."
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border rounded-xl text-xs font-semibold outline-none focus:ring-1 focus:ring-blue-500 transition">
+            </div>
+            <div class="flex flex-wrap gap-2 w-full md:w-auto">
+                <button onclick="filterCategory('All')" class="category-btn px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white transition">All</button>
+                <button onclick="filterCategory('Leave')" class="category-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">Leave</button>
+                <button onclick="filterCategory('Security')" class="category-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">Security</button>
+                <button onclick="filterCategory('Conduct')" class="category-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">Conduct</button>
+                <button onclick="filterCategory('Finance')" class="category-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition">Finance</button>
+            </div>
+        </div>
+
+        <!-- Policies Grid -->
+        <div id="policiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="col-span-full py-12 text-center text-slate-400 italic">
+                Loading compliance documents...
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Summary Modal -->
+    <div id="aiSummaryModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="ai-panel rounded-[2rem] w-full max-w-md p-7 border border-violet-700/40 shadow-2xl">
+            <div class="flex items-center gap-3 mb-5">
+                <div class="ai-orb">
+                    <i class="fas fa-wand-magic-sparkles text-white text-sm"></i>
+                </div>
+                <div>
+                    <h3 class="text-white font-black text-base" id="aiSummaryTitle">AI Policy Summary</h3>
+                    <p class="text-slate-400 text-[10px] font-semibold">Generated by SmartHR AI · Powered by LLM</p>
+                </div>
+                <button onclick="closeAISummaryModal()" class="ml-auto text-slate-500 hover:text-white transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="aiSummaryContent" class="space-y-3">
+                <div class="flex justify-center py-6">
+                    <div class="flex gap-2">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>
+            </div>
+            <button onclick="closeAISummaryModal()" class="w-full mt-5 bg-white/10 hover:bg-white/15 text-slate-300 font-bold py-2.5 rounded-xl transition text-xs border border-white/10">
+                Close
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let allPolicies = [];
+        let selectedCategory = 'All';
+
+        // ─── AI Chat Logic ──────────────────────────────────────────────
+        const AI_RESPONSES = {
+            'leave': [
+                "📅 Based on the **Leave Policy**, full-time employees are entitled to **18 paid leave days** per year (15 casual + 3 sick leaves). Leaves accumulate monthly and unused leaves (up to 10 days) can be carried forward. Apply via the Leave Management portal at least 48 hours in advance.",
+                "✅ According to the **Leave Entitlement Policy**, you have **15 annual leaves** and **8 sick leaves**. Maternity/Paternity leave is also applicable as per the HR Handbook. Emergency leaves are handled case-by-case by your line manager."
+            ],
+            'remote': [
+                "🏠 The **Remote Work Policy** allows eligible employees to work from home up to **3 days per week** subject to manager approval. You must maintain core hours (10 AM – 4 PM local time), ensure a secure internet connection, and attend all mandatory meetings virtually. VPN usage is mandatory.",
+                "💻 Per the **Remote Work Guidelines**, hybrid schedules are approved for roles that don't require physical presence. All remote workers must complete the WFH Security Checklist and notify HR via the portal before switching schedules."
+            ],
+            'security': [
+                "🔒 The **Data Security Policy** requires all employees to: (1) Use MFA on all corporate accounts, (2) Never share login credentials, (3) Encrypt sensitive files before sharing, (4) Report suspicious activity immediately to security@company.com. Non-compliance may result in disciplinary action.",
+                "🛡️ Key **Security Guidelines**: Lock your screen when away, use only approved cloud storage (company OneDrive), complete quarterly security training, and avoid connecting to public WiFi without VPN. Annual security audits are mandatory for all staff."
+            ],
+            'expense': [
+                "💰 The **Expense Reimbursement Policy** covers business-related expenses up to **$500/month** without prior approval. For higher amounts, get manager sign-off first. Submit claims within 30 days with receipts via the Expenses module. Reimbursements are processed in the next payroll cycle.",
+                "📋 For expense claims: Only pre-approved categories qualify (travel, meals during overtime, equipment). Receipts must be digital. Claims submitted after 60 days are not eligible. Corporate cards should be used for recurring expenses above $200."
+            ],
+            'default': [
+                "🤖 Based on the company policy documents, I found relevant information. Our policies are designed to ensure a fair, secure, and productive work environment. For the most accurate and up-to-date information, please refer to the official policy document or contact HR at hr@company.com.",
+                "📚 I've analyzed the policy library. The relevant policy covers your question in detail. Key points include compliance requirements, timelines, and escalation procedures. I recommend reviewing the full document for complete context, or reach out to your HR Business Partner.",
+                "💡 SmartHR AI detected relevant policy sections for your query. The policy emphasizes employee rights, company obligations, and clear procedures. For confidential matters, you can reach HR directly or use the anonymous feedback channel."
+            ]
+        };
+
+        function getAIResponse(question) {
+            const q = question.toLowerCase();
+            if (q.includes('leave') || q.includes('annual') || q.includes('vacation') || q.includes('day')) {
+                return AI_RESPONSES.leave[Math.floor(Math.random() * AI_RESPONSES.leave.length)];
+            } else if (q.includes('remote') || q.includes('work from home') || q.includes('hybrid') || q.includes('wfh')) {
+                return AI_RESPONSES.remote[Math.floor(Math.random() * AI_RESPONSES.remote.length)];
+            } else if (q.includes('security') || q.includes('data') || q.includes('password') || q.includes('vpn')) {
+                return AI_RESPONSES.security[Math.floor(Math.random() * AI_RESPONSES.security.length)];
+            } else if (q.includes('expense') || q.includes('reimbursement') || q.includes('claim') || q.includes('receipt')) {
+                return AI_RESPONSES.expense[Math.floor(Math.random() * AI_RESPONSES.expense.length)];
+            }
+            return AI_RESPONSES.default[Math.floor(Math.random() * AI_RESPONSES.default.length)];
+        }
+
+        function appendUserMessage(text) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-2 justify-end';
+            div.innerHTML = `
+                <div class="chat-bubble-user rounded-2xl rounded-tr-none px-4 py-2.5 max-w-xs">
+                    <p class="text-slate-200 text-xs font-semibold">${text}</p>
+                </div>
+                <div class="w-6 h-6 rounded-full bg-slate-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-user text-slate-300 text-[8px]"></i>
+                </div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function appendTypingIndicator() {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.id = 'typingIndicator';
+            div.className = 'flex items-start gap-2';
+            div.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white text-[8px]"></i>
+                </div>
+                <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-3 flex items-center gap-1.5">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        function appendAIMessage(text) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-2';
+            // Format bold markdown
+            const formatted = text.replace(/\*\*(.*?)\*\*/g, '<span class="text-violet-300 font-bold">$1</span>');
+            div.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-gradient-to-br from-violet-600 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <i class="fas fa-robot text-white text-[8px]"></i>
+                </div>
+                <div class="chat-bubble-ai rounded-2xl rounded-tl-none px-4 py-2.5 max-w-lg">
+                    <p class="text-slate-200 text-xs font-semibold leading-relaxed">${formatted}</p>
+                </div>`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendAIMessage() {
+            const input = document.getElementById('aiChatInput');
+            const question = input.value.trim();
+            if (!question) return;
+            input.value = '';
+            appendUserMessage(question);
+            appendTypingIndicator();
+            // Simulate AI thinking delay
+            await new Promise(r => setTimeout(r, 1400 + Math.random() * 800));
+            removeTypingIndicator();
+            appendAIMessage(getAIResponse(question));
+        }
+
+        function sendQuickQuestion(question) {
+            document.getElementById('aiChatInput').value = question;
+            sendAIMessage();
+        }
+
+        // ─── AI Summary Modal ─────────────────────────────────────────────
+        const AI_SUMMARIES = {
+            'Leave': {
+                points: ['18 paid leave days annually (15 casual + 3 sick)', 'Unused leaves (up to 10) carry forward to next year', '48-hour advance notice required for planned leaves', 'Emergency leaves handled case-by-case by HR'],
+                risk: 'Low', coverage: '94%'
+            },
+            'Security': {
+                points: ['Mandatory MFA on all corporate systems', 'VPN required for remote access and public WiFi', 'Quarterly security training completion mandatory', 'Incidents must be reported within 2 hours'],
+                risk: 'High', coverage: '88%'
+            },
+            'Conduct': {
+                points: ['Zero tolerance for harassment or discrimination', 'Conflict of interest must be disclosed immediately', 'Social media guidelines apply to official communications', 'Whistleblower protection guaranteed under policy'],
+                risk: 'Medium', coverage: '91%'
+            },
+            'Finance': {
+                points: ['Expense claims must be submitted within 30 days', 'Receipts required for all claims above $25', 'Pre-approval needed for expenses over $500', 'Corporate card usage is audited monthly'],
+                risk: 'Medium', coverage: '87%'
+            }
+        };
+
+        function openAISummary(policyTitle, category) {
+            document.getElementById('aiSummaryTitle').textContent = `AI Summary: ${policyTitle}`;
+            document.getElementById('aiSummaryContent').innerHTML = `
+                <div class="flex justify-center py-6">
+                    <div class="flex gap-2">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                </div>`;
+            document.getElementById('aiSummaryModal').classList.remove('hidden');
+
+            setTimeout(() => {
+                const data = AI_SUMMARIES[category] || {
+                    points: ['Policy outlines employee responsibilities and rights', 'Clear escalation procedures are defined', 'Regular review cycle ensures policy stays current', 'Non-compliance may result in HR intervention'],
+                    risk: 'Low', coverage: '85%'
+                };
+                const riskColor = data.risk === 'High' ? 'text-rose-400 bg-rose-900/20 border-rose-700/30' :
+                                  data.risk === 'Medium' ? 'text-amber-400 bg-amber-900/20 border-amber-700/30' :
+                                  'text-emerald-400 bg-emerald-900/20 border-emerald-700/30';
+                document.getElementById('aiSummaryContent').innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-slate-400 text-[10px] font-bold uppercase tracking-wider">Key Takeaways</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] font-black px-2 py-0.5 rounded-full border ${riskColor} uppercase">${data.risk} Risk</span>
+                                <span class="text-[9px] font-black text-violet-300 bg-violet-900/20 border border-violet-700/30 px-2 py-0.5 rounded-full">${data.coverage} Coverage</span>
+                            </div>
+                        </div>
+                        ${data.points.map(p => `
+                            <div class="flex items-start gap-2.5 bg-white/5 rounded-xl px-3 py-2.5 border border-white/8">
+                                <i class="fas fa-check-circle text-violet-400 text-xs mt-0.5 flex-shrink-0"></i>
+                                <span class="text-slate-300 text-xs font-semibold leading-relaxed">${p}</span>
+                            </div>`).join('')}
+                        <div class="bg-blue-900/20 border border-blue-700/30 rounded-xl px-3 py-2.5 mt-2">
+                            <p class="text-blue-300 text-[10px] font-bold"><i class="fas fa-lightbulb mr-1"></i> AI Insight: This policy was last analyzed against ${Math.floor(Math.random()*20)+50} similar enterprise policies. Compliance score is above industry average.</p>
+                        </div>
+                    </div>`;
+            }, 1600);
+        }
+
+        function closeAISummaryModal() {
+            document.getElementById('aiSummaryModal').classList.add('hidden');
+        }
+
+        // ─── Policies Load & Render ──────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", function() {
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(() => { loadPolicies(); })
+                .catch(() => { window.location.href = 'login.html'; });
+        });
+
+        async function loadPolicies() {
+            try {
+                const res = await fetch('/api/policies/all');
+                allPolicies = await res.json();
+                renderPolicies();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('policiesGrid').innerHTML = `
+                    <div class="col-span-full py-12 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl">
+                        Failed to download policy guidelines.
+                    </div>`;
+            }
+        }
+
+        function renderPolicies() {
+            const grid = document.getElementById('policiesGrid');
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allPolicies.filter(p => {
+                const matchesSearch = p.title.toLowerCase().includes(searchVal) || p.description.toLowerCase().includes(searchVal);
+                const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+                return matchesSearch && matchesCategory;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 italic">
+                        <i class="fas fa-file-invoice text-4xl mb-4 text-slate-200 block"></i>
+                        No matching policies found.
+                    </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => {
+                const categoryPill = p.category === 'Leave' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                     p.category === 'Security' ? 'bg-orange-50 text-orange-700 border-orange-100' :
+                                     p.category === 'Conduct' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                     'bg-slate-100 text-slate-600 border-slate-200';
+                const aiIcon = p.category === 'Leave' ? 'fa-calendar-check text-indigo-500' :
+                               p.category === 'Security' ? 'fa-shield-halved text-orange-500' :
+                               p.category === 'Conduct' ? 'fa-scale-balanced text-emerald-500' :
+                               'fa-coins text-slate-500';
+                const docLink = p.documentUrl ? p.documentUrl : '#';
+
+                return `
+                    <div class="policy-card-ai-hover bg-white border border-slate-100 rounded-[2rem] p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition group">
+                        <div>
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="px-2.5 py-0.5 rounded text-[8px] font-black uppercase border ${categoryPill}">
+                                    ${p.category || 'General'}
+                                </span>
+                                <span class="text-[9px] font-bold text-slate-400">Effective: ${p.effectiveDate || 'Immediate'}</span>
+                            </div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas ${aiIcon} text-sm"></i>
+                                <h4 class="font-extrabold text-slate-800 text-base truncate">${p.title || 'Untitled Policy'}</h4>
+                            </div>
+                            <p class="text-slate-500 text-xs font-semibold leading-relaxed mb-3 line-clamp-3">${p.description || '-'}</p>
+
+                            <!-- AI Summary Teaser (reveals on hover) -->
+                            <div class="ai-summary-reveal">
+                                <div class="ai-summary-badge rounded-xl px-3 py-2 mb-3">
+                                    <p class="text-violet-700 text-[10px] font-bold flex items-center gap-1.5">
+                                        <i class="fas fa-wand-magic-sparkles text-violet-500"></i>
+                                        AI-analyzed · Click below for instant summary
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-100 pt-4 flex justify-between items-center gap-3">
+                            <a href="${docLink}" target="_blank"
+                                class="text-blue-600 hover:text-blue-800 font-extrabold text-xs inline-flex items-center">
+                                <i class="fas fa-file-pdf mr-2"></i> View Document
+                            </a>
+                            <!-- AI Summary Button -->
+                            <button onclick="openAISummary('${(p.title || 'Policy').replace(/'/g, "\\'")}', '${p.category || 'General'}')"
+                                class="text-[10px] font-black text-violet-600 hover:text-violet-800 bg-violet-50 hover:bg-violet-100 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 border border-violet-200">
+                                <i class="fas fa-wand-magic-sparkles text-[9px]"></i> AI Summary
+                            </button>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        function filterPolicies() { renderPolicies(); }
+
+        function filterCategory(cat) {
+            selectedCategory = cat;
+            const buttons = document.querySelectorAll('.category-btn');
+            buttons.forEach(btn => {
+                if (btn.innerText === cat) {
+                    btn.className = "category-btn px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 text-white transition";
+                } else {
+                    btn.className = "category-btn px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition";
+                }
+            });
+            renderPolicies();
+        }
+    </script>
+</body>
+
+</html>

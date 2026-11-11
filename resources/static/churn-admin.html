@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Predictive Churn Panel - HR Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .glass-dark-card {
+            background: rgba(30, 41, 59, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .ai-glow {
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.15);
+        }
+        .ai-glow-red {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.25);
+        }
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="admin-dashboard.html" class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 p-2 rounded-xl text-white shadow-lg">
+                        <i class="fas fa-brain text-xl"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
+                        SmartHR AI
+                    </span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <a href="admin-dashboard.html" class="text-slate-400 hover:text-white font-semibold text-sm transition">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+                </a>
+                <span class="text-xs font-semibold px-3 py-1 bg-red-500/10 border border-red-500/20 text-red-400 rounded-full">
+                    ADMIN INTEL SECURE
+                </span>
+                <div id="userInfo" class="flex items-center space-x-3 border-l border-slate-800 pl-6">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Panel -->
+    <header class="hero-gradient py-12 px-4 border-b border-slate-800 relative overflow-hidden">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.05),transparent_40%)]"></div>
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+            <div>
+                <span class="text-xs font-bold uppercase tracking-wider text-blue-400 mb-2 block">Enterprise Predictive Analytics</span>
+                <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight leading-tight">
+                    AI Churn Risk <span class="text-red-500 font-extrabold text-shadow-lg">Predictor</span>
+                </h1>
+                <p class="text-slate-400 mt-2 text-sm md:text-base max-w-2xl">
+                    Smart telemetry monitors compensation, overtime pressure, career progression gaps, and survey feedback to calculate turnover probabilities.
+                </p>
+            </div>
+            <div>
+                <button onclick="refreshData()" class="px-5 py-3 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-sm font-bold shadow-md transition border border-slate-700 flex items-center gap-2">
+                    <i class="fas fa-sync-alt"></i> Force AI Recalculation
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Summary Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-dark-card p-6 rounded-2xl hover-lift ai-glow relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-blue-400"><i class="fas fa-percentage"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Company Risk Index</p>
+                <div class="flex items-baseline space-x-2 mt-2">
+                    <h3 id="avgRiskVal" class="text-4xl font-extrabold text-white">0%</h3>
+                    <span id="riskTrend" class="text-xs text-green-400 font-bold"><i class="fas fa-arrow-down mr-1"></i>0.4%</span>
+                </div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full mt-4 overflow-hidden">
+                    <div id="avgRiskBar" class="bg-blue-500 h-full rounded-full" style="width: 0%;"></div>
+                </div>
+            </div>
+
+            <div class="glass-dark-card p-6 rounded-2xl hover-lift ai-glow-red relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-red-500"><i class="fas fa-exclamation-triangle"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">High Risk Count</p>
+                <div class="flex items-baseline space-x-2 mt-2">
+                    <h3 id="highRiskVal" class="text-4xl font-extrabold text-red-500">0</h3>
+                    <span class="text-xs text-slate-400">Critical Action Required</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-4">Risk levels exceeding 70% probability.</p>
+            </div>
+
+            <div class="glass-dark-card p-6 rounded-2xl hover-lift relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-amber-500"><i class="fas fa-circle-exclamation"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Medium Risk Count</p>
+                <div class="flex items-baseline space-x-2 mt-2">
+                    <h3 id="medRiskVal" class="text-4xl font-extrabold text-amber-400">0</h3>
+                    <span class="text-xs text-slate-400">Needs Observation</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-4">Risk levels between 40% and 70% probability.</p>
+            </div>
+
+            <div class="glass-dark-card p-6 rounded-2xl hover-lift relative overflow-hidden">
+                <div class="absolute -right-4 -bottom-4 opacity-10 text-6xl text-green-400"><i class="fas fa-shield-halved"></i></div>
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-wider">Stable Workforce</p>
+                <div class="flex items-baseline space-x-2 mt-2">
+                    <h3 id="lowRiskVal" class="text-4xl font-extrabold text-green-400">0</h3>
+                    <span class="text-xs text-slate-400">Safe Category</span>
+                </div>
+                <p class="text-xs text-slate-500 mt-4">Employees showing minimal turnover flags.</p>
+            </div>
+        </div>
+
+        <!-- Charts Dashboard & Quick Insights -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+            <!-- Risk distribution chart -->
+            <div class="lg:col-span-1 glass-dark-card p-6 rounded-3xl">
+                <h3 class="font-bold text-base text-slate-200 mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-pie text-blue-500"></i> Risk Breakdown
+                </h3>
+                <div class="h-64 flex items-center justify-center relative">
+                    <canvas id="riskDistributionChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Risk factors statistics -->
+            <div class="lg:col-span-2 glass-dark-card p-6 rounded-3xl flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-base text-slate-200 mb-4 flex items-center gap-2">
+                        <i class="fas fa-bullseye text-red-500"></i> Key Organizational Churn Drivers
+                    </h3>
+                    <p class="text-xs text-slate-400 mb-6">Aggregated telemetry mapping the root causes driving turnover risk.</p>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span>High Workload / Overtime stress</span>
+                                <span class="text-red-400">42%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-red-500 h-full rounded-full" style="width: 42%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span>Compensation below average (Market parity issue)</span>
+                                <span class="text-amber-400">35%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-amber-400 h-full rounded-full" style="width: 35%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold mb-1">
+                                <span>Growth Stagnation / Promotion delays</span>
+                                <span class="text-indigo-400">18%</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="bg-indigo-50 h-full rounded-full" style="width: 18%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 p-4 bg-slate-800/50 border border-slate-700/60 rounded-2xl flex items-center justify-between text-xs">
+                    <span class="text-slate-400"><i class="fas fa-lightbulb text-amber-400 mr-2"></i> <strong>AI Insight:</strong> Mitigating workload overtime can save an estimated $120,000 in potential hiring costs.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Telemetry Table -->
+        <div class="glass-dark-card rounded-3xl overflow-hidden border border-slate-800 mb-12 shadow-2xl">
+            <div class="p-6 border-b border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 bg-slate-900/40">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-200"><i class="fas fa-list text-blue-500 mr-2"></i> Employee Risk Telemetry</h2>
+                    <p class="text-xs text-slate-400 mt-1">Real-time calculations for all approved personnel</p>
+                </div>
+                <div class="flex gap-2">
+                    <input id="searchInput" oninput="filterTable()" type="text" placeholder="Search by name or department..." class="px-4 py-2 bg-slate-800 text-slate-200 border border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none w-64">
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-800/30 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-800">
+                            <th class="py-4 px-6">Employee Details</th>
+                            <th class="py-4 px-6 text-center">Satisfaction</th>
+                            <th class="py-4 px-6 text-center">Work Stress</th>
+                            <th class="py-4 px-6 text-center">W-L Balance</th>
+                            <th class="py-4 px-6 text-center">Churn Risk Score</th>
+                            <th class="py-4 px-6">Primary Drivers</th>
+                            <th class="py-4 px-6 text-right">Strategic Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="telemetryTableBody" class="divide-y divide-slate-800/60 text-sm">
+                        <!-- Loaded dynamically -->
+                    </tbody>
+                </table>
+                <div id="emptyState" class="hidden py-16 text-center text-slate-500">
+                    <i class="fas fa-folder-open text-4xl mb-3"></i>
+                    <p class="font-bold text-base text-slate-400">No employees match this search.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Collapsible Strategic Chatbot Drawer -->
+    <div id="chatDrawer" class="fixed bottom-6 right-6 z-40 flex flex-col items-end">
+        <div id="chatWindow" class="hidden w-96 h-[500px] bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl flex flex-col overflow-hidden mb-4 transition-all">
+            <!-- Chat Head -->
+            <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-xl"><i class="fas fa-robot text-lg"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">Strategic ChurnBot AI</h4>
+                        <span class="text-[10px] text-blue-200 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> HR Strategist Mode</span>
+                    </div>
+                </div>
+                <button onclick="toggleChat()" class="text-white/80 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+
+            <!-- Chat Content -->
+            <div id="chatBody" class="flex-1 p-4 overflow-y-auto space-y-4 text-xs">
+                <!-- Welcome Msg -->
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white flex-shrink-0 font-bold text-[10px]">AI</div>
+                    <div class="bg-slate-700 p-3 rounded-2xl max-w-[80%] rounded-tl-none">
+                        Hello! I am **ChurnBot AI**, your strategic HR retention advisor. I can analyze employee risk matrices, identify department-wide bottlenecks, suggest retention tactics, and draft meeting emails. Ask me 'Who is at highest risk?' or 'How can I retain an employee?' for details!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Quick Tags -->
+            <div class="p-2 border-t border-slate-700/60 bg-slate-900/30 flex gap-1.5 overflow-x-auto whitespace-nowrap text-[10px] no-scrollbar">
+                <button onclick="sendQuickMessage('Who is at highest risk?')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Who is at highest risk?</button>
+                <button onclick="sendQuickMessage('How to retain a high risk employee?')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">How to retain?</button>
+                <button onclick="sendQuickMessage('Draft an email to schedule check-in')" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-full border border-slate-600 font-semibold">Draft email</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="p-3 bg-slate-900/60 border-t border-slate-700 flex gap-2">
+                <input id="chatInput" type="text" placeholder="Ask ChurnBot strategy questions..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-3 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-blue-500" onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- Float button -->
+        <button onclick="toggleChat()" class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white shadow-2xl hover:scale-110 active:scale-95 transition-all relative group ring-4 ring-blue-500/10">
+            <i class="fas fa-robot text-2xl"></i>
+            <span class="absolute right-20 bg-slate-800 border border-slate-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold shadow-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap">Ask ChurnBot AI</span>
+        </button>
+    </div>
+
+    <!-- AI Plan Generation Modal -->
+    <div id="planModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+            <div class="bg-gradient-to-r from-red-600 to-rose-600 p-6 text-white flex justify-between items-center">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2.5 rounded-xl"><i class="fas fa-wand-magic-sparkles text-xl"></i></div>
+                    <div>
+                        <h3 class="font-extrabold text-lg">AI Smart Retention Architect</h3>
+                        <p class="text-[10px] text-red-200 font-semibold uppercase">Mitigating Turnover Risk Probability</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="text-white/80 hover:text-white"><i class="fas fa-times text-lg"></i></button>
+            </div>
+
+            <!-- Modal Content (Markdown styled text) -->
+            <div id="modalPlanContent" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-300">
+                <!-- Loaded dynamically -->
+            </div>
+
+            <!-- Modal footer -->
+            <div class="p-4 bg-slate-900 border-t border-slate-700/60 flex justify-end gap-3">
+                <button onclick="copyPlanText()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i class="fas fa-copy"></i> Copy to Clipboard
+                </button>
+                <button onclick="closeModal()" class="px-5 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold">
+                    Close Strategy Report
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Block -->
+    <script>
+        let fullTelemetryData = [];
+        let distributionChart = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Verify User and Access level
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admins only.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+
+                    // Render User Info in nav
+                    const userInfo = document.getElementById('userInfo');
+                    const pic = user.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.fullName || 'Admin'));
+                    userInfo.innerHTML = `
+                        <img src="${pic}" class="w-9 h-9 rounded-full border border-slate-700 object-cover shadow-inner">
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-xs font-bold text-slate-200 leading-tight">${user.fullName}</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider">${user.role}</span>
+                        </div>
+                        <a href="/logout" class="text-slate-500 hover:text-red-400 text-xs font-bold ml-2 transition">Logout</a>
+                    `;
+
+                    // Load records
+                    loadTelemetry();
+                })
+                .catch(err => {
+                    console.error('Session validation error:', err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        // Fetch metrics and load table
+        function loadTelemetry() {
+            fetch('/api/churn/admin/records')
+                .then(res => res.json())
+                .then(data => {
+                    fullTelemetryData = data;
+                    renderMetrics();
+                    renderTable(data);
+                    renderChart();
+                })
+                .catch(err => {
+                    console.error('Error fetching telemetry records:', err);
+                });
+        }
+
+        // Render aggregated card values
+        function renderMetrics() {
+            let total = fullTelemetryData.length;
+            if(total === 0) return;
+
+            let sumRisk = 0;
+            let highs = 0;
+            let meds = 0;
+            let lows = 0;
+
+            fullTelemetryData.forEach(r => {
+                sumRisk += r.riskScore;
+                if(r.riskLevel === 'HIGH') highs++;
+                else if(r.riskLevel === 'MEDIUM') meds++;
+                else lows++;
+            });
+
+            let avgRisk = Math.round(sumRisk / total);
+            document.getElementById('avgRiskVal').innerText = avgRisk + '%';
+            document.getElementById('avgRiskBar').style.width = avgRisk + '%';
+            document.getElementById('highRiskVal').innerText = highs;
+            document.getElementById('medRiskVal').innerText = meds;
+            document.getElementById('lowRiskVal').innerText = lows;
+        }
+
+        // Render data rows in table
+        function renderTable(records) {
+            const body = document.getElementById('telemetryTableBody');
+            const empty = document.getElementById('emptyState');
+            body.innerHTML = '';
+
+            if (records.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            records.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/20 transition-all border-b border-slate-800/40 align-middle";
+                
+                // Badges/Status settings
+                let levelBadge = '';
+                if(r.riskLevel === 'HIGH') {
+                    levelBadge = '<span class="px-3 py-1 rounded-full text-[10px] font-black bg-red-500/10 border border-red-500/20 text-red-400">HIGH RISK</span>';
+                } else if(r.riskLevel === 'MEDIUM') {
+                    levelBadge = '<span class="px-3 py-1 rounded-full text-[10px] font-black bg-amber-500/10 border border-amber-500/20 text-amber-400">MEDIUM RISK</span>';
+                } else {
+                    levelBadge = '<span class="px-3 py-1 rounded-full text-[10px] font-black bg-green-500/10 border border-green-500/20 text-green-400">STABLE</span>';
+                }
+
+                // Drivers list styling
+                let driverBadges = '';
+                if (r.riskFactors === 'None') {
+                    driverBadges = '<span class="text-slate-500 text-xs italic">Morale Stable</span>';
+                } else {
+                    let list = r.riskFactors.split(', ');
+                    list.forEach(driver => {
+                        driverBadges += `<span class="inline-block bg-slate-800 border border-slate-700/60 text-slate-300 text-[10px] font-medium px-2 py-0.5 rounded-md mr-1 mb-1">${driver}</span>`;
+                    });
+                }
+
+                const pic = r.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(r.fullName));
+
+                // Star rendering helper function
+                const renderStars = (score, colorClass) => {
+                    let stars = '';
+                    let val = Math.round(score);
+                    for(let i=1; i<=5; i++) {
+                        if(i <= val) {
+                            stars += `<i class="fas fa-star ${colorClass}"></i>`;
+                        } else {
+                            stars += `<i class="far fa-star text-slate-700"></i>`;
+                        }
+                    }
+                    return stars;
+                };
+
+                tr.innerHTML = `
+                    <td class="py-4 px-6 flex items-center space-x-3.5">
+                        <img src="${pic}" class="w-10 h-10 rounded-full object-cover border border-slate-800">
+                        <div>
+                            <span class="font-extrabold text-slate-100 block leading-tight">${r.fullName}</span>
+                            <span class="text-[10px] text-slate-400 font-medium">${r.designation} &bull; ${r.department}</span>
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 text-center text-xs">
+                        <div class="flex justify-center gap-0.5">${renderStars(r.satisfactionScore, 'text-blue-400')}</div>
+                    </td>
+                    <td class="py-4 px-6 text-center text-xs">
+                        <div class="flex justify-center gap-0.5">${renderStars(r.stressLevel, 'text-red-400')}</div>
+                    </td>
+                    <td class="py-4 px-6 text-center text-xs">
+                        <div class="flex justify-center gap-0.5">${renderStars(r.workLifeBalance, 'text-green-400')}</div>
+                    </td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="font-black text-sm text-slate-200">${Math.round(r.riskScore)}%</span>
+                            ${levelBadge}
+                        </div>
+                    </td>
+                    <td class="py-4 px-6 max-w-xs">
+                        <div class="flex flex-wrap">${driverBadges}</div>
+                    </td>
+                    <td class="py-4 px-6 text-right">
+                        <button onclick="requestPlan(${r.employeeId})" class="px-3 py-2 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-lg text-xs font-bold shadow-md transition flex items-center gap-1 inline-flex">
+                            <i class="fas fa-wand-magic-sparkles"></i> AI Plan
+                        </button>
+                    </td>
+                `;
+                body.appendChild(tr);
+            });
+        }
+
+        // Table searching filter
+        function filterTable() {
+            let val = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = fullTelemetryData.filter(r => 
+                r.fullName.toLowerCase().includes(val) || 
+                r.department.toLowerCase().includes(val) ||
+                r.designation.toLowerCase().includes(val)
+            );
+            renderTable(filtered);
+        }
+
+        // Fresh trigger for data update
+        function refreshData() {
+            loadTelemetry();
+            alert('AI System re-evaluated operational indices successfully.');
+        }
+
+        // AI Plan generator request
+        function requestPlan(employeeId) {
+            fetch('/api/churn/admin/retention-plan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({employeeId: employeeId})
+            })
+            .then(res => res.json())
+            .then(data => {
+                let markdownPlan = data.plan;
+                // Parse a tiny subset of markdown to show beautiful HTML in Modal
+                let htmlContent = markdownPlan
+                    .replace(/\n\n/g, '<br><br>')
+                    .replace(/### (.*)/g, '<h3 class="text-lg font-black text-white">$1</h3>')
+                    .replace(/#### (.*)/g, '<h4 class="text-sm font-bold text-red-400 mt-4">$1</h4>')
+                    .replace(/\*\*([^*]+)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+                    .replace(/- (.*)/g, '<div class="flex items-start gap-2 mt-1.5"><i class="fas fa-check-circle text-red-500 mt-1"></i> <span>$1</span></div>');
+
+                document.getElementById('modalPlanContent').innerHTML = htmlContent;
+                document.getElementById('planModal').classList.remove('hidden');
+            });
+        }
+
+        function closeModal() {
+            document.getElementById('planModal').classList.add('hidden');
+        }
+
+        function copyPlanText() {
+            let txt = document.getElementById('modalPlanContent').innerText;
+            navigator.clipboard.writeText(txt).then(() => {
+                alert('Strategy checklist copied to clipboard!');
+            });
+        }
+
+        // Collapsible Strategist Chat Controls
+        function toggleChat() {
+            const windowDiv = document.getElementById('chatWindow');
+            windowDiv.classList.toggle('hidden');
+        }
+
+        function sendQuickMessage(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            input.value = '';
+            
+            // Append User Chat
+            appendMessage(text, 'user');
+
+            // POST to AI Assistant
+            fetch('/api/churn/ai-assistant', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: text})
+            })
+            .then(res => res.json())
+            .then(data => {
+                appendMessage(data.response, 'ai');
+            });
+        }
+
+        function appendMessage(text, sender) {
+            const body = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 " + (sender === 'user' ? "justify-end" : "");
+            
+            let bubbleColor = sender === 'user' ? "bg-blue-600 text-white rounded-tr-none" : "bg-slate-700 text-slate-200 rounded-tl-none";
+            let avatar = sender === 'user' ? "HR" : "AI";
+            let avatarBg = sender === 'user' ? "bg-blue-500" : "bg-indigo-600";
+
+            // Tiny simple markdown formatting check
+            let formattedText = text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/```([^`]+)```/g, '<pre class="bg-slate-900 p-2.5 rounded-lg font-mono text-[10px] mt-1 overflow-x-auto">$1</pre>');
+
+            div.innerHTML = `
+                ${sender !== 'user' ? `<div class="w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${avatar}</div>` : ''}
+                <div class="${bubbleColor} p-3 rounded-2xl max-w-[80%] leading-relaxed">
+                    ${formattedText}
+                </div>
+                ${sender === 'user' ? `<div class="w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${avatar}</div>` : ''}
+            `;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+
+        // Render dynamic risk distribution chart using Chart.js
+        function renderChart() {
+            let highs = 0;
+            let meds = 0;
+            let lows = 0;
+
+            fullTelemetryData.forEach(r => {
+                if(r.riskLevel === 'HIGH') highs++;
+                else if(r.riskLevel === 'MEDIUM') meds++;
+                else lows++;
+            });
+
+            if (distributionChart) {
+                distributionChart.destroy();
+            }
+
+            const ctx = document.getElementById('riskDistributionChart').getContext('2d');
+            distributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stable (Low Risk)', 'Medium Risk', 'Critical (High Risk)'],
+                    datasets: [{
+                        data: [lows, meds, highs],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                        borderWidth: 2,
+                        borderColor: '#1e293b'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                font: {
+                                    size: 10,
+                                    weight: 'bold'
+                                },
+                                boxWidth: 10
+                            }
+                        }
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
+    </script>
+</body>
+</html>

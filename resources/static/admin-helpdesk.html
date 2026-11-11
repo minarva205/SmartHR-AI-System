@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Help Desk Board | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,.25); }
+        .shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 12px;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="admin-dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">IT Support Console</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Manage corporate tickets, assign hardware issues, and update system resolution statuses</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider hidden md:inline-block">
+                    Help Desk Coordinator
+                </span>
+                <button type="button" onclick="aiInboxAnalysis()"
+                    class="ai-btn flex items-center gap-2 text-xs font-black bg-gradient-to-r from-violet-500 to-purple-600 text-white px-4 py-2.5 rounded-xl ai-badge">
+                    <i class="fas fa-brain"></i> AI Inbox Analysis
+                </button>
+            </div>
+        </header>
+
+        <!-- AI Analysis Box -->
+        <div id="aiInboxBox" class="hidden mb-8 p-6 bg-gradient-to-br from-violet-50 to-purple-50 border border-violet-100 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-violet-500 text-6xl transform rotate-12"><i class="fas fa-robot"></i></div>
+            <h3 class="text-sm font-black text-violet-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fas fa-bolt text-amber-400"></i> AI Workload Summary
+            </h3>
+            <div id="aiInboxLoader" class="hidden shimmer h-12 w-full max-w-lg mb-2"></div>
+            <div id="aiInboxTxt" class="text-slate-700 text-sm leading-relaxed font-medium relative z-10 whitespace-pre-line"></div>
+        </div>
+
+        <!-- Help Desk Tickets Table Card -->
+        <div class="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                <h3 class="text-base font-bold text-slate-700">
+                    <i class="fas fa-inbox text-blue-500 mr-2"></i>
+                    Workforce Support Inbox
+                </h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50/20 text-slate-400 text-[10px] uppercase font-black tracking-wider border-b border-slate-100">
+                            <th class="py-4 px-8">Employee</th>
+                            <th class="py-4 px-8">Ticket Details</th>
+                            <th class="py-4 px-8">Classification</th>
+                            <th class="py-4 px-8">Status Update</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ticketTableBody" class="divide-y divide-slate-100 text-slate-600 text-xs font-semibold">
+                        <tr>
+                            <td colspan="4" class="py-12 text-center text-slate-400 italic">
+                                Loading workforce tickets...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let usersMap = {};
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check for admin
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admin privileges required.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    initSupportInbox();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function initSupportInbox() {
+            try {
+                // Fetch users mapping
+                const uRes = await fetch('/api/users/all');
+                if (uRes.ok) {
+                    const users = await uRes.json();
+                    users.forEach(u => usersMap[u.id] = u);
+                }
+                fetchTickets();
+            } catch (err) {
+                console.error("Initialization error", err);
+            }
+        }
+
+        async function fetchTickets() {
+            try {
+                const response = await fetch('/api/helpdesk/tickets');
+                const tickets = await response.json();
+                const tbody = document.getElementById('ticketTableBody');
+                
+                if (!tickets || tickets.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="4" class="py-12 text-center text-slate-400 italic">
+                                <i class="fas fa-check-double text-3xl mb-3 text-slate-200 block"></i>
+                                Support inbox is empty. No pending tickets.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = tickets.map(ticket => {
+                    const matchedUser = usersMap[ticket.employeeId];
+                    const empName = matchedUser ? matchedUser.fullName : `Employee ID: ${ticket.employeeId}`;
+                    const empDept = matchedUser ? (matchedUser.department || matchedUser.organization || 'General') : 'N/A';
+
+                    const priorityPill = ticket.priority === 'Critical' || ticket.priority === 'High' ? 
+                        'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-slate-100 text-slate-600 border border-slate-200';
+
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-5 px-8">
+                                <div class="font-extrabold text-slate-800 text-sm">${empName}</div>
+                                <div class="text-slate-400 mt-1 font-semibold text-[11px]">${empDept}</div>
+                            </td>
+                            <td class="py-5 px-8">
+                                <div class="font-extrabold text-slate-800 text-sm">${ticket.title || 'Untitled'}</div>
+                                <div class="text-slate-400 mt-1 leading-relaxed text-[11px] max-w-md">${ticket.description || '-'}</div>
+                            </td>
+                            <td class="py-5 px-8 space-y-1.5">
+                                <div class="font-bold text-slate-500">${ticket.category}</div>
+                                <span class="px-2.5 py-0.5 rounded text-[8px] font-black uppercase border ${priorityPill}">
+                                    ${ticket.priority}
+                                </span>
+                            </td>
+                            <td class="py-5 px-8">
+                                <select onchange="updateTicketStatus(${ticket.id}, this.value)"
+                                    class="p-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="Open" ${ticket.status === 'Open' ? 'selected' : ''}>Open</option>
+                                    <option value="In Progress" ${ticket.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                    <option value="Resolved" ${ticket.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                                </select>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Failed to load tickets", err);
+                document.getElementById('ticketTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="py-8 text-center text-rose-500 font-bold bg-rose-50">
+                            Failed to read workforce tickets.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        async function updateTicketStatus(ticketId, newStatus) {
+            try {
+                const res = await fetch(`/api/helpdesk/tickets/${ticketId}/status?status=${newStatus}`, {
+                    method: 'PUT'
+                });
+                if (res.ok) {
+                    fetchTickets();
+                } else {
+                    alert("Failed to update status.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        /* ─── GEMINI AI ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key";
+        let allAdminTicketsData = [];
+
+        const originalFetchTickets = fetchTickets;
+        fetchTickets = async function() {
+            await originalFetchTickets();
+            try {
+                const res = await fetch('/api/helpdesk/tickets');
+                allAdminTicketsData = await res.json();
+            } catch(e) {}
+        };
+
+        async function callGemini(prompt) {
+            const r = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                { method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+            );
+            if (!r.ok) throw new Error('API error');
+            const d = await r.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function aiInboxAnalysis() {
+            const box = document.getElementById('aiInboxBox');
+            const loader = document.getElementById('aiInboxLoader');
+            const txt = document.getElementById('aiInboxTxt');
+
+            box.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            txt.textContent = '';
+
+            if (allAdminTicketsData.length === 0) {
+                txt.textContent = "No tickets to analyze.";
+                loader.classList.add('hidden');
+                return;
+            }
+
+            const openTickets = allAdminTicketsData.filter(t => t.status !== 'Resolved').length;
+            const criticalTickets = allAdminTicketsData.filter(t => t.priority === 'Critical' && t.status !== 'Resolved').length;
+
+            const prompt = `You are an IT Manager AI. There are ${openTickets} open tickets, with ${criticalTickets} marked as critical. Write a 2-sentence encouraging summary advising the helpdesk team on what to prioritize today.`;
+
+            try {
+                const analysis = await callGemini(prompt);
+                txt.innerHTML = analysis.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+            } catch(e) {
+                // Fallback
+                txt.innerHTML = `<strong>Priority Alert:</strong> You have ${openTickets} open tickets (${criticalTickets} critical). Focus on resolving critical issues first!`;
+            }
+
+            loader.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

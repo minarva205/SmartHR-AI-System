@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Smart Alerts | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(15, 23, 42) 0%, rgb(13, 18, 33) 90.1%);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-blue:hover {
+            box-shadow: 0 10px 30px -5px rgba(59, 130, 246, 0.25);
+            border-color: rgba(59, 130, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        input {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #f8fafc !important;
+        }
+        input:focus {
+            border-color: #3b82f6 !important;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-400 hover:text-blue-300 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-teal-400 to-indigo-300 tracking-tight font-black">
+                    My Alerts Workspace
+                </h1>
+                <p class="text-slate-400 text-sm mt-0.5">Review personalized deadlines, pending action items, and smart compliance recommendations.</p>
+            </div>
+            <div>
+                <span class="text-xs bg-blue-600/20 text-blue-400 border border-blue-500/30 px-4 py-2 rounded-full font-extrabold uppercase tracking-wider flex items-center">
+                    <i class="fas fa-user mr-2"></i> Employee Portal
+                </span>
+            </div>
+        </header>
+
+        <!-- KPI Scorecards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            <!-- Pending Actions -->
+            <div class="glass-panel p-6 rounded-3xl text-center glow-blue transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Pending Alerts</span>
+                <div class="text-5xl font-black text-blue-400" id="pendingCount">0</div>
+                <span class="text-xs font-bold text-slate-400 mt-3">Action required on these items</span>
+            </div>
+
+            <!-- Resolved Actions -->
+            <div class="glass-panel p-6 rounded-3xl text-center glow-blue transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Completed Compliance Items</span>
+                <div class="text-5xl font-black text-emerald-400" id="resolvedCount">0</div>
+                <span class="text-xs font-bold text-slate-400 mt-3">Keep up the secure standard</span>
+            </div>
+
+            <!-- Health Status -->
+            <div class="glass-panel p-6 rounded-3xl text-center glow-blue transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Active Health Level</span>
+                <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300 uppercase mt-2 mb-2" id="safetyScoreText">
+                    --
+                </div>
+                <span class="text-xs font-bold text-slate-400" id="safetySummary">Resolving items raises rating</span>
+            </div>
+        </div>
+
+        <!-- Ledger & Chatbot Split-screen -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+            
+            <!-- Alerts list -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-panel p-8 rounded-3xl shadow-lg glow-blue transition-all">
+                    <h3 class="text-xl font-bold text-slate-100 flex items-center mb-6">
+                        <i class="fas fa-bell text-blue-500 mr-3"></i> My Notification Ledger
+                    </h3>
+
+                    <!-- Ledger list container -->
+                    <div id="alertsList" class="space-y-6 max-h-[600px] overflow-y-auto pr-2 scrollbar-hide">
+                        <p class="text-slate-400 italic text-sm">Initializing your alert stack...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side chatbot advisor -->
+            <div class="lg:col-span-2">
+                <div class="glass-panel rounded-3xl shadow-lg h-[650px] flex flex-col glow-blue transition-all">
+                    
+                    <!-- Chat header -->
+                    <div class="p-6 border-b border-slate-700 bg-gradient-to-r from-blue-950/40 to-indigo-950/40 rounded-t-3xl flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-lg">
+                                <i class="fas fa-robot text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-slate-100 text-sm">Compliance Companion</h4>
+                                <p class="text-[10px] text-blue-400 font-bold uppercase tracking-wider flex items-center">
+                                    <span class="w-2.5 h-2.5 bg-blue-500 rounded-full inline-block mr-1.5 animate-ping"></span> Live Assistant
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat messages -->
+                    <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs scrollbar-hide">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-blue-950 border border-blue-800 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="glass-panel rounded-2xl p-4 shadow-sm text-slate-300 leading-relaxed max-w-[85%]">
+                                Hello! I am your **Compliance Companion**. I can help you understand the impact of your active alerts, security audits, or guide you on resolving deadlines. Ask me anything!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat input -->
+                    <div class="p-4 border-t border-slate-700 bg-slate-900/60 rounded-b-3xl">
+                        <form id="chatForm" onsubmit="sendChatMessage(event)" class="flex gap-2">
+                            <input type="text" id="chatInput" placeholder="Ask about compliance policies or alert details..." required
+                                class="flex-1 px-4 py-3 border border-slate-700 rounded-xl text-xs outline-none bg-slate-950 text-slate-100 shadow-sm font-medium">
+                            <button type="submit" id="chatSendBtn"
+                                class="bg-gradient-to-tr from-blue-600 to-indigo-500 hover:from-blue-700 hover:to-indigo-650 text-white font-bold px-5 py-3 rounded-xl transition shadow-md flex items-center justify-center">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let myAlerts = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    loadStats();
+                    loadAlerts();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/alerts/stats');
+                if (res.ok) {
+                    const stats = await res.json();
+                    document.getElementById('pendingCount').innerText = stats.pending;
+                    document.getElementById('resolvedCount').innerText = stats.resolved;
+
+                    const score = Math.round(stats.complianceScore);
+                    const statusText = document.getElementById('safetyScoreText');
+                    const summaryText = document.getElementById('safetySummary');
+
+                    statusText.innerText = `${score}% Secure`;
+                    if (score >= 85) {
+                        statusText.className = "text-3xl font-black text-emerald-400 mt-2 mb-2";
+                        summaryText.innerText = "Excellent rating! Standard fully met.";
+                    } else if (score <= 50) {
+                        statusText.className = "text-3xl font-black text-red-400 mt-2 mb-2";
+                        summaryText.innerText = "Attention required. Critical gaps.";
+                    } else {
+                        statusText.className = "text-3xl font-black text-amber-400 mt-2 mb-2";
+                        summaryText.innerText = "Moderate compliance risk. Update items.";
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch('/api/alerts/employee/my-alerts');
+                if (res.ok) {
+                    const data = await res.json();
+                    myAlerts = data;
+
+                    const container = document.getElementById('alertsList');
+                    if (data.length === 0) {
+                        container.innerHTML = `
+                            <div class="py-12 text-center text-slate-400 italic">
+                                <i class="fas fa-shield-check text-4xl mb-4 text-slate-700 block"></i>
+                                You are all caught up! No active alerts.
+                            </div>`;
+                        return;
+                    }
+
+                    container.innerHTML = data.map(a => {
+                        const formattedDate = a.createdAt ? new Date(a.createdAt).toLocaleDateString(undefined, {
+                            year: 'numeric', month: 'short', day: 'numeric'
+                        }) : 'Recent';
+
+                        const formattedDeadline = a.deadline ? new Date(a.deadline).toLocaleDateString(undefined, {
+                            year: 'numeric', month: 'short', day: 'numeric'
+                        }) : 'None';
+
+                        const isOverdue = a.deadline && new Date(a.deadline) < new Date() && !a.resolved;
+
+                        const severityClass = a.severity === 'HIGH' ? 'bg-red-950/80 text-red-400 border border-red-900/30' :
+                                              a.severity === 'MEDIUM' ? 'bg-amber-950/80 text-amber-400 border border-amber-900/30' :
+                                              'bg-blue-950/80 text-blue-400 border border-blue-900/30';
+
+                        // Set up redirect actions for quick resolutions
+                        let actionHtml = '';
+                        if (!a.resolved) {
+                            let actionUrl = '';
+                            let actionLabel = 'Take Action';
+                            if (a.title.toLowerCase().includes('2fa') || a.title.toLowerCase().includes('security')) {
+                                actionUrl = 'security.html';
+                                actionLabel = 'Enable 2FA Now';
+                            } else if (a.title.toLowerCase().includes('course') || a.title.toLowerCase().includes('lms') || a.title.toLowerCase().includes('training')) {
+                                actionUrl = 'lms.html';
+                                actionLabel = 'Launch LMS Module';
+                            } else if (a.title.toLowerCase().includes('tax') || a.title.toLowerCase().includes('declaration') || a.title.toLowerCase().includes('payroll')) {
+                                actionUrl = 'payroll.html';
+                                actionLabel = 'Submit Documents';
+                            }
+
+                            if (actionUrl) {
+                                actionHtml = `
+                                    <button onclick="location.href='${actionUrl}'"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition">
+                                        <i class="fas fa-external-link-alt mr-1.5"></i> ${actionLabel}
+                                    </button>
+                                `;
+                            } else {
+                                actionHtml = `
+                                    <button onclick="resolveAlert(${a.id})"
+                                        class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-black uppercase tracking-wider shadow-md transition">
+                                        <i class="fas fa-check mr-1.5"></i> Resolve Alert
+                                    </button>
+                                `;
+                            }
+                        } else {
+                            actionHtml = `
+                                <span class="px-3 py-1.5 bg-slate-800 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                                    <i class="fas fa-check-double mr-1"></i> Acknowledged
+                                </span>
+                            `;
+                        }
+
+                        return `
+                            <div class="glass-panel p-6 rounded-[2rem] hover:border-blue-500/50 transition relative group shadow-sm">
+                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+                                    <div>
+                                        <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">${a.type} • Assigned ${formattedDate}</span>
+                                        <h4 class="font-extrabold text-slate-100 text-sm mt-1">${a.title}</h4>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${severityClass}">
+                                            ${a.severity} Severity
+                                        </span>
+                                        <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${isOverdue ? 'bg-red-900 text-red-200 border border-red-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+                                            Deadline: ${formattedDeadline} ${isOverdue ? '(OVERDUE)' : ''}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <p class="text-xs text-slate-300 leading-relaxed mb-4">${a.message}</p>
+                                
+                                <!-- AI Diagnostics Reasoning Panel -->
+                                <div class="bg-slate-900/60 border border-white/5 rounded-2xl p-4 mb-6 text-xs text-slate-400 leading-relaxed flex items-start gap-3">
+                                    <i class="fas fa-brain text-blue-400 mt-0.5 animate-pulse"></i>
+                                    <div>
+                                        <span class="block font-black text-slate-300 text-[9px] uppercase tracking-wider mb-1">AI Predictive Reasoning</span>
+                                        ${a.aiReasoning || 'Assessing telemetry patterns...'}
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-center justify-between pt-4 border-t border-white/5">
+                                    <div class="text-[9px] font-black uppercase tracking-wider ${a.resolved ? 'text-emerald-400' : 'text-amber-400'}">
+                                        Status: ${a.resolved ? 'COMPLETED' : 'ACTION REQUIRED'}
+                                    </div>
+                                    <div>
+                                        ${actionHtml}
+                                    </div>
+                                </div>
+                            </div>`;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function resolveAlert(id) {
+            try {
+                const res = await fetch(`/api/alerts/${id}/resolve`, { method: 'PUT' });
+                if (res.ok) {
+                    loadStats();
+                    loadAlerts();
+                } else {
+                    alert("Failed to resolve alert.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function sendChatMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            appendMessage(message, true);
+
+            try {
+                const res = await fetch('/api/alerts/ai-advisor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    appendMessage(data.response, false);
+                } else {
+                    appendMessage("Unable to connect to your compliance assistant.", false);
+                }
+            } catch (err) {
+                console.error(err);
+                appendMessage("Network failure. Verify active service endpoints.", false);
+            }
+        }
+
+        function appendMessage(text, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "flex items-start space-x-3 " + (isUser ? "justify-end" : "");
+
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="bg-gradient-to-tr from-blue-600 to-indigo-500 text-white rounded-2xl p-3.5 shadow-sm leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-blue-950 border border-blue-800 text-blue-400 flex items-center justify-center font-bold text-xs shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm text-slate-300 leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

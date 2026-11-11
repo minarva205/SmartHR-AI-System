@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HR Morale & Sentiment Analytics | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(250, 241, 241) 0%, rgb(238, 222, 222) 90.1%);
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .glow-red:hover {
+            box-shadow: 0 10px 25px -5px rgba(225, 29, 72, 0.2);
+            border-color: rgba(225, 29, 72, 0.3);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="admin-dashboard.html" class="inline-flex items-center text-rose-600 hover:text-rose-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-4xl font-extrabold text-slate-800 tracking-tight font-black">Morale & Sentiment Analytics</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Track workforce satisfaction levels, scan AI-flagged grievances, and review custom structural action checklists.</p>
+            </div>
+            <div>
+                <span class="text-xs bg-rose-600 text-white px-4 py-2 rounded-full font-extrabold uppercase tracking-wider shadow-md">
+                    <i class="fas fa-crown mr-2"></i> HR Administrator
+                </span>
+            </div>
+        </header>
+
+        <!-- KPI Scorecards Section -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <!-- Morale index card -->
+            <div class="glass-panel p-6 rounded-3xl shadow-sm text-center glow-red transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Workforce Morale Index</span>
+                <div class="relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-rose-500 to-rose-600 rounded-full shadow-lg shadow-rose-100 text-white font-black text-3xl" id="moraleIndexCircle">
+                    50%
+                </div>
+                <span class="text-xs font-bold text-rose-600 mt-3" id="moraleHealthText">Optimal Index</span>
+            </div>
+
+            <!-- Sentiment counts progress -->
+            <div class="glass-panel p-6 rounded-3xl shadow-sm glow-red transition-all md:col-span-2">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-4 block">Morale Mood Breakdown</span>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>Positive Morale 😊</span>
+                            <span id="posCountText">0 logs (0%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50">
+                            <div class="bg-emerald-500 h-full rounded-full transition-all duration-700" id="posBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>Neutral Morale 😐</span>
+                            <span id="neuCountText">0 logs (0%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50">
+                            <div class="bg-slate-400 h-full rounded-full transition-all duration-700" id="neuBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                            <span>Negative Morale / Friction 😫</span>
+                            <span id="negCountText">0 logs (0%)</span>
+                        </div>
+                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200/50">
+                            <div class="bg-rose-500 h-full rounded-full transition-all duration-700" id="negBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alert stats -->
+            <div class="glass-panel p-6 rounded-3xl shadow-sm text-center glow-red transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Total feedback tickets</span>
+                <div class="text-5xl font-black text-slate-800" id="totalTicketsText">0</div>
+                <div class="flex justify-center gap-2 mt-4 text-[9px] font-black tracking-wider uppercase text-slate-500">
+                    <span class="bg-amber-100 text-amber-800 px-2 py-0.5 rounded" id="pendingStats">0 Pending</span>
+                    <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded" id="resolvedStats">0 Resolved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger & Chatbot Split-screen -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+            
+            <!-- Ledger list -->
+            <div class="lg:col-span-3 space-y-6">
+                <div class="glass-panel p-8 rounded-3xl shadow-lg glow-red transition-all">
+                    
+                    <!-- Filters -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h3 class="text-xl font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-inbox text-rose-500 mr-3"></i> Workforce Morale Ledger
+                        </h3>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <select id="filterSentiment" onchange="loadFeedbacks()"
+                                class="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-1 focus:ring-rose-500 w-full md:w-auto shadow-sm">
+                                <option value="ALL">All Sentiments</option>
+                                <option value="Negative">Grievances / Negative First</option>
+                                <option value="Positive">Appreciations / Positive First</option>
+                                <option value="Neutral">Neutral First</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ledger content list -->
+                    <div id="ledgerList" class="space-y-6 max-h-[550px] overflow-y-auto pr-2 scrollbar-hide">
+                        <!-- Feedbacks injected here -->
+                        <p class="text-slate-400 italic text-sm">Initializing morale ledger logs...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side widget: Strategic chatbot advice -->
+            <div class="lg:col-span-2">
+                <div class="glass-panel rounded-3xl shadow-lg h-[680px] flex flex-col glow-red transition-all">
+                    
+                    <!-- Chat header -->
+                    <div class="p-6 border-b border-slate-200/50 bg-gradient-to-r from-rose-500/10 to-pink-500/10 rounded-t-3xl flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center shadow-lg shadow-rose-100">
+                                <i class="fas fa-brain text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-slate-800 text-sm">SentimentBot HR Advisor</h4>
+                                <p class="text-[10px] text-rose-600 font-bold uppercase tracking-wider flex items-center">
+                                    <span class="w-2.5 h-2.5 bg-rose-500 rounded-full inline-block mr-1.5 animate-ping"></span> Strategic consultant
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat conversation messages list -->
+                    <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs scrollbar-hide">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-xs shrink-0">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-slate-600 leading-relaxed max-w-[85%]">
+                                Hello Administrator! I am <strong>SentimentBot AI</strong>, your strategic organizational psychologist. I can analyze workforce satisfaction feedback, identify departments experiencing high burnout risk, or summarize suggestions. How can I guide you today?
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input form -->
+                    <div class="p-4 border-t border-slate-200/50 bg-white/50 rounded-b-3xl">
+                        <form id="chatForm" onsubmit="sendChatMessage(event)" class="flex gap-2">
+                            <input type="text" id="chatInput" placeholder="Ask AI Strategic advice (e.g. who is unhappy, draft email template)..." required
+                                class="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-xs outline-none focus:ring-1 focus:ring-rose-500 bg-white shadow-sm font-medium">
+                            <button type="submit" id="chatSendBtn"
+                                class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-3 rounded-xl transition shadow-md shadow-rose-100 flex items-center justify-center">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- AI Executive Report modal slide-over (Hidden by default) -->
+        <div id="reportModal" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onclick="closeReportModal()"></div>
+            
+            <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+                <div class="w-screen max-w-md">
+                    <div class="h-full flex flex-col bg-white shadow-2xl rounded-l-[2.5rem] overflow-y-auto">
+                        <div class="p-8 border-b border-slate-100 bg-gradient-to-r from-rose-50 to-pink-50 flex items-center justify-between">
+                            <h2 class="text-xl font-black text-slate-800" id="reportTitle">AI Executive Report</h2>
+                            <button type="button" onclick="closeReportModal()" class="text-slate-400 hover:text-rose-600 transition">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="p-8 space-y-6 text-xs" id="reportContent">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let usersMap = {};
+        let activeFeedbacks = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check for admin
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admin privileges required.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    initAdminDashboard();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function initAdminDashboard() {
+            try {
+                // Pre-fetch all user profiles to map employee details correctly
+                const uRes = await fetch('/api/users/all');
+                if (uRes.ok) {
+                    const users = await uRes.json();
+                    users.forEach(u => usersMap[u.id] = u);
+                }
+                loadStats();
+                loadFeedbacks();
+            } catch (err) {
+                console.error("Initialization error", err);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/feedback/stats');
+                if (res.ok) {
+                    const stats = await res.json();
+                    
+                    // Morale Index Circle
+                    const morale = Math.round(stats.moraleIndex);
+                    const circle = document.getElementById('moraleIndexCircle');
+                    circle.innerText = `${morale}%`;
+                    
+                    let healthText = "Optimal Index";
+                    if (morale >= 70) {
+                        healthText = "Excellent Morale Index 🎉";
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-100 text-white font-black text-3xl animate-pulse";
+                    } else if (morale <= 35) {
+                        healthText = "Review Needed / Elevated Stress 😫";
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-rose-500 to-rose-600 rounded-full shadow-lg shadow-rose-100 text-white font-black text-3xl";
+                    } else {
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-indigo-500 to-indigo-600 rounded-full shadow-lg shadow-indigo-100 text-white font-black text-3xl";
+                    }
+                    document.getElementById('moraleHealthText').innerText = healthText;
+
+                    // Totals
+                    document.getElementById('totalTicketsText').innerText = stats.total;
+                    document.getElementById('pendingStats').innerText = `${stats.pending} Pending`;
+                    document.getElementById('resolvedStats').innerText = `${stats.resolved} Resolved`;
+
+                    // Mood bars
+                    if (stats.total > 0) {
+                        const posPct = Math.round((stats.positive / stats.total) * 100);
+                        const neuPct = Math.round((stats.neutral / stats.total) * 100);
+                        const negPct = Math.round((stats.negative / stats.total) * 100);
+                        
+                        document.getElementById('posCountText').innerText = `${stats.positive} logs (${posPct}%)`;
+                        document.getElementById('posBar').style.width = `${posPct}%`;
+                        
+                        document.getElementById('neuCountText').innerText = `${stats.neutral} logs (${neuPct}%)`;
+                        document.getElementById('neuBar').style.width = `${neuPct}%`;
+                        
+                        document.getElementById('negCountText').innerText = `${stats.negative} logs (${negPct}%)`;
+                        document.getElementById('negBar').style.width = `${negPct}%`;
+                    }
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadFeedbacks() {
+            try {
+                const res = await fetch('/api/feedback/all');
+                const data = await res.json();
+                activeFeedbacks = data;
+                
+                const filter = document.getElementById('filterSentiment').value;
+                let filtered = [...data];
+
+                // Sort based on filter
+                if (filter === 'Negative') {
+                    filtered.sort((a, b) => {
+                        const scoreA = a.sentimentScore != null ? a.sentimentScore : 50;
+                        const scoreB = b.sentimentScore != null ? b.sentimentScore : 50;
+                        return scoreA - scoreB; // negative first
+                    });
+                } else if (filter === 'Positive') {
+                    filtered.sort((a, b) => {
+                        const scoreA = a.sentimentScore != null ? a.sentimentScore : 50;
+                        const scoreB = b.sentimentScore != null ? b.sentimentScore : 50;
+                        return scoreB - scoreA; // positive first
+                    });
+                } else if (filter === 'Neutral') {
+                    // Filter neutrals first
+                    filtered.sort((a, b) => {
+                        const isNeuA = a.sentiment === 'Neutral' ? 1 : 0;
+                        const isNeuB = b.sentiment === 'Neutral' ? 1 : 0;
+                        return isNeuB - isNeuA;
+                    });
+                }
+
+                const container = document.getElementById('ledgerList');
+
+                if (!filtered || filtered.length === 0) {
+                    container.innerHTML = `
+                        <div class="py-12 text-center text-slate-400 italic">
+                            <i class="fas fa-inbox text-4xl mb-4 text-slate-200 block"></i>
+                            No feedback logs found.
+                        </div>`;
+                    return;
+                }
+
+                container.innerHTML = filtered.map(fb => {
+                    const formattedDate = fb.submittedAt ? new Date(fb.submittedAt).toLocaleDateString(undefined, {
+                        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                    }) : 'Recent';
+
+                    let empName = "Anonymous Submission";
+                    let empDept = "N/A";
+                    let picUrl = "https://ui-avatars.com/api/?background=random&name=Secret";
+
+                    if (!fb.anonymous) {
+                        const matchedUser = usersMap[fb.employeeId];
+                        if (matchedUser) {
+                            empName = matchedUser.fullName || 'System User';
+                            empDept = matchedUser.department || matchedUser.organization || 'General Staff';
+                            picUrl = matchedUser.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(empName));
+                        } else {
+                            empName = `Staff (ID: ${fb.employeeId})`;
+                            empDept = 'General Staff';
+                        }
+                    }
+
+                    const statusPill = fb.status === 'Resolved' ? 'bg-green-50 text-green-700 border border-green-100' :
+                                       fb.status === 'Approved' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+                                       fb.status === 'Rejected' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-amber-50 text-amber-700 border border-amber-100';
+
+                    const sentimentPill = fb.sentiment === 'Positive' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                          fb.sentiment === 'Negative' ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-slate-100 text-slate-700 border-slate-200';
+
+                    const formattedScore = fb.sentimentScore != null ? Math.round(fb.sentimentScore) : 50;
+
+                    return `
+                        <div class="bg-white border border-slate-100 p-6 rounded-[2rem] hover:border-rose-400 transition relative group shadow-sm">
+                            <!-- Top Right Actions -->
+                            <div class="absolute top-6 right-6 flex items-center gap-3">
+                                <select onchange="updateFeedbackStatus(${fb.id}, this.value)"
+                                    class="p-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-1 focus:ring-rose-500 shadow-sm">
+                                    <option value="Pending" ${fb.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="Approved" ${fb.status === 'Approved' ? 'selected' : ''}>Approved</option>
+                                    <option value="Rejected" ${fb.status === 'Rejected' ? 'selected' : ''}>Rejected</option>
+                                    <option value="Resolved" ${fb.status === 'Resolved' ? 'selected' : ''}>Resolved</option>
+                                </select>
+                                <button onclick="deleteFeedback(${fb.id})" 
+                                    class="text-slate-300 hover:text-rose-600 transition p-1" 
+                                    title="Delete Log">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            
+                            <!-- Header: Details -->
+                            <div class="flex items-center space-x-3 mb-4 pr-32">
+                                <img src="${picUrl}" class="w-10 h-10 rounded-full border border-slate-100 shadow-sm shrink-0">
+                                <div>
+                                    <div class="text-xs font-extrabold text-slate-800 flex items-center gap-1.5">
+                                        ${empName} 
+                                        ${fb.anonymous ? `<i class="fas fa-user-secret text-slate-400" title="Anonymous submission"></i>` : ''}
+                                    </div>
+                                    <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">${empDept} • ${formattedDate}</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Category and Morale indicators -->
+                            <div class="flex gap-2 mb-4">
+                                <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-100">
+                                    Category: ${fb.category || 'Suggestion'}
+                                </span>
+                                <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${sentimentPill}">
+                                    Morale Index: ${formattedScore}% (${fb.sentiment || 'Neutral'})
+                                </span>
+                            </div>
+
+                            <h4 class="font-extrabold text-slate-800 text-sm mb-2">${fb.subject || 'No Subject'}</h4>
+                            <p class="text-xs text-slate-500 leading-relaxed mb-6">${fb.message || '-'}</p>
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
+                                <div class="flex items-center text-[9px] font-black uppercase tracking-wider ${statusPill} px-2.5 py-1.5 rounded-lg">
+                                    Status: ${fb.status || 'Pending'}
+                                </div>
+                                <button onclick="openReport(${fb.id})"
+                                    class="bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-100 font-extrabold text-[10px] uppercase tracking-wider px-4 py-2 rounded-xl transition">
+                                    <i class="fas fa-file-invoice mr-1.5"></i> Generate AI Report
+                                </button>
+                            </div>
+                        </div>`;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('ledgerList').innerHTML = `<div class="p-6 text-center text-rose-500 bg-rose-50 rounded-2xl">Error downloading ledger database.</div>`;
+            }
+        }
+
+        async function updateFeedbackStatus(id, newStatus) {
+            try {
+                const res = await fetch(`/api/feedback/${id}/status`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                if (res.ok) {
+                    loadStats();
+                    loadFeedbacks();
+                } else {
+                    alert("Failed to update resolution status.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteFeedback(id) {
+            if (!confirm("Are you sure you want to delete this feedback log?")) return;
+            try {
+                const res = await fetch(`/api/feedback/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    loadStats();
+                    loadFeedbacks();
+                } else {
+                    alert("Failed to delete ledger entry.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Generate and open the modal AI Report
+        function openReport(id) {
+            const fb = activeFeedbacks.find(f => f.id === id);
+            if (!fb) return;
+
+            const modal = document.getElementById('reportModal');
+            const title = document.getElementById('reportTitle');
+            const content = document.getElementById('reportContent');
+
+            let senderName = "Anonymous Employee";
+            if (!fb.anonymous) {
+                const user = usersMap[fb.employeeId];
+                if (user) senderName = user.fullName;
+            }
+
+            title.innerText = `AI Executive Report`;
+            
+            const score = Math.round(fb.sentimentScore);
+            const scoreBarColor = score >= 65 ? "bg-emerald-500" : score <= 35 ? "bg-rose-500" : "bg-slate-400";
+
+            content.innerHTML = `
+                <!-- Morale Metrics Header -->
+                <div class="bg-slate-50 border border-slate-100 rounded-3xl p-6 shadow-sm">
+                    <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Diagnosed Target</div>
+                    <div class="font-bold text-slate-800 mb-4">${senderName}</div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="block text-[8px] font-bold text-slate-400 uppercase">Sentiment Score</span>
+                            <span class="text-xl font-extrabold text-slate-800">${score}%</span>
+                            <div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden mt-1.5">
+                                <div class="${scoreBarColor} h-full" style="width: ${score}%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="block text-[8px] font-bold text-slate-400 uppercase">Emotional Tone</span>
+                            <span class="text-xs font-black text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md inline-block mt-1">${fb.emotionalTone || 'Neutral'}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Raw message log -->
+                <div class="space-y-2">
+                    <h4 class="font-extrabold text-slate-800 text-sm">Grievance / Feedback Text</h4>
+                    <p class="bg-slate-50/50 p-4 border rounded-2xl leading-relaxed text-slate-600 italic">"${fb.message}"</p>
+                </div>
+
+                <!-- Key Takeaways -->
+                <div class="space-y-2">
+                    <h4 class="font-extrabold text-slate-800 text-sm flex items-center"><i class="fas fa-brain text-rose-500 mr-2"></i> AI Morale Takeaway Summary</h4>
+                    <div class="bg-rose-50/30 border border-rose-100/50 rounded-2xl p-5 text-slate-600 leading-relaxed space-y-2">
+                        ${fb.aiKeyTakeaways ? fb.aiKeyTakeaways.replace(/\n/g, "<br>") : '- No specific structural issues extracted.'}
+                    </div>
+                </div>
+
+                <!-- Strategic HR Recommendations -->
+                <div class="space-y-2">
+                    <h4 class="font-extrabold text-slate-800 text-sm flex items-center"><i class="fas fa-list-check text-rose-500 mr-2"></i> Action Checklist Checklist</h4>
+                    <div class="bg-slate-900 text-slate-300 rounded-2xl p-6 shadow-md leading-relaxed font-mono text-[10px] space-y-3">
+                        ${fb.aiRecommendation ? fb.aiRecommendation.replace("### Recommended Action Checklist for HR Management:\n\n", "").replace(/\n/g, "<br>") : '- Standard check-in sync requested.'}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        // Strategic HR Advisor Chat messages
+        async function sendChatMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            appendMessage(message, true);
+
+            try {
+                const res = await fetch('/api/feedback/ai-assistant', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    appendMessage(data.response, false);
+                } else {
+                    appendMessage("Unable to communicate with the strategic central engine currently.", false);
+                }
+            } catch (e) {
+                console.error(e);
+                appendMessage("Connection error. Verify active service endpoint.", false);
+            }
+        }
+
+        function appendMessage(text, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "flex items-start space-x-3 " + (isUser ? "justify-end" : "");
+
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="bg-rose-600 text-white rounded-2xl p-3.5 shadow-sm leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold text-xs shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="bg-white border border-slate-100 rounded-2xl p-4 shadow-sm text-slate-600 leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

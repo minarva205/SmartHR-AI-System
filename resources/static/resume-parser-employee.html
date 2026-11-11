@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My AI Resume Workspace - SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .hero-gradient { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); }
+        .glass-dark { background: rgba(30, 41, 59, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(255, 255, 255, 0.06); }
+        .ai-glow-indigo { box-shadow: 0 0 28px rgba(99, 102, 241, 0.18); }
+        .ai-glow-violet { box-shadow: 0 0 28px rgba(139, 92, 246, 0.25); }
+        .hover-lift { transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 14px 28px -8px rgba(0, 0, 0, 0.25); }
+        .skill-pill { display: inline-block; margin: 4px; padding: 4px 12px; border-radius: 999px; font-size: 11px; font-weight: 700; transition: all 0.2s; }
+        .skill-pill:hover { transform: scale(1.05); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* Drag & Drop Zone Border Animation */
+        .drop-zone-active { border-color: #6366f1 !important; background-color: rgba(99, 102, 241, 0.1) !important; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen hero-gradient">
+
+    <!-- NAVIGATION -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-indigo-600 to-violet-600 p-2 rounded-xl text-white shadow-lg">
+                        <i class="fas fa-file-waveform text-xl animate-pulse"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-300">SmartHR AI</span>
+                </a>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-slate-400 hover:text-white font-semibold text-sm transition">
+                    <i class="fas fa-arrow-left mr-2"></i>My Dashboard
+                </a>
+                <span class="text-xs font-semibold px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full">
+                    EMPLOYEE · CAREER WORKSPACE
+                </span>
+                <div id="userInfo" class="flex items-center space-x-3 border-l border-slate-800 pl-6">
+                    <!-- Dynamically Loaded -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HEADER -->
+    <header class="py-10 px-4 border-b border-slate-800/60 relative overflow-hidden text-center max-w-4xl mx-auto z-10">
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.06),transparent_40%)]"></div>
+        <span class="text-xs font-bold uppercase tracking-wider text-indigo-400 mb-2 block">Powered by NLP Intelligence</span>
+        <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight leading-tight">
+            My Resume <span class="text-indigo-400 font-extrabold">Intelligence Hub</span>
+        </h1>
+        <p class="text-slate-400 mt-3 text-sm md:text-base">
+            Upload your professional resume to extract skills, evaluate match analytics, map yourself to open job profiles, and chat with your career coach.
+        </p>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
+        
+        <!-- LEFT: RESUME UPLOAD AND ANALYSIS -->
+        <div class="lg:col-span-7 space-y-6">
+            
+            <!-- UPLOAD ZONE -->
+            <div id="uploadCard" class="glass-dark p-8 rounded-3xl ai-glow-indigo border border-indigo-500/10 relative overflow-hidden transition-all duration-300">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-black text-indigo-300"><i class="fas fa-file-arrow-up mr-2"></i> Resume Telemetry</h2>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Accepts PDF, DOCX, TXT formats (Max size 10MB)</p>
+                    </div>
+                    <span id="lastParsedAt" class="text-[9px] text-slate-500 font-bold bg-slate-800/80 px-2.5 py-1 rounded-md border border-slate-700">
+                        NOT YET UPLOADED
+                    </span>
+                </div>
+
+                <!-- DRAG ZONE -->
+                <div id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)"
+                    class="border-2 border-dashed border-slate-700 bg-slate-800/20 hover:bg-slate-800/40 rounded-2xl p-8 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[180px]">
+                    <input type="file" id="resumeFileInput" onchange="handleFileSelect(event)" class="hidden" accept=".pdf,.docx,.txt">
+                    <div id="dropZoneContent" class="space-y-3">
+                        <div class="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center text-indigo-400 mx-auto text-2xl group border border-indigo-500/20 shadow-inner">
+                            <i class="fas fa-cloud-arrow-up group-hover:-translate-y-1 transition-transform"></i>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-xs font-bold text-slate-200">Drag & drop your resume file here</p>
+                            <p class="text-[11px] text-slate-500">or click to browse local files</p>
+                        </div>
+                    </div>
+                    
+                    <!-- PARSER ANIMATION STATE -->
+                    <div id="parsingState" class="hidden space-y-4 py-4">
+                        <div class="relative w-16 h-16 mx-auto">
+                            <div class="w-16 h-16 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                            <div class="absolute inset-0 flex items-center justify-center"><i class="fas fa-brain text-indigo-400 text-lg animate-pulse"></i></div>
+                        </div>
+                        <div class="space-y-1">
+                            <p id="parserProgressText" class="text-xs font-bold text-indigo-300">Scanning document...</p>
+                            <p id="parserDetailText" class="text-[10px] font-mono text-slate-500 select-none">[ AI ] Running OCR models...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PARSED PROFILE DASHBOARD -->
+            <div id="profileDashboard" class="glass-dark p-8 rounded-3xl border border-slate-800 hidden space-y-6">
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-800/60 pb-6">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h2 id="parsedName" class="text-2xl font-black text-white">Candidate Name</h2>
+                            <span id="fitBadge" class="px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">FIT STATUS</span>
+                        </div>
+                        <div class="flex items-center gap-4 text-xs text-slate-400 mt-1">
+                            <span id="parsedEmail"><i class="far fa-envelope text-indigo-400 mr-1.5"></i>email@smarthr.com</span>
+                            <span id="parsedPhone"><i class="fas fa-phone-alt text-indigo-400 mr-1.5"></i>+91-98765-43210</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3 bg-slate-800/40 p-3 rounded-2xl border border-slate-800">
+                        <div class="text-right">
+                            <span class="text-[9px] text-slate-500 block uppercase font-bold tracking-wider">AI Skill Match</span>
+                            <strong id="matchPercent" class="text-xl font-black text-emerald-400">0%</strong>
+                        </div>
+                        <div class="w-10 h-10 rounded-full border-2 border-emerald-500/30 flex items-center justify-center bg-emerald-500/10">
+                            <i class="fas fa-bullseye text-emerald-400 text-sm"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- INFO GRID -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-slate-800/30 border border-slate-800/80 p-4 rounded-2xl relative overflow-hidden">
+                        <span class="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Primary Role</span>
+                        <strong id="parsedRole" class="text-sm font-black text-slate-200 block mt-1">Software Engineer</strong>
+                        <i class="fas fa-briefcase text-slate-800 absolute right-4 bottom-3 text-2xl -z-10 opacity-30"></i>
+                    </div>
+                    <div class="bg-slate-800/30 border border-slate-800/80 p-4 rounded-2xl relative overflow-hidden">
+                        <span class="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Experience Level</span>
+                        <strong id="parsedExperience" class="text-sm font-black text-indigo-300 block mt-1">0 years</strong>
+                        <i class="fas fa-history text-slate-800 absolute right-4 bottom-3 text-2xl -z-10 opacity-30"></i>
+                    </div>
+                    <div class="bg-slate-800/30 border border-slate-800/80 p-4 rounded-2xl relative overflow-hidden">
+                        <span class="text-[10px] text-slate-500 font-bold block uppercase tracking-wider">Best Match Position</span>
+                        <strong id="parsedBestJob" class="text-sm font-black text-violet-300 block mt-1">N/A</strong>
+                        <i class="fas fa-crown text-slate-800 absolute right-4 bottom-3 text-2xl -z-10 opacity-30"></i>
+                    </div>
+                </div>
+
+                <!-- EDUCATION -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400"><i class="fas fa-graduation-cap text-indigo-400 mr-1.5"></i>Education Details</h3>
+                    <div id="parsedEducation" class="text-xs text-slate-300 bg-slate-800/20 p-3.5 rounded-xl border border-slate-800">
+                        Education details extracted by NLP.
+                    </div>
+                </div>
+
+                <!-- EXTRACTED SKILLS -->
+                <div class="space-y-3">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="fas fa-code text-indigo-400"></i> Extracted Core Skills
+                    </h3>
+                    <div id="parsedSkillsContainer" class="flex flex-wrap bg-slate-800/10 p-3 rounded-2xl border border-slate-800/60 min-h-[50px]">
+                        <!-- Loaded dynamically -->
+                    </div>
+                </div>
+
+                <!-- AI SUMMARY -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                        <i class="fas fa-wand-magic-sparkles text-indigo-400"></i> AI Professional Summary
+                    </h3>
+                    <div class="border-l-4 border-indigo-500 bg-indigo-500/5 p-4 rounded-r-2xl leading-relaxed text-xs text-slate-300 italic" id="parsedSummary">
+                        Summary extracted by NLP engine...
+                    </div>
+                </div>
+
+                <!-- FILE LINK -->
+                <div id="fileLinkSection" class="flex justify-between items-center bg-slate-800/40 p-4 rounded-2xl border border-slate-800 text-xs">
+                    <span class="text-slate-400">Current Resume Link:</span>
+                    <a id="downloadBtn" href="#" target="_blank" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold shadow-md transition flex items-center gap-1.5">
+                        <i class="fas fa-file-pdf"></i> View Resume File
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT: CONFIDENTIAL CAREER COACH CHAT -->
+        <div class="lg:col-span-5 flex flex-col h-[650px] glass-dark rounded-3xl overflow-hidden ai-glow-violet border border-indigo-500/10">
+            
+            <!-- Chat Head -->
+            <div class="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 text-white flex items-center justify-between shadow-md">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-xl"><i class="fas fa-robot text-lg animate-bounce"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">ResumeBot Career Coach</h4>
+                        <span class="text-[10px] text-indigo-200 font-semibold flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Career Coaching Mode
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Content -->
+            <div id="chatBody" class="flex-1 p-5 overflow-y-auto space-y-4 text-xs no-scrollbar bg-slate-900/10">
+                <!-- System Greeting -->
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">AI</div>
+                    <div class="bg-slate-800 p-3.5 rounded-2xl max-w-[85%] rounded-tl-none leading-relaxed border border-slate-800 shadow-sm text-slate-200">
+                        Hello! I am **ResumeBot AI** — your career coach. I analyze your extracted resume profile and can help you with:
+                        - Tailored tips to **improve your resume layout** and descriptions
+                        - Preparing for interviews with **mock technical questions**
+                        - Recommending **skills or certificates** to bridge career gaps
+                        
+                        How can I assist your career journey today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Suggestions -->
+            <div class="p-2 border-t border-slate-800/80 bg-slate-900/40 flex gap-2 overflow-x-auto whitespace-nowrap text-[10px] no-scrollbar">
+                <button onclick="sendQuick('How can I improve my resume?')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-full border border-indigo-500/10 font-bold transition">Resume tips</button>
+                <button onclick="sendQuick('Give me mock interview questions')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-full border border-indigo-500/10 font-bold transition">Interview prep</button>
+                <button onclick="sendQuick('Identify skill gaps in my resume')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-full border border-indigo-500/10 font-bold transition">Skill gaps</button>
+                <button onclick="sendQuick('Prepare for a system design interview')" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-indigo-300 rounded-full border border-indigo-500/10 font-bold transition">System Design</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="p-3 bg-slate-900/60 border-t border-slate-800 flex gap-2">
+                <input id="chatInput" type="text" placeholder="Ask ResumeBot Career Coach..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500" onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" class="p-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs transition active:scale-95"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script>
+        const pillColors = [
+            'bg-indigo-500/15 border border-indigo-500/30 text-indigo-300',
+            'bg-violet-500/15 border border-violet-500/30 text-violet-300',
+            'bg-blue-500/15 border border-blue-500/30 text-blue-300',
+            'bg-emerald-500/15 border border-emerald-500/30 text-emerald-300',
+            'bg-amber-500/15 border border-amber-500/30 text-amber-300',
+            'bg-rose-500/15 border border-rose-500/30 text-rose-300',
+        ];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Verify Authentication
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    // Populate Nav User Info
+                    const userInfo = document.getElementById('userInfo');
+                    const pic = user.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.fullName || 'User'));
+                    userInfo.innerHTML = `
+                        <img src="${pic}" class="w-9 h-9 rounded-full border border-slate-700 object-cover">
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-xs font-bold text-slate-200 leading-tight">${user.fullName}</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider">${user.role}</span>
+                        </div>
+                        <a href="/logout" class="text-slate-500 hover:text-red-400 text-xs font-bold ml-2 transition">Logout</a>
+                    `;
+
+                    // Load Employee parsed resume
+                    loadMyResume();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+
+            // Set click handle for dragzone
+            document.getElementById('dropZone').addEventListener('click', () => {
+                document.getElementById('resumeFileInput').click();
+            });
+        });
+
+        // Fetch user resume data
+        function loadMyResume() {
+            fetch('/api/resume-parser/employee/my-record')
+                .then(res => res.json())
+                .then(r => {
+                    renderResumeDashboard(r);
+                })
+                .catch(err => console.error("Error loading resume details:", err));
+        }
+
+        // Render dashboard details
+        function renderResumeDashboard(r) {
+            if (!r || !r.id) return;
+            
+            document.getElementById('profileDashboard').classList.remove('hidden');
+
+            document.getElementById('parsedName').textContent = r.fullName || "Candidate";
+            document.getElementById('parsedEmail').innerHTML = `<i class="far fa-envelope text-indigo-400 mr-1.5"></i>${r.email || ''}`;
+            document.getElementById('parsedPhone').innerHTML = `<i class="fas fa-phone-alt text-indigo-400 mr-1.5"></i>${r.phone || 'N/A'}`;
+            document.getElementById('matchPercent').textContent = r.skillMatchPercent || "0%";
+            document.getElementById('parsedRole').textContent = r.currentRole || "N/A";
+            document.getElementById('parsedExperience').textContent = (r.experienceYears || 0) + ' year' + (r.experienceYears !== 1 ? 's' : '');
+            document.getElementById('parsedBestJob').textContent = r.matchingJobTitle || "N/A";
+            document.getElementById('parsedEducation').textContent = r.education || "No education details parsed.";
+            document.getElementById('parsedSummary').innerHTML = (r.aiSummary || "No summary profile generated.")
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+            // Set fit rating badge
+            const fit = r.fitRating || "Needs Review";
+            const badge = document.getElementById('fitBadge');
+            badge.textContent = fit;
+            badge.className = "px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ";
+            if (fit === 'Excellent') badge.className += "bg-violet-500/10 border border-violet-500/20 text-violet-400";
+            else if (fit === 'Good') badge.className += "bg-indigo-500/10 border border-indigo-500/20 text-indigo-400";
+            else if (fit === 'Fair') badge.className += "bg-amber-500/10 border border-amber-500/20 text-amber-400";
+            else badge.className += "bg-slate-500/10 border border-slate-500/20 text-slate-400";
+
+            // Set parse timestamp
+            if (r.parsedAt) {
+                const date = new Date(r.parsedAt);
+                document.getElementById('lastParsedAt').textContent = "EXTRACTED: " + date.toLocaleString().toUpperCase();
+            } else {
+                document.getElementById('lastParsedAt').textContent = "EXTRACTED: BASELINE PROFILE";
+            }
+
+            // Render Skills
+            const skillsContainer = document.getElementById('parsedSkillsContainer');
+            skillsContainer.innerHTML = '';
+            const skillsList = (r.skills || '').split(',').map(s => s.trim()).filter(Boolean);
+            if (skillsList.length === 0) {
+                skillsContainer.innerHTML = `<span class="text-xs text-slate-500 italic">No skills extracted yet.</span>`;
+            } else {
+                skillsList.forEach((s, idx) => {
+                    const span = document.createElement('span');
+                    span.className = `skill-pill ${pillColors[idx % pillColors.length]}`;
+                    span.textContent = s;
+                    skillsContainer.appendChild(span);
+                });
+            }
+
+            // Set Resume Link
+            const linkSec = document.getElementById('fileLinkSection');
+            if (r.resumeLink && r.resumeLink !== '#') {
+                linkSec.classList.remove('hidden');
+                document.getElementById('downloadBtn').href = r.resumeLink;
+            } else {
+                linkSec.classList.add('hidden');
+            }
+        }
+
+        // Drag & Drop Handlers
+        function handleDragOver(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.add('drop-zone-active');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drop-zone-active');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('dropZone').classList.remove('drop-zone-active');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadResume(files[0]);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadResume(files[0]);
+            }
+        }
+
+        // Upload resume file to endpoint
+        function uploadResume(file) {
+            // Check type extension
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (!['pdf', 'docx', 'txt'].includes(ext)) {
+                alert("Invalid format. Please upload PDF, DOCX or TXT files.");
+                return;
+            }
+
+            const dropContent = document.getElementById('dropZoneContent');
+            const parseState = document.getElementById('parsingState');
+            const progressText = document.getElementById('parserProgressText');
+            const detailText = document.getElementById('parserDetailText');
+
+            // Hide drag prompt, show parser animation
+            dropContent.classList.add('hidden');
+            parseState.classList.remove('hidden');
+
+            const statusSteps = [
+                { time: 400, prog: "Reading document bytes...", det: "[ SYS ] Accessing system stream..." },
+                { time: 900, prog: "Extracting semantic tokens...", det: "[ NLP ] Running Named Entity Recognition (NER)..." },
+                { time: 1400, prog: "Classifying candidate skills...", det: "[ AI  ] Mapping profile keywords..." },
+                { time: 2000, prog: "Computing AI match report...", det: "[ DB  ] Cross-referencing current registry..." }
+            ];
+
+            statusSteps.forEach(step => {
+                setTimeout(() => {
+                    progressText.textContent = step.prog;
+                    detailText.textContent = step.det;
+                }, step.time);
+            });
+
+            const formData = new FormData();
+            formData.append('resumeFile', file);
+
+            fetch('/api/resume-parser/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => {
+                if (!res.ok) throw new Error("Upload failed with code: " + res.status);
+                return res.json();
+            })
+            .then(data => {
+                setTimeout(() => {
+                    // Restore upload drag zone look
+                    dropContent.classList.remove('hidden');
+                    parseState.classList.add('hidden');
+                    
+                    alert("Resume uploaded and parsed successfully!");
+                    renderResumeDashboard(data.record);
+                }, 2400);
+            })
+            .catch(err => {
+                console.error("Upload error:", err);
+                setTimeout(() => {
+                    dropContent.classList.remove('hidden');
+                    parseState.classList.add('hidden');
+                    alert("Error parsing resume file: " + err.message);
+                }, 2400);
+            });
+        }
+
+        // AI Career Coach controls
+        function sendQuick(msg) {
+            document.getElementById('chatInput').value = msg;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            appendChat(text, 'user');
+
+            fetch('/api/resume-parser/ai-assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            })
+            .then(res => res.json())
+            .then(data => {
+                appendChat(data.response, 'ai');
+            })
+            .catch(err => {
+                console.error("AI Assistant error:", err);
+                appendChat("Sorry, I encountered an issue connecting to the Career Coach service.", 'ai');
+            });
+        }
+
+        function appendChat(text, sender) {
+            const body = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2' + (sender === 'user' ? ' justify-end' : '');
+            
+            const bubble = sender === 'user' ? 'bg-indigo-600 text-white rounded-tr-none shadow-md shadow-indigo-500/5' : 'bg-slate-800 text-slate-200 rounded-tl-none border border-slate-800 shadow-sm';
+            const av = sender === 'user' ? 'ME' : 'AI';
+            const avBg = sender === 'user' ? 'bg-indigo-500' : 'bg-indigo-700';
+            
+            // Format markdown details
+            const formatted = text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/- (.*)/g, '<div class="flex items-start gap-1.5 mt-1">• <span>$1</span></div>');
+                
+            div.innerHTML = `
+                ${sender !== 'user' ? `<div class="w-8 h-8 rounded-full ${avBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${av}</div>` : ''}
+                <div class="${bubble} p-3 rounded-2xl max-w-[80%] leading-relaxed text-xs">${formatted}</div>
+                ${sender === 'user' ? `<div class="w-8 h-8 rounded-full ${avBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${av}</div>` : ''}
+            `;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+    </script>
+</body>
+</html>

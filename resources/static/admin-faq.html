@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin FAQ Guide - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;850&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='admin-dashboard.html'">
+                <div class="w-10 h-10 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md">
+                    S
+                </div>
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-emerald-600 cursor-pointer text-lg" title="Security Settings" onclick="window.location.href='admin-security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="admin-dashboard.html" class="text-slate-500 hover:text-emerald-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex items-center space-x-4 mb-10">
+            <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-xl shadow-sm">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <h1 class="text-3xl font-bold text-slate-800">Admin FAQ Guide</h1>
+                    <span class="bg-violet-100 text-violet-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1"><i class="fas fa-microchip"></i> AI Insight Enabled</span>
+                </div>
+                <p class="text-slate-500">Essential configuration and security guidelines for SmartHR administrative custodians</p>
+            </div>
+        </div>
+
+        <!-- FAQ Items -->
+        <div class="space-y-4">
+            
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden" open>
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>How can I modify Geofence office perimeter coordinates?</span>
+                    <span class="transition group-open:rotate-180 text-emerald-600"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Geofence markers can be updated in the **Admin Security Settings** panel. Ensure you enter correct latitude and longitude coordinates along with a boundary radius (recommended: 100 meters) before hitting <em>Apply Geofence Changes</em>.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>Where do I audit database log edits?</span>
+                    <span class="transition group-open:rotate-180 text-emerald-600"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Open the **Admin Analytics Portal** via the bottom navigation menu. The portal offers audit tables, recruitment funnel tracking, department division metrics, and a raw CSV exporter button to archive log histories.
+                </div>
+            </details>
+
+            <!-- AI FAQ Item -->
+            <details class="group bg-gradient-to-br from-violet-900 to-indigo-900 border border-violet-500/30 rounded-3xl p-6 shadow-lg shadow-violet-500/10 [&_summary::-webkit-details-marker]:hidden relative overflow-hidden">
+                <div class="absolute -right-6 -top-6 w-24 h-24 bg-violet-500/20 rounded-full blur-2xl"></div>
+                <summary class="flex justify-between items-center font-bold text-violet-100 cursor-pointer list-none relative z-10">
+                    <span class="flex items-center gap-2"><i class="fas fa-chart-line text-violet-400"></i> How do I view AI Retention and Flight Risk metrics?</span>
+                    <span class="transition group-open:rotate-180 text-violet-400"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-violet-200/80 text-sm leading-relaxed border-t border-violet-500/50 pt-4 relative z-10">
+                    Navigate to the **Admin Analytics Portal**. The AI predictive engine automatically scans attendance logs, leave patterns, and engagement metrics to generate a <em>Flight Risk Score</em> for every employee. High-risk employees are flagged in the **AI Insights & Action Items** section.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>What is the standard procedure for onboarding a new department?</span>
+                    <span class="transition group-open:rotate-180 text-emerald-600"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    First, set up the new department credentials under the Directory control settings. Then configure matching leave parameters in the LMS module so that new hires automatically receive target leave allocations.
+                </div>
+            </details>
+
+            <details class="group bg-white border border-slate-100 rounded-3xl p-6 shadow-sm [&_summary::-webkit-details-marker]:hidden">
+                <summary class="flex justify-between items-center font-bold text-slate-800 cursor-pointer list-none">
+                    <span>How can I trigger outgoing Webhook payloads to external systems?</span>
+                    <span class="transition group-open:rotate-180 text-emerald-600"><i class="fas fa-chevron-down"></i></span>
+                </summary>
+                <div class="mt-4 text-slate-500 text-sm leading-relaxed border-t pt-4">
+                    Configure target system URLs inside the **Integration Center**. Ensure you specify the secure secret verification key to protect system payload transmissions.
+                </div>
+            </details>
+
+        </div>
+
+        <!-- AI Ask Banner -->
+        <div class="mt-8 border border-violet-200/50 bg-white rounded-3xl p-6 md:p-8 flex flex-col md:flex-row items-center justify-between shadow-xl relative overflow-hidden gap-6">
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            <div class="relative z-10 flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-violet-100 flex items-center justify-center shrink-0 border border-violet-200">
+                    <i class="fas fa-robot text-violet-600 text-xl animate-pulse"></i>
+                </div>
+                <div>
+                    <h3 class="text-slate-800 font-bold text-lg">Need complex configuration help?</h3>
+                    <p class="text-slate-500 text-sm">Query the Admin AI Intelligence Assistant to instantly generate custom webhook payloads or audit scripts.</p>
+                </div>
+            </div>
+            <button class="relative z-10 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-xl font-bold shadow-lg transition transform hover:scale-105 flex items-center gap-2 whitespace-nowrap">
+                <i class="fas fa-terminal text-emerald-400"></i> Open AI Console
+            </button>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN' && user.role !== 'HR') {
+                        alert("Access Restricted. Redirecting to employee FAQ portal.");
+                        window.location.href = 'faq.html';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>My Leave Portal | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <a href="index.html" class="text-blue-600 font-bold mb-8 inline-flex items-center hover:underline">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Dashboard
+        </a>
+
+        <div class="mb-10">
+            <h1 class="text-3xl font-black text-slate-800">Leave Applications</h1>
+            <p class="text-sm text-slate-400 mt-1" id="profileIndicator">Checking credentials...</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-200 h-fit">
+                <h2 class="text-xl font-bold mb-6 text-slate-700">Request Time Off</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Leave Type</label>
+                        <select id="leaveType"
+                            class="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50">
+                            <option value="Casual Leave">Casual Leave</option>
+                            <option value="Sick Leave">Sick Leave</option>
+                            <option value="Maternity/Paternity">Maternity/Paternity</option>
+                            <option value="Unpaid Leave">Unpaid Leave</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-400 mb-1">Start Date</label>
+                            <input type="date" id="startDate"
+                                class="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-400 mb-1">End Date</label>
+                            <input type="date" id="endDate"
+                                class="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="block text-xs font-bold uppercase text-slate-400">Reason Description</label>
+                            <button onclick="optimizeReasonWithAI()" class="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1 transition-all">
+                                <i class="fas fa-wand-magic-sparkles text-blue-500 animate-pulse"></i> Rewrite with AI
+                            </button>
+                        </div>
+                        <textarea id="reason" rows="4" placeholder="State your professional reason..."
+                            class="w-full p-3 border rounded-xl outline-none focus:border-blue-500 bg-slate-50 text-xs"></textarea>
+                    </div>
+
+                    <button onclick="submitLeaveRequest()"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-blue-100 uppercase tracking-wider text-xs">
+                        Submit Application
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Leave Assistant Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-6 rounded-3xl shadow-lg border border-indigo-950/60 h-fit">
+                <div class="flex items-center space-x-2.5 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center animate-pulse">
+                        <i class="fas fa-brain text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm leading-tight text-white">SmartHR AI™ Co-Pilot</h3>
+                        <p class="text-[10px] text-indigo-300">Predictive approval & scheduling agent</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div class="bg-indigo-950/60 rounded-2xl p-4 border border-indigo-800/40">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-semibold text-slate-300">Predicted Approval Chance</span>
+                            <span class="text-xs font-bold text-emerald-400" id="aiProbability">94%</span>
+                        </div>
+                        <div class="w-full bg-indigo-950 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-cyan-400 to-emerald-400 h-1.5 rounded-full transition-all duration-500" style="width: 94%" id="aiProgressBar"></div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-emerald-400 mt-0.5" id="aiInsight1Icon"></i>
+                            <p class="text-slate-300 leading-normal text-[11px]" id="aiInsight1">Low overlap in your department (Engineering) during these dates.</p>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-check-circle text-emerald-400 mt-0.5" id="aiInsight2Icon"></i>
+                            <p class="text-slate-300 leading-normal text-[11px]" id="aiInsight2">Leave history shows good policy adherence. No outstanding sprint delays predicted.</p>
+                        </div>
+                        <div class="flex items-start space-x-2">
+                            <i class="fas fa-circle-info text-cyan-400 mt-0.5" id="aiInsight3Icon"></i>
+                            <p class="text-slate-300 leading-normal text-[11px]" id="aiInsight3">Pro Tip: Submitting reasons with delegated backup contacts increases approvals by 20%.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-200">
+                <h2 class="text-xl font-bold mb-6 text-slate-700">My Leave Balance & Logs</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-2">
+                                <th class="pb-3">Type</th>
+                                <th class="pb-3">Duration</th>
+                                <th class="pb-3">Reason</th>
+                                <th class="pb-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaveHistory" class="text-sm text-slate-600">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loggedInEmpId = null;
+
+        async function fetchLogs() {
+            try {
+                // Fetch logged-in user details
+                const sessionRes = await fetch('/api/current-user');
+                if (sessionRes.ok) {
+                    const sessionUser = await sessionRes.json();
+                    loggedInEmpId = sessionUser.id; // fallback
+                    document.getElementById('profileIndicator').innerText = `Logged profile tracking active: ${sessionUser.fullName}`;
+                    
+                    // Fetch true Employee record matching the logged-in User
+                    const empRes = await fetch('/api/employees/me');
+                    if (empRes.ok) {
+                        const emp = await empRes.json();
+                        loggedInEmpId = emp.id;
+                    }
+                } else {
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                // Fetch data for targeted specific employee record array structure standard match list
+                const res = await fetch(`http://localhost:9090/api/leaves/employee/${loggedInEmpId}`);
+                const data = await res.json();
+                const tbody = document.getElementById('leaveHistory');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-slate-400 italic">No leaves applied in system yet.</td></tr>`;
+                    return;
+                }
+
+                data.forEach(item => {
+                    let badge = item.status === 'Approved' ? 'bg-green-100 text-green-700' : item.status === 'Rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+                    tbody.innerHTML += `
+                        <tr class="border-b border-slate-100 hover:bg-slate-50 transition">
+                            <td class="py-3 font-semibold text-slate-800">${item.leaveType}</td>
+                            <td class="py-3 text-xs">${item.startDate} to ${item.endDate || 'N/A'}</td>
+                            <td class="py-3 text-slate-500 text-xs">${item.reason}</td>
+                            <td class="py-3"><span class="px-2.5 py-1 text-xs font-bold rounded-lg ${badge}">${item.status}</span></td>
+                        </tr>`;
+                });
+            } catch (err) { console.error("History fetch client module failed layout rendering", err); }
+        }
+
+        async function submitLeaveRequest() {
+            const leaveData = {
+                employee: { id: parseInt(loggedInEmpId) },
+                startDate: document.getElementById('startDate').value,
+                endDate: document.getElementById('endDate').value,
+                leaveType: document.getElementById('leaveType').value,
+                reason: document.getElementById('reason').value,
+                status: "Pending"
+            };
+
+            if (!leaveData.startDate || !leaveData.reason) {
+                alert("Please fill necessary form options completely!");
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:9090/api/leaves/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(leaveData)
+                });
+
+                if (response.ok) {
+                    alert("Leave request submitted successfully code tracker logs generated!");
+                    fetchLogs();
+                } else { alert("Server handling error encountered."); }
+            } catch (error) { alert("Cannot access secure 9090 server routing mapping ports layer framework."); }
+        }
+
+        function optimizeReasonWithAI() {
+            const reasonEl = document.getElementById('reason');
+            let rawText = reasonEl.value.trim();
+            if (!rawText) {
+                rawText = "personal work";
+            }
+            
+            let polished = "";
+            const lower = rawText.toLowerCase();
+            if (lower.includes("marriage") || lower.includes("wedding") || lower.includes("ceremony")) {
+                polished = "Requesting annual leave to attend a critical family wedding ceremony. I have aligned with my immediate peers to handle any urgent operational tasks during this window.";
+            } else if (lower.includes("sick") || lower.includes("fever") || lower.includes("doctor") || lower.includes("medical") || lower.includes("hospital")) {
+                polished = "Applying for sick leave to address an unexpected health concern under professional medical advice. I will monitor my health closely and return fully energized.";
+            } else if (lower.includes("trip") || lower.includes("vacation") || lower.includes("travel") || lower.includes("holiday")) {
+                polished = "Applying for pre-planned annual leave for family personal time. I have resolved all active sprint deliverables and delegated emergency escalation protocols.";
+            } else if (lower.includes("personal") || lower.includes("work") || lower.includes("family") || lower.includes("urgent")) {
+                polished = "Kindly requesting time off to attend to important and urgent personal family obligations. I will ensure all active files are updated before my departure.";
+            } else {
+                polished = `Applying for leave to address ${rawText}. I have reviewed the department calendar and confirmed my absence will not impact the upcoming deadlines.`;
+            }
+            
+            reasonEl.value = polished;
+            updateAIAnalysis();
+        }
+        
+        function updateAIAnalysis() {
+            const leaveType = document.getElementById('leaveType').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const reason = document.getElementById('reason').value;
+            
+            let probability = 85;
+            let insights = [
+                "Low overlap in your department (Engineering) during these dates.",
+                "Leave history shows good policy adherence. No outstanding sprint delays predicted.",
+                "Pro Tip: Submitting reasons with delegated backup contacts increases approvals by 20%."
+            ];
+            
+            if (leaveType === "Sick Leave") {
+                probability = 98;
+                insights[0] = "Medical & sick leaves are pre-approved under standard HR welfare guidelines.";
+                insights[1] = "Team support resources mapped to ensure absolute service continuity.";
+            } else if (leaveType === "Unpaid Leave") {
+                probability = 72;
+                insights[0] = "Unpaid leaves require operational VP consensus check.";
+                insights[1] = "Caution: Exceeds standard quarterly allocation thresholds.";
+            }
+            
+            if (reason.length > 30) {
+                probability += 10;
+                insights[2] = "✨ AI-optimized description detected: Detailed justification boosts trust indices.";
+            }
+            
+            if (startDate && endDate) {
+                const diffTime = Math.abs(new Date(endDate) - new Date(startDate));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                if (diffDays > 5) {
+                    probability -= 15;
+                    insights[1] = "Duration exceeds 5 consecutive business days; requires secondary division head signoff.";
+                }
+            }
+            
+            probability = Math.min(Math.max(probability, 15), 99);
+            
+            document.getElementById('aiProbability').innerText = `${probability}%`;
+            document.getElementById('aiProgressBar').style.width = `${probability}%`;
+            document.getElementById('aiInsight1').innerText = insights[0];
+            document.getElementById('aiInsight2').innerText = insights[1];
+            document.getElementById('aiInsight3').innerText = insights[2];
+        }
+
+        window.onload = () => {
+            fetchLogs();
+            document.getElementById('leaveType').addEventListener('change', updateAIAnalysis);
+            document.getElementById('startDate').addEventListener('change', updateAIAnalysis);
+            document.getElementById('endDate').addEventListener('change', updateAIAnalysis);
+            document.getElementById('reason').addEventListener('input', updateAIAnalysis);
+            updateAIAnalysis();
+        };
+    </script>
+</body>
+
+</html>

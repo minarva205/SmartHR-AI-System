@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Analytics - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;850&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .chart-bar {
+            transition: height 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
+                <img src="assets/images/logo.png" alt="SmartHR" class="w-10 h-10 drop-shadow-md">
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-slate-400 cursor-pointer hover:text-blue-600 transition text-lg" title="Security Settings" onclick="window.location.href='security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="index.html" class="text-slate-500 hover:text-blue-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-6xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl shadow-sm">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-slate-800">My Analytics</h1>
+                    <p class="text-slate-500">Track your personal time records, leave stats, and work productivity metrics</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-violet-700 flex items-center gap-1.5 border border-violet-200" style="background:linear-gradient(90deg,rgba(124,58,237,0.12),rgba(59,130,246,0.1))">
+                    <i class="fas fa-wand-magic-sparkles text-violet-500"></i> AI-Powered
+                </span>
+                <div class="flex items-center space-x-2 text-xs font-semibold text-slate-500 bg-white border border-slate-200 px-4 py-2.5 rounded-full shadow-sm">
+                    <i class="far fa-calendar text-blue-500"></i>
+                    <span>Current Cycle: May 2026</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <!-- Card 1 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
+                <div class="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-blue-600 text-lg">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs font-bold uppercase block tracking-wider">Average Hours</span>
+                    <strong class="text-slate-800 text-xl font-extrabold">8.1 hrs / day</strong>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
+                <div class="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 text-lg">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs font-bold uppercase block tracking-wider">Attendance Rate</span>
+                    <strong class="text-slate-800 text-xl font-extrabold">96.4%</strong>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
+                <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center text-purple-600 text-lg">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs font-bold uppercase block tracking-wider">Tasks Done</span>
+                    <strong class="text-slate-800 text-xl font-extrabold">18 Completed</strong>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center space-x-4">
+                <div class="w-12 h-12 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-600 text-lg">
+                    <i class="fas fa-umbrella-beach"></i>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs font-bold uppercase block tracking-wider">Leave Balance</span>
+                    <strong class="text-slate-800 text-xl font-extrabold">14 Days Left</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Weekly Hours Chart -->
+            <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-lg font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-chart-bar text-blue-500 mr-2"></i> Weekly Time Tracking
+                        </h2>
+                        <span class="text-xs text-slate-400 font-semibold">Hours worked per day</span>
+                    </div>
+
+                    <!-- SVG Bar Chart -->
+                    <div class="h-64 flex items-end justify-between px-6 border-b border-slate-100 pb-2">
+                        <!-- Monday -->
+                        <div class="flex flex-col items-center space-y-2 w-12">
+                            <span class="text-[10px] font-bold text-slate-500">8.2h</span>
+                            <div class="w-8 bg-blue-600 rounded-t-lg chart-bar" style="height: 164px;"></div>
+                            <span class="text-xs font-bold text-slate-400">Mon</span>
+                        </div>
+                        <!-- Tuesday -->
+                        <div class="flex flex-col items-center space-y-2 w-12">
+                            <span class="text-[10px] font-bold text-slate-500">8.5h</span>
+                            <div class="w-8 bg-blue-600 rounded-t-lg chart-bar" style="height: 170px;"></div>
+                            <span class="text-xs font-bold text-slate-400">Tue</span>
+                        </div>
+                        <!-- Wednesday -->
+                        <div class="flex flex-col items-center space-y-2 w-12">
+                            <span class="text-[10px] font-bold text-slate-500">7.8h</span>
+                            <div class="w-8 bg-blue-500 rounded-t-lg chart-bar" style="height: 156px;"></div>
+                            <span class="text-xs font-bold text-slate-400">Wed</span>
+                        </div>
+                        <!-- Thursday -->
+                        <div class="flex flex-col items-center space-y-2 w-12">
+                            <span class="text-[10px] font-bold text-slate-500">8.1h</span>
+                            <div class="w-8 bg-blue-600 rounded-t-lg chart-bar" style="height: 162px;"></div>
+                            <span class="text-xs font-bold text-slate-400">Thu</span>
+                        </div>
+                        <!-- Friday -->
+                        <div class="flex flex-col items-center space-y-2 w-12">
+                            <span class="text-[10px] font-bold text-slate-500">8.0h</span>
+                            <div class="w-8 bg-blue-600 rounded-t-lg chart-bar" style="height: 160px;"></div>
+                            <span class="text-xs font-bold text-slate-400">Fri</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-between items-center mt-6 text-xs text-slate-400 font-semibold">
+                    <span>Target: 40 hrs / week</span>
+                    <span class="text-emerald-600"><i class="fas fa-circle-check"></i> Target Met (40.6 hrs total)</span>
+                </div>
+
+                <!-- AI Burnout Predictor -->
+                <div class="mt-6 p-4 rounded-2xl bg-violet-50/50 border border-violet-100 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-600 shrink-0">
+                        <i class="fas fa-brain text-xs"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-bold text-violet-900 block flex items-center gap-2">AI Workload Analysis</span>
+                        <span class="text-xs text-violet-700/80 mt-1 block">Your average hours have increased by 12% this week. Consider utilizing some of your 14 available leave days to maintain optimal productivity and avoid burnout.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time Off & Productivity Cards -->
+            <div class="space-y-6">
+                <!-- Leave Balance Details -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-plane-departure text-amber-500 mr-2"></i> Leave Allocations
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                <span>Sick Leaves</span>
+                                <span>4 / 6 Days Used</span>
+                            </div>
+                            <div class="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                                <div class="bg-red-500 h-full rounded-full" style="width: 66%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                <span>Casual Leaves</span>
+                                <span>2 / 8 Days Used</span>
+                            </div>
+                            <div class="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded-full" style="width: 25%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                <span>Annual Leaves</span>
+                                <span>0 / 12 Days Used</span>
+                            </div>
+                            <div class="w-full bg-slate-150 h-2 rounded-full overflow-hidden">
+                                <div class="bg-blue-500 h-full rounded-full" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Productivity -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm">
+                    <h2 class="text-lg font-bold text-slate-800 mb-4 flex items-center">
+                        <i class="fas fa-award text-purple-500 mr-2"></i> Monthly Milestone
+                    </h2>
+                    <p class="text-slate-500 text-xs leading-relaxed mb-4">You completed all scheduled compliance training and milestone tasks on time.</p>
+                    <div class="bg-purple-50/50 border border-purple-100 p-4 rounded-2xl flex items-center space-x-3">
+                        <i class="fas fa-circle-check text-purple-600 text-xl"></i>
+                        <div>
+                            <span class="text-xs font-bold text-purple-800 block">Performance Index: Good</span>
+                            <span class="text-[10px] text-purple-500 block">Calculated on task throughput</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Smart Coach -->
+                    <div class="mt-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 p-4 rounded-2xl flex flex-col gap-2 relative overflow-hidden">
+                        <div class="absolute -right-6 -top-6 w-20 h-20 bg-blue-500/10 rounded-full blur-2xl"></div>
+                        <div class="flex items-center gap-2">
+                            <i class="fas fa-sparkles text-blue-500 text-xs"></i>
+                            <span class="text-xs font-bold text-blue-900">AI Productivity Coach</span>
+                        </div>
+                        <span class="text-[10px] text-blue-700 leading-relaxed">Based on your activity patterns, you are most productive between 10:00 AM and 1:00 PM. We recommend scheduling deep work tasks during this window.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role === 'ADMIN' || user.role === 'HR') {
+                        window.location.href = 'admin-analytics.html';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+    </script>
+</body>
+
+</html>

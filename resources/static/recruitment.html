@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Referrals & Openings | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Careers & Internal Referrals</h1>
+                <p class="text-slate-500 text-sm mt-0.5" id="userWelcome">Help us grow our team by referring talented peers</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider" id="userRoleBadge">
+                    Employee Portal
+                </span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <!-- Active Job Openings + AI Card -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                    <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                        <i class="fas fa-briefcase text-blue-500 mr-2"></i>
+                        Active Openings
+                    </h3>
+                    <div id="jobList" class="space-y-4">
+                        <div class="animate-pulse flex space-x-4">
+                            <div class="flex-1 space-y-4 py-1">
+                                <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                                <div class="space-y-2"><div class="h-4 bg-slate-200 rounded"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Candidate Fit Scorer Card -->
+                <div class="bg-gradient-to-br from-slate-900 to-violet-950 text-white p-6 rounded-[2rem] shadow-lg border border-violet-900/40">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-9 h-9 rounded-xl bg-violet-500/20 border border-violet-400/30 flex items-center justify-center animate-pulse">
+                            <i class="fas fa-brain text-violet-400 text-sm"></i>
+                        </div>
+                        <div>
+                            <p class="font-bold text-sm text-white">AI Candidate Fit Scorer</p>
+                            <p class="text-[10px] text-violet-300">SmartHR AI™ — Real-time match engine</p>
+                        </div>
+                    </div>
+                    <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">Fill in candidate details and AI will instantly score their fit for the selected role based on experience, resume quality, and role demand.</p>
+                    <div class="bg-violet-950/60 rounded-2xl p-4 border border-violet-800/30 mb-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-semibold text-slate-300">Predicted Fit Score</span>
+                            <span class="text-sm font-black text-violet-300" id="aiFitScore">—</span>
+                        </div>
+                        <div class="w-full bg-violet-950 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-violet-400 to-pink-400 h-1.5 rounded-full transition-all duration-700" style="width:0%" id="aiFitBar"></div>
+                        </div>
+                    </div>
+                    <div class="space-y-1.5 text-[11px]">
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-circle-check text-violet-400 mt-0.5" id="aiTip1Icon"></i>
+                            <p class="text-slate-400" id="aiTip1">Enter experience years to activate scoring.</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <i class="fas fa-circle-info text-slate-500 mt-0.5" id="aiTip2Icon"></i>
+                            <p class="text-slate-400" id="aiTip2">Adding a resume link boosts trust score by +15 pts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Referral Form -->
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold mb-2 text-slate-700 flex items-center">
+                    <i class="fas fa-user-plus text-emerald-500 mr-2"></i>
+                    Refer a Candidate
+                </h3>
+                <p class="text-slate-400 text-xs mb-6">Enter candidate details below. They will be logged into our ATS for HR review.</p>
+                
+                <form id="referralForm" onsubmit="submitReferral(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Candidate's Full Name *</label>
+                        <input type="text" id="aName" required placeholder="John Doe"
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Email Address *</label>
+                            <input type="email" id="aEmail" required placeholder="john.doe@example.com"
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Phone Number *</label>
+                            <input type="text" id="aPhone" required placeholder="+91 98765 43210"
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Select Target Role *</label>
+                            <select id="aJob" required onchange="updateFitScore()"
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                                <option value="">Select Opening...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Years of Experience *</label>
+                            <input type="number" id="aExp" required min="0" placeholder="e.g. 3" oninput="updateFitScore()"
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Resume Link (Google Drive, Dropbox, URL) *</label>
+                        <input type="url" id="aResume" required placeholder="https://drive.google.com/..." oninput="updateFitScore()"
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    </div>
+
+                    <button type="submit" id="submitBtn"
+                        class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-200 mt-2">
+                        Submit Candidate Referral
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    document.getElementById('userWelcome').innerText = `Hello ${user.fullName || 'User'}, view job openings and refer friends.`;
+                    document.getElementById('userRoleBadge').innerText = `${user.role} Portal`;
+                    loadJobs();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function loadJobs() {
+            try {
+                const jRes = await fetch('/api/recruitment/jobs');
+                const jobs = await jRes.json();
+                
+                const jobList = document.getElementById('jobList');
+                const jobSelect = document.getElementById('aJob');
+
+                if (!jobs || jobs.length === 0) {
+                    jobList.innerHTML = `<div class="p-6 text-center text-slate-400 italic bg-slate-50 border rounded-2xl">No open job postings listed currently.</div>`;
+                    jobSelect.innerHTML = '<option value="">No openings available</option>';
+                    return;
+                }
+
+                // Render Job Postings with AI demand indicator
+                const demandLabels = ['High Demand', 'Fast-Filling', 'Competitive', 'Critical Role', 'Niche Role'];
+                const demandColors = ['text-rose-600 bg-rose-50','text-amber-600 bg-amber-50','text-violet-600 bg-violet-50','text-blue-600 bg-blue-50','text-slate-600 bg-slate-100'];
+                jobList.innerHTML = jobs.map((j, idx) => {
+                    const demand = demandLabels[idx % demandLabels.length];
+                    const dColor = demandColors[idx % demandColors.length];
+                    return `
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-300 hover:bg-white transition-all shadow-sm group">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-bold text-slate-800 text-base group-hover:text-blue-600 transition-colors">${j.jobTitle}</div>
+                                <div class="text-[11px] text-slate-400 font-bold uppercase mt-1 tracking-wider">
+                                    <i class="far fa-folder mr-1"></i> ${j.department} • <i class="far fa-clock mr-1"></i> ${j.jobType}
+                                </div>
+                            </div>
+                            <span class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider shrink-0 ml-2">${j.status || 'Open'}</span>
+                        </div>
+                        <div class="mt-2 flex items-center gap-1.5">
+                            <i class="fas fa-brain text-[9px] text-violet-500"></i>
+                            <span class="text-[9px] font-bold px-2 py-0.5 rounded-full ${dColor}">${demand}</span>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                // Populate Dropdown
+                jobSelect.innerHTML = '<option value="">Select Opening...</option>' + 
+                    jobs.map(j => `<option value="${j.id}">${j.jobTitle} (${j.department})</option>`).join('');
+
+            } catch (error) {
+                console.error("Failed to load jobs list", error);
+                document.getElementById('jobList').innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50 border rounded-2xl border-rose-100">Failed to connect to recruitment server.</div>`;
+            }
+        }
+
+        async function submitReferral(event) {
+            event.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Submitting Referral...";
+
+            const payload = {
+                fullName: document.getElementById('aName').value,
+                email: document.getElementById('aEmail').value,
+                phoneNumber: document.getElementById('aPhone').value,
+                resumeLink: document.getElementById('aResume').value,
+                experienceYears: parseInt(document.getElementById('aExp').value) || 0,
+                jobPosting: { id: parseInt(document.getElementById('aJob').value) },
+                applicationStatus: 'New'
+            };
+
+            try {
+                const res = await fetch('/api/recruitment/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Thank you! Candidate referred successfully.");
+                    document.getElementById('referralForm').reset();
+                } else {
+                    alert("Failed to submit candidate referral. Check fields.");
+                }
+            } catch (err) {
+                console.error("Referral submit error", err);
+                alert("Connection error occurred while submitting.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Candidate Referral";
+            }
+        }
+        function updateFitScore() {
+            const exp = parseInt(document.getElementById('aExp').value) || 0;
+            const resume = document.getElementById('aResume').value.trim();
+            const job = document.getElementById('aJob').value;
+
+            let score = 40;
+            if (exp >= 1) score += 15;
+            if (exp >= 3) score += 15;
+            if (exp >= 6) score += 10;
+            if (resume.length > 10) score += 15;
+            if (job) score += 5;
+            score = Math.min(score, 99);
+
+            let label = score >= 80 ? 'Strong Match ✦' : score >= 60 ? 'Good Fit' : 'Partial Match';
+            let tip1 = score >= 80
+                ? 'Excellent experience level — candidate is ready for fast-track review.'
+                : exp < 3 ? 'Below 3 yrs exp may require L1 role adjustment.'
+                : 'Moderate profile — HR screening recommended.';
+
+            document.getElementById('aiFitScore').innerText = score + '%';
+            document.getElementById('aiFitBar').style.width = score + '%';
+            document.getElementById('aiTip1').innerText = tip1;
+            document.getElementById('aiTip2').innerText = resume.length > 10
+                ? '✅ Resume link detected — trust score boosted by +15 pts.'
+                : 'Add a resume link to boost candidate trust score by +15 pts.';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('aJob').addEventListener('change', updateFitScore);
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Employee Help Desk | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(99,102,241,.25); }
+        .shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 12px;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(99,102,241,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(99,102,241,0); }
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-6xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">IT Help Desk</h1>
+                <p class="text-slate-500 text-sm mt-0.5">Submit technical complaints, request software permissions, or inquire with HR</p>
+            </div>
+            <div>
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                    Support Ticket Portal
+                </span>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <!-- Create Ticket Form -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                    Create New Ticket
+                </h3>
+                <form id="createTicketForm" onsubmit="createTicket(event)" class="space-y-4 text-left">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Subject *</label>
+                        <input type="text" id="title" placeholder="e.g. Broken laptop charger" required
+                            class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition font-semibold">
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Category *</label>
+                            <select id="category" required
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                                <option value="Hardware Issue">Hardware Issue</option>
+                                <option value="Software Issue">Software Issue</option>
+                                <option value="Network/Access">Network/Access</option>
+                                <option value="HR Inquiry">HR Inquiry</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Priority *</label>
+                            <select id="priority" required
+                                class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-semibold transition">
+                                <option value="Low">Low</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="High">High</option>
+                                <option value="Critical">Critical</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-bold text-slate-400 uppercase">Description *</label>
+                            <button type="button" onclick="aiFormatTicket()" class="ai-btn text-[10px] font-black bg-gradient-to-r from-violet-500 to-purple-600 text-white px-3 py-1 rounded-lg ai-badge flex items-center gap-1.5">
+                                <i class="fas fa-wand-magic-sparkles"></i> AI Format
+                            </button>
+                        </div>
+                        <div id="aiTicketLoader" class="hidden shimmer h-8 w-full mb-2"></div>
+                        <textarea id="description" placeholder="Provide system details, error codes, or inquiry description..." required rows="3"
+                            class="w-full p-4 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" id="submitBtn"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition shadow-md shadow-blue-100">
+                        Submit Ticket
+                    </button>
+                </form>
+            </div>
+
+            <!-- Tickets List -->
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-ticket text-emerald-500 mr-2"></i>
+                    My Support Tickets
+                </h3>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-wider border-b border-slate-100">
+                                <th class="py-3 px-4">Ticket Details</th>
+                                <th class="py-3 px-4">Classification</th>
+                                <th class="py-3 px-4">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ticketTableBody" class="divide-y divide-slate-100 text-slate-600 text-xs font-semibold">
+                            <tr>
+                                <td colspan="3" class="py-10 text-center text-slate-400 italic">
+                                    Loading your request history...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    currentUser = user;
+                    fetchTickets();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function fetchTickets() {
+            try {
+                const response = await fetch('/api/helpdesk/tickets');
+                const tickets = await response.json();
+                const tbody = document.getElementById('ticketTableBody');
+                
+                if (!tickets || tickets.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="py-12 text-center text-slate-400 italic">
+                                <i class="fas fa-check-circle text-3xl mb-3 text-slate-200 block"></i>
+                                No active support tickets. All systems normal.
+                            </td>
+                        </tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = tickets.map(ticket => {
+                    const priorityPill = ticket.priority === 'Critical' || ticket.priority === 'High' ? 
+                        'bg-rose-50 text-rose-700 border-rose-100' : 'bg-slate-100 text-slate-600 border-slate-200';
+
+                    const statusPill = ticket.status === 'Resolved' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' :
+                                       ticket.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+
+                    return `
+                        <tr class="hover:bg-slate-50/50 transition">
+                            <td class="py-4 px-4">
+                                <div class="font-extrabold text-slate-800 text-sm">${ticket.title || 'Untitled Ticket'}</div>
+                                <div class="text-slate-400 mt-1 text-[11px] leading-relaxed max-w-sm">${ticket.description || '-'}</div>
+                            </td>
+                            <td class="py-4 px-4 space-y-1">
+                                <div class="font-bold text-slate-500">${ticket.category}</div>
+                                <span class="px-2 py-0.5 rounded text-[8px] font-black uppercase border ${priorityPill}">
+                                    ${ticket.priority}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase border ${statusPill}">
+                                    ${ticket.status || 'Open'}
+                                </span>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error("Failed to fetch tickets", err);
+                document.getElementById('ticketTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="3" class="py-6 text-center text-rose-500 bg-rose-50">
+                            Error loading support tickets.
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        async function createTicket(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerText = "Submitting...";
+
+            const ticketData = {
+                title: document.getElementById('title').value,
+                category: document.getElementById('category').value,
+                priority: document.getElementById('priority').value,
+                description: document.getElementById('description').value
+            };
+
+            try {
+                const res = await fetch('/api/helpdesk/tickets', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(ticketData)
+                });
+                
+                if (res.ok) {
+                    document.getElementById('createTicketForm').reset();
+                    document.getElementById('category').value = 'Hardware Issue';
+                    document.getElementById('priority').value = 'Medium';
+                    fetchTickets();
+                } else {
+                    alert("Failed to submit ticket.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection error.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Submit Ticket";
+            }
+        }
+
+        /* ─── GEMINI AI ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key";
+        async function callGemini(prompt) {
+            const r = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                { method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+            );
+            if (!r.ok) throw new Error('API error');
+            const d = await r.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function aiFormatTicket() {
+            const txtArea = document.getElementById('description');
+            const loader = document.getElementById('aiTicketLoader');
+            const originalText = txtArea.value.trim();
+
+            if (!originalText) {
+                alert("Please draft a brief description first.");
+                return;
+            }
+
+            loader.classList.remove('hidden');
+            txtArea.disabled = true;
+
+            const prompt = `You are an IT Helpdesk AI. Rewrite this employee ticket description to be very clear, professional, and detailed for the IT team. Original: "${originalText}"`;
+
+            try {
+                const formatted = await callGemini(prompt);
+                txtArea.value = formatted.trim();
+            } catch(e) {
+                // Fallback
+                txtArea.value = "Issue Description:\n" + originalText + "\n\n(Auto-formatted for clarity. Please investigate as soon as possible.)";
+            }
+
+            loader.classList.add('hidden');
+            txtArea.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

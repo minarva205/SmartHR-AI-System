@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HR Smart Alerts & Compliance Center | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgb(15, 23, 42) 0%, rgb(9, 13, 26) 90.1%);
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glow-red:hover {
+            box-shadow: 0 10px 30px -5px rgba(239, 68, 68, 0.25);
+            border-color: rgba(239, 68, 68, 0.3);
+            transition: all 0.3s ease;
+        }
+        .glow-amber:hover {
+            box-shadow: 0 10px 30px -5px rgba(245, 158, 11, 0.25);
+            border-color: rgba(245, 158, 11, 0.3);
+            transition: all 0.3s ease;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        input, select, textarea {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #f8fafc !important;
+        }
+        input:focus, select:focus, textarea:focus {
+            border-color: #ef4444 !important;
+            outline: none !important;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-100 min-h-screen">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="admin-dashboard.html" class="inline-flex items-center text-red-500 hover:text-red-400 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Admin Dashboard
+                </a>
+                <h1 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-amber-400 to-amber-300 tracking-tight font-black">
+                    Smart Alerts Compliance Center
+                </h1>
+                <p class="text-slate-400 text-sm mt-0.5">Predictive AI-generated deadlines, compliance audits, payroll risks, and active organizational triggers.</p>
+            </div>
+            <div>
+                <span class="text-xs bg-red-600 text-white px-4 py-2 rounded-full font-extrabold uppercase tracking-wider shadow-md shadow-red-900/30 flex items-center">
+                    <i class="fas fa-shield-halved mr-2"></i> HR Administrator
+                </span>
+            </div>
+        </header>
+
+        <!-- KPI Scorecards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <!-- Compliance Circle -->
+            <div class="glass-panel p-6 rounded-3xl text-center glow-red transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Compliance Score</span>
+                <div class="relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-red-600 to-amber-500 rounded-full shadow-lg text-white font-black text-3xl" id="complianceCircle">
+                    --%
+                </div>
+                <span class="text-xs font-bold text-red-400 mt-3" id="complianceHealthText">Analyzing health...</span>
+            </div>
+
+            <!-- Severity Counts -->
+            <div class="glass-panel p-6 rounded-3xl glow-amber transition-all md:col-span-2 flex flex-col justify-between">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-4 block">Pending Severity Breakdown</span>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                            <span>High Severity 🚨</span>
+                            <span id="highSeverityText">0 active</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+                            <div class="bg-red-500 h-full rounded-full transition-all duration-700" id="highSeverityBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                            <span>Medium Severity ⚠️</span>
+                            <span id="mediumSeverityText">0 active</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+                            <div class="bg-amber-500 h-full rounded-full transition-all duration-700" id="mediumSeverityBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-xs font-bold text-slate-300 mb-1">
+                            <span>Low Severity ℹ️</span>
+                            <span id="lowSeverityText">0 active</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-white/5">
+                            <div class="bg-blue-500 h-full rounded-full transition-all duration-700" id="lowSeverityBar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total stats -->
+            <div class="glass-panel p-6 rounded-3xl text-center glow-red transition-all flex flex-col justify-center items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Total System Alerts</span>
+                <div class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-amber-300" id="totalAlertsText">0</div>
+                <div class="flex justify-center gap-2 mt-4 text-[9px] font-black tracking-wider uppercase text-slate-400">
+                    <span class="bg-red-950/80 text-red-400 border border-red-800/30 px-2 py-0.5 rounded" id="pendingStats">0 Pending</span>
+                    <span class="bg-emerald-950/80 text-emerald-400 border border-emerald-800/30 px-2 py-0.5 rounded" id="resolvedStats">0 Resolved</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ledger & Chatbot Split-screen -->
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 mb-12">
+            
+            <!-- Ledger list & manual creator -->
+            <div class="lg:col-span-3 space-y-6">
+                <!-- Alerts Ledger -->
+                <div class="glass-panel p-8 rounded-3xl shadow-lg glow-red transition-all">
+                    
+                    <!-- Filters -->
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <h3 class="text-xl font-bold text-slate-100 flex items-center">
+                            <i class="fas fa-inbox text-red-500 mr-3"></i> System Alerts Ledger
+                        </h3>
+                        <div class="flex gap-2 w-full md:w-auto">
+                            <select id="filterType" onchange="loadAlerts()"
+                                class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none shadow-sm">
+                                <option value="ALL">All Categories</option>
+                                <option value="COMPLIANCE">Compliance</option>
+                                <option value="DEADLINE">Deadlines</option>
+                                <option value="PAYROLL">Payroll</option>
+                                <option value="SYSTEM">System/Review</option>
+                            </select>
+                            <select id="filterSeverity" onchange="loadAlerts()"
+                                class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none shadow-sm">
+                                <option value="ALL">All Severities</option>
+                                <option value="HIGH">High Severity</option>
+                                <option value="MEDIUM">Medium Severity</option>
+                                <option value="LOW">Low Severity</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ledger content list -->
+                    <div id="ledgerList" class="space-y-6 max-h-[550px] overflow-y-auto pr-2 scrollbar-hide">
+                        <p class="text-slate-400 italic text-sm">Initializing system alerts ledger...</p>
+                    </div>
+                </div>
+
+                <!-- Manual Alert Trigger Panel -->
+                <div class="glass-panel p-8 rounded-3xl shadow-lg glow-amber transition-all">
+                    <h3 class="text-xl font-bold text-slate-100 flex items-center mb-6">
+                        <i class="fas fa-bolt text-amber-500 mr-3"></i> Trigger Predictive/Custom Alert
+                    </h3>
+                    <form id="createAlertForm" onsubmit="triggerAlert(event)" class="space-y-4 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Assign Target Employee</label>
+                                <select id="employeeSelect" required
+                                    class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none">
+                                    <option value="">Select Employee...</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Alert Category</label>
+                                <select id="alertType" required
+                                    class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none">
+                                    <option value="COMPLIANCE">Security & Compliance</option>
+                                    <option value="DEADLINE">Deadline Overrun</option>
+                                    <option value="PAYROLL">Payroll & Tax</option>
+                                    <option value="SYSTEM">System/Feedback</option>
+                                    <option value="LEAVE">Leave Management</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Severity Level</label>
+                                <select id="alertSeverity" required
+                                    class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none">
+                                    <option value="HIGH">🚨 High Severity</option>
+                                    <option value="MEDIUM">⚠️ Medium Severity</option>
+                                    <option value="LOW">ℹ️ Low Severity</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Deadline Target (Optional)</label>
+                                <input type="datetime-local" id="alertDeadline"
+                                    class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Alert Title</label>
+                            <input type="text" id="alertTitle" placeholder="e.g. Mandatory Compliance Certification Pending" required
+                                class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">Detailed Notification Message</label>
+                            <textarea id="alertMessage" placeholder="Describe the audit deficiency or upcoming deadline risk in detail..." rows="3" required
+                                class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-slate-400 mb-1.5">AI Reasoning Override (Optional)</label>
+                            <textarea id="alertAiReasoning" placeholder="Input specific security analysis or predictive telemetry data. Leave blank to let the AI Engine auto-fill." rows="2"
+                                class="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-gradient-to-r from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white font-extrabold py-3.5 rounded-xl transition shadow-lg shadow-red-950/20 text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                            <i class="fas fa-paper-plane"></i> Deploy Alert Node
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Side widget: Strategic chatbot advice -->
+            <div class="lg:col-span-2">
+                <div class="glass-panel rounded-3xl shadow-lg h-[800px] flex flex-col glow-red transition-all">
+                    
+                    <!-- Chat header -->
+                    <div class="p-6 border-b border-slate-700 bg-gradient-to-r from-red-950/40 to-amber-950/40 rounded-t-3xl flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-red-600 to-amber-500 text-white flex items-center justify-center shadow-lg">
+                                <i class="fas fa-brain text-lg"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-slate-100 text-sm">Alerts & Compliance Advisor</h4>
+                                <p class="text-[10px] text-amber-400 font-bold uppercase tracking-wider flex items-center">
+                                    <span class="w-2.5 h-2.5 bg-red-500 rounded-full inline-block mr-1.5 animate-ping"></span> Predictive Consultant
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat conversation messages list -->
+                    <div id="chatMessages" class="flex-1 p-6 overflow-y-auto space-y-4 text-xs scrollbar-hide">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 rounded-full bg-red-950 border border-red-800 text-red-400 flex items-center justify-center font-bold text-xs shrink-0">
+                                <i class="fas fa-robot"></i>
+                            </div>
+                            <div class="glass-panel rounded-2xl p-4 shadow-sm text-slate-300 leading-relaxed max-w-[85%]">
+                                Hello Administrator! I am the **Smart Alerts AI Advisor**. I audit compliance levels, analyze high-severity deadline overruns, and draft personalized warning notices. Ask me:
+                                <br><br>
+                                • *"What are the critical compliance risks right now?"*<br>
+                                • *"What is our current compliance score?"*<br>
+                                • *"Draft an email template for safety audit compliance."*
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input form -->
+                    <div class="p-4 border-t border-slate-700 bg-slate-900/60 rounded-b-3xl">
+                        <form id="chatForm" onsubmit="sendChatMessage(event)" class="flex gap-2">
+                            <input type="text" id="chatInput" placeholder="Ask AI Advisor about audit status, template drafts..." required
+                                class="flex-1 px-4 py-3 border border-slate-700 rounded-xl text-xs outline-none bg-slate-950 text-slate-100 shadow-sm font-medium">
+                            <button type="submit" id="chatSendBtn"
+                                class="bg-gradient-to-tr from-red-600 to-amber-500 hover:from-red-700 hover:to-amber-600 text-white font-bold px-5 py-3 rounded-xl transition shadow-md flex items-center justify-center">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- AI Executive Report modal slide-over (Hidden by default) -->
+        <div id="reportModal" class="fixed inset-0 z-50 overflow-hidden hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm transition-opacity" onclick="closeReportModal()"></div>
+            
+            <div class="absolute inset-y-0 right-0 max-w-full flex pl-10">
+                <div class="w-screen max-w-md">
+                    <div class="h-full flex flex-col bg-slate-900 border-l border-white/10 shadow-2xl rounded-l-[2.5rem] overflow-y-auto">
+                        <div class="p-8 border-b border-slate-800 bg-gradient-to-r from-red-950/40 to-slate-950/40 flex items-center justify-between">
+                            <h2 class="text-xl font-black text-slate-100" id="reportTitle">AI Alert Investigation</h2>
+                            <button type="button" onclick="closeReportModal()" class="text-slate-400 hover:text-red-400 transition">
+                                <i class="fas fa-times text-xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="p-8 space-y-6 text-xs text-slate-300" id="reportContent">
+                            <!-- Injected dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let employeesMap = {};
+        let activeAlerts = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check for admin
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admin privileges required.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    initAdminDashboard();
+                })
+                .catch(() => {
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function initAdminDashboard() {
+            try {
+                // Fetch all employees to populate dropdown & map details
+                const empRes = await fetch('/api/employees/all');
+                if (empRes.ok) {
+                    const employees = await empRes.json();
+                    const select = document.getElementById('employeeSelect');
+                    employees.forEach(e => {
+                        employeesMap[e.id] = e;
+                        const opt = document.createElement('option');
+                        opt.value = e.id;
+                        opt.textContent = `${e.fullName} (${e.department || 'General'})`;
+                        select.appendChild(opt);
+                    });
+                }
+                loadStats();
+                loadAlerts();
+            } catch (err) {
+                console.error("Initialization error", err);
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/alerts/stats');
+                if (res.ok) {
+                    const stats = await res.json();
+                    
+                    // Compliance score circle
+                    const score = Math.round(stats.complianceScore);
+                    const circle = document.getElementById('complianceCircle');
+                    circle.innerText = `${score}%`;
+                    
+                    let healthText = "Analyzing Compliance...";
+                    if (score >= 85) {
+                        healthText = "Excellent Health 🎉";
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-emerald-500 to-teal-500 rounded-full shadow-lg shadow-emerald-950/20 text-white font-black text-3xl animate-pulse";
+                    } else if (score <= 50) {
+                        healthText = "Vulnerable Status 🚨";
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-red-600 to-red-700 rounded-full shadow-lg shadow-red-900/30 text-white font-black text-3xl";
+                    } else {
+                        healthText = "Moderate Risks Detected ⚠️";
+                        circle.className = "relative w-28 h-28 flex items-center justify-center bg-gradient-to-tr from-amber-500 to-amber-600 rounded-full shadow-lg shadow-amber-900/30 text-white font-black text-3xl";
+                    }
+                    document.getElementById('complianceHealthText').innerText = healthText;
+
+                    // Totals
+                    document.getElementById('totalAlertsText').innerText = stats.total;
+                    document.getElementById('pendingStats').innerText = `${stats.pending} Pending`;
+                    document.getElementById('resolvedStats').innerText = `${stats.resolved} Resolved`;
+
+                    // Bars
+                    const totalPending = stats.pending;
+                    if (totalPending > 0) {
+                        const hiPct = Math.round((stats.highSeverity / totalPending) * 100);
+                        const medPct = Math.round((stats.mediumSeverity / totalPending) * 100);
+                        const lowPct = Math.round((stats.lowSeverity / totalPending) * 100);
+
+                        document.getElementById('highSeverityText').innerText = `${stats.highSeverity} active (${hiPct}%)`;
+                        document.getElementById('highSeverityBar').style.width = `${hiPct}%`;
+
+                        document.getElementById('mediumSeverityText').innerText = `${stats.mediumSeverity} active (${medPct}%)`;
+                        document.getElementById('mediumSeverityBar').style.width = `${medPct}%`;
+
+                        document.getElementById('lowSeverityText').innerText = `${stats.lowSeverity} active (${lowPct}%)`;
+                        document.getElementById('lowSeverityBar').style.width = `${lowPct}%`;
+                    } else {
+                        document.getElementById('highSeverityText').innerText = "0 active (0%)";
+                        document.getElementById('highSeverityBar').style.width = "0%";
+                        document.getElementById('mediumSeverityText').innerText = "0 active (0%)";
+                        document.getElementById('mediumSeverityBar').style.width = "0%";
+                        document.getElementById('lowSeverityText').innerText = "0 active (0%)";
+                        document.getElementById('lowSeverityBar').style.width = "0%";
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function loadAlerts() {
+            try {
+                const res = await fetch('/api/alerts/admin/all');
+                if (res.ok) {
+                    const data = await res.json();
+                    activeAlerts = data;
+
+                    const typeFilter = document.getElementById('filterType').value;
+                    const severityFilter = document.getElementById('filterSeverity').value;
+
+                    let filtered = data.filter(a => {
+                        const matchesType = typeFilter === 'ALL' || a.type === typeFilter;
+                        const matchesSeverity = severityFilter === 'ALL' || a.severity === severityFilter;
+                        return matchesType && matchesSeverity;
+                    });
+
+                    const container = document.getElementById('ledgerList');
+                    if (filtered.length === 0) {
+                        container.innerHTML = `
+                            <div class="py-12 text-center text-slate-400 italic">
+                                <i class="fas fa-bell-slash text-4xl mb-4 text-slate-700 block"></i>
+                                No matching alerts found.
+                            </div>`;
+                        return;
+                    }
+
+                    container.innerHTML = filtered.map(a => {
+                        const formattedDate = a.createdAt ? new Date(a.createdAt).toLocaleDateString(undefined, {
+                            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        }) : 'Recent';
+
+                        const formattedDeadline = a.deadline ? new Date(a.deadline).toLocaleDateString(undefined, {
+                            year: 'numeric', month: 'short', day: 'numeric'
+                        }) : 'None';
+
+                        const isOverdue = a.deadline && new Date(a.deadline) < new Date() && !a.resolved;
+
+                        const severityClass = a.severity === 'HIGH' ? 'bg-red-950/80 text-red-400 border border-red-900/30' :
+                                              a.severity === 'MEDIUM' ? 'bg-amber-950/80 text-amber-400 border border-amber-900/30' :
+                                              'bg-blue-950/80 text-blue-400 border border-blue-900/30';
+
+                        const typeClass = 'bg-slate-800 text-slate-300 border border-slate-700';
+
+                        const resolvedClass = a.resolved ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-800/30' : 'bg-red-950/80 text-red-400 border border-red-800/30';
+
+                        const emp = employeesMap[a.employeeId];
+                        const pic = emp && emp.profilePic ? emp.profilePic : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(a.employeeName)}`;
+                        const dept = emp && emp.department ? emp.department : 'General Staff';
+
+                        return `
+                            <div class="glass-panel p-6 rounded-[2rem] hover:border-red-500/50 transition relative group shadow-sm">
+                                <!-- Top Right Actions -->
+                                <div class="absolute top-6 right-6 flex items-center gap-3">
+                                    ${!a.resolved ? `
+                                        <button onclick="resolveAlert(${a.id})" 
+                                            class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm transition">
+                                            <i class="fas fa-check mr-1"></i> Resolve
+                                        </button>` : `
+                                        <span class="px-3 py-1.5 bg-slate-800 text-slate-500 rounded-xl text-[10px] font-black uppercase tracking-wider">
+                                            <i class="fas fa-check-double mr-1"></i> Resolved
+                                        </span>
+                                    `}
+                                    <button onclick="deleteAlert(${a.id})" 
+                                        class="text-slate-500 hover:text-red-500 transition p-1" 
+                                        title="Delete Alert">
+                                        <i class="fas fa-trash-alt text-xs"></i>
+                                    </button>
+                                </div>
+                                
+                                <!-- Header Details -->
+                                <div class="flex items-center space-x-3 mb-4 pr-32">
+                                    <img src="${pic}" class="w-10 h-10 rounded-full border border-white/5 shadow-sm shrink-0">
+                                    <div>
+                                        <div class="text-xs font-extrabold text-slate-100 flex items-center gap-1.5">
+                                            ${a.employeeName} 
+                                        </div>
+                                        <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">${dept} • Assigned ${formattedDate}</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Badges -->
+                                <div class="flex gap-2 mb-4">
+                                    <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${typeClass}">
+                                        ${a.type}
+                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${severityClass}">
+                                        ${a.severity} Severity
+                                    </span>
+                                    <span class="px-2.5 py-0.5 rounded-lg text-[9px] font-black uppercase tracking-wider ${isOverdue ? 'bg-red-900 text-red-200 animate-pulse border border-red-500/20' : 'bg-slate-800 text-slate-400 border border-slate-700'}">
+                                        Deadline: ${formattedDeadline} ${isOverdue ? '(OVERDUE)' : ''}
+                                    </span>
+                                </div>
+
+                                <h4 class="font-extrabold text-slate-100 text-sm mb-2">${a.title}</h4>
+                                <p class="text-xs text-slate-400 leading-relaxed mb-6">${a.message}</p>
+                                
+                                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between pt-4 border-t border-white/5">
+                                    <div class="flex items-center text-[9px] font-black uppercase tracking-wider ${resolvedClass} px-2.5 py-1.5 rounded-lg">
+                                        Status: ${a.resolved ? 'RESOLVED' : 'PENDING'}
+                                    </div>
+                                    <button onclick="openReport(${a.id})"
+                                        class="bg-red-950/40 text-red-400 hover:bg-red-900/40 border border-red-800/30 font-extrabold text-[10px] uppercase tracking-wider px-4 py-2 rounded-xl transition">
+                                        <i class="fas fa-brain mr-1.5"></i> View AI Analysis
+                                    </button>
+                                </div>
+                            </div>`;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function resolveAlert(id) {
+            try {
+                const res = await fetch(`/api/alerts/${id}/resolve`, { method: 'PUT' });
+                if (res.ok) {
+                    loadStats();
+                    loadAlerts();
+                } else {
+                    alert("Failed to resolve alert.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function deleteAlert(id) {
+            if (!confirm("Are you sure you want to delete this alert node?")) return;
+            try {
+                const res = await fetch(`/api/alerts/${id}`, { method: 'DELETE' });
+                if (res.ok) {
+                    loadStats();
+                    loadAlerts();
+                } else {
+                    alert("Failed to delete alert.");
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function triggerAlert(event) {
+            event.preventDefault();
+            const employeeId = document.getElementById('employeeSelect').value;
+            const type = document.getElementById('alertType').value;
+            const severity = document.getElementById('alertSeverity').value;
+            const deadline = document.getElementById('alertDeadline').value;
+            const title = document.getElementById('alertTitle').value;
+            const message = document.getElementById('alertMessage').value;
+            const aiReasoning = document.getElementById('alertAiReasoning').value;
+
+            const payload = {
+                employeeId: parseInt(employeeId),
+                type,
+                severity,
+                title,
+                message,
+                aiReasoning: aiReasoning || null,
+                deadline: deadline ? deadline : null
+            };
+
+            try {
+                const res = await fetch('/api/alerts/admin/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    document.getElementById('createAlertForm').reset();
+                    loadStats();
+                    loadAlerts();
+                    alert("Predictive Alert Node successfully deployed into environment!");
+                } else {
+                    const text = await res.text();
+                    alert("Error: " + text);
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Connection breakdown on alert dispatch path.");
+            }
+        }
+
+        function openReport(id) {
+            const a = activeAlerts.find(al => al.id === id);
+            if (!a) return;
+
+            const modal = document.getElementById('reportModal');
+            const title = document.getElementById('reportTitle');
+            const content = document.getElementById('reportContent');
+
+            title.innerText = `AI Alert Analysis`;
+            
+            const severityColor = a.severity === 'HIGH' ? "bg-red-500" : a.severity === 'MEDIUM' ? "bg-amber-500" : "bg-blue-500";
+
+            content.innerHTML = `
+                <!-- Metrics Card -->
+                <div class="glass-panel rounded-3xl p-6 shadow-sm border border-white/5">
+                    <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Profile</div>
+                    <div class="font-bold text-slate-100 mb-4">${a.employeeName}</div>
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <span class="block text-[8px] font-bold text-slate-400 uppercase">Risk Level</span>
+                            <span class="text-xs font-black text-slate-100 px-2 py-0.5 rounded-md inline-block mt-1 ${severityColor}">${a.severity}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[8px] font-bold text-slate-400 uppercase">Category</span>
+                            <span class="text-xs font-black text-slate-100 bg-slate-800 border border-slate-700 px-2 py-0.5 rounded-md inline-block mt-1">${a.type}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alert Details -->
+                <div class="space-y-2">
+                    <h4 class="font-extrabold text-slate-100 text-sm">Alert Title & Trigger</h4>
+                    <p class="font-bold text-amber-400">${a.title}</p>
+                    <p class="glass-panel p-4 border rounded-2xl leading-relaxed text-slate-300 italic">"${a.message}"</p>
+                </div>
+
+                <!-- AI Reasonings -->
+                <div class="space-y-2">
+                    <h4 class="font-extrabold text-slate-100 text-sm flex items-center">
+                        <i class="fas fa-brain text-red-500 mr-2 animate-pulse"></i> AI Intelligence Reasoning
+                    </h4>
+                    <div class="bg-red-950/20 border border-red-900/30 rounded-2xl p-5 text-slate-300 leading-relaxed">
+                        ${a.aiReasoning ? a.aiReasoning.replace(/\n/g, "<br>") : '- No telemetry reasoning available.'}
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.add('hidden');
+        }
+
+        async function sendChatMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            appendMessage(message, true);
+
+            try {
+                const res = await fetch('/api/alerts/ai-advisor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    appendMessage(data.response, false);
+                } else {
+                    appendMessage("Unable to connect to the compliance central logic engine.", false);
+                }
+            } catch (err) {
+                console.error(err);
+                appendMessage("Network failure. Verify active service endpoints.", false);
+            }
+        }
+
+        function appendMessage(text, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = "flex items-start space-x-3 " + (isUser ? "justify-end" : "");
+
+            const formattedText = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            if (isUser) {
+                messageDiv.innerHTML = `
+                    <div class="bg-gradient-to-tr from-red-600 to-amber-500 text-white rounded-2xl p-3.5 shadow-sm leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-red-950 border border-red-800 text-red-400 flex items-center justify-center font-bold text-xs shrink-0">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="glass-panel rounded-2xl p-4 shadow-sm text-slate-300 leading-relaxed max-w-[85%]">
+                        ${formattedText}
+                    </div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

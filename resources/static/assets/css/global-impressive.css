@@ -1,0 +1,89 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Premium Global Font and Smooth Background */
+body {
+    font-family: 'Outfit', sans-serif !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%) !important;
+    background-attachment: fixed !important;
+    color: #1e293b;
+    position: relative;
+    overflow-x: hidden;
+}
+
+/* Subtle Animated Glass Orbs in Background */
+body::before {
+    content: '';
+    position: fixed;
+    top: -30%;
+    left: -10%;
+    width: 80vw;
+    height: 80vw;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(255,255,255,0) 60%);
+    animation: float1 20s ease-in-out infinite alternate;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+body::after {
+    content: '';
+    position: fixed;
+    bottom: -20%;
+    right: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(255,255,255,0) 60%);
+    animation: float2 25s ease-in-out infinite alternate;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: 50%;
+}
+
+@keyframes float1 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(5%, 5%) scale(1.05); }
+}
+
+@keyframes float2 {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(-5%, -5%) scale(1.05); }
+}
+
+/* Glassmorphism for Cards and Modals */
+.bg-white, .bg-slate-50 {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.6) !important;
+}
+
+/* Smooth Shadows */
+.shadow-sm, .shadow-md, .shadow-lg, .shadow-xl, .shadow-2xl {
+    box-shadow: 0 10px 40px -10px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* Premium Button Glow */
+button, a.bg-blue-600, a.bg-indigo-600, a.bg-purple-600 {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+button:hover, a.bg-blue-600:hover, a.bg-indigo-600:hover, a.bg-purple-600:hover {
+    transform: translateY(-2px) !important;
+}
+
+.bg-blue-600 {
+    box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3) !important;
+}
+.bg-blue-600:hover {
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5) !important;
+}
+
+/* Form Inputs styling */
+input, select, textarea {
+    font-family: 'Outfit', sans-serif !important;
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.3s ease !important;
+}
+input:focus, select:focus, textarea:focus {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}

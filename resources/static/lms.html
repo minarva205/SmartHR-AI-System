@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Training & LMS Portal | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Confetti & Markdown Rendering for AI Features -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+            <div>
+                <a href="index.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    Back to Dashboard
+                </a>
+                <h1 class="text-3xl font-black text-slate-800 tracking-tight">Learning Management System</h1>
+                <p class="text-slate-500 text-sm mt-0.5" id="userWelcome">Improve your capabilities with company courses</p>
+            </div>
+            <div>
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider" id="userRoleBadge">
+                    Employee Portal
+                </span>
+            </div>
+        </header>
+
+        <!-- Video Learning Section -->
+        <div class="bg-slate-900 p-8 rounded-[2rem] shadow-2xl mb-8 border border-slate-800 text-white relative overflow-hidden hidden"
+            id="videoSection">
+            <div class="absolute top-0 right-0 p-8 opacity-5">
+                <i class="fas fa-magic text-9xl"></i>
+            </div>
+            
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Video Player & Syllabus Chapter Info -->
+                <div class="lg:col-span-2 flex flex-col gap-6">
+                    <div>
+                        <h3 class="text-2xl font-black mb-1 flex items-center text-blue-400">
+                            <i class="fas fa-video mr-3 animate-pulse"></i> <span id="playingCourseName">Select a course to play</span>
+                        </h3>
+                        <p class="text-slate-400 text-sm" id="playingCourseDesc">Watch the video course. Your learning progress is auto-tracked.</p>
+                    </div>
+                    
+                    <div class="rounded-[1.5rem] overflow-hidden bg-black shadow-2xl border-4 border-slate-800 relative">
+                        <video id="courseVideo" class="w-full" controls ontimeupdate="trackVideoProgress(this)">
+                            <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4">
+                            Your browser does not support HTML video.
+                        </video>
+                    </div>
+
+                    <!-- Curated Syllabus Chapters List -->
+                    <div class="bg-slate-800/40 p-6 rounded-2xl border border-slate-700/50">
+                        <h4 class="font-bold text-sm text-blue-300 flex items-center gap-2 mb-3">
+                            <i class="fas fa-list-check"></i> Course Curriculum chapters
+                        </h4>
+                        <div id="playingCourseChapters" class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-slate-300">
+                            <div class="italic text-slate-500">No structured syllabus logged for this course.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Tracker & AI Co-pilot Side Console -->
+                <div class="flex flex-col gap-6">
+                    <!-- Progress Card -->
+                    <div class="bg-slate-800/80 p-6 rounded-[1.5rem] border border-slate-700 relative overflow-hidden">
+                        <div class="absolute -right-4 -bottom-4 opacity-5 text-blue-400 text-7xl"><i class="fas fa-graduation-cap"></i></div>
+                        <h4 class="font-bold text-md mb-3 text-slate-200 flex items-center gap-2">
+                            <i class="fas fa-compass text-blue-400"></i> Performance Tracker
+                        </h4>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs text-slate-400 font-bold uppercase">Watched Progress</span>
+                            <span class="text-3xl font-black text-blue-400" id="videoProgressText">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-750 rounded-full h-2 mb-4 overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-300" id="videoProgressBar" style="width: 0%"></div>
+                        </div>
+
+                        <!-- Exam/Certificate Activation Center -->
+                        <div id="examActivationCenter" class="mt-4 space-y-2">
+                            <button onclick="openExamPortal()" id="takeExamBtn"
+                                class="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-indigo-950/20">
+                                <i class="fas fa-graduation-cap text-sm"></i> Take AI Certification Exam
+                            </button>
+                            <button onclick="viewMyCertificate()" id="viewCertBtn" class="hidden w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold py-3.5 px-4 rounded-xl text-xs transition active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-amber-950/20 animate-bounce">
+                                <i class="fas fa-award text-sm"></i> View Digital AI Certificate
+                            </button>
+                        </div>
+
+                        <button onclick="closeVideo()"
+                            class="w-full mt-4 bg-slate-700 hover:bg-slate-650 text-white font-semibold py-2.5 rounded-xl text-xs transition-all">
+                            Close Video Player
+                        </button>
+                    </div>
+
+                    <!-- AI Study Co-pilot Chat Drawer -->
+                    <div class="bg-slate-800/80 p-6 rounded-[1.5rem] border border-slate-700 flex flex-col h-[350px] relative">
+                        <h4 class="font-bold text-xs mb-3 text-indigo-300 flex items-center gap-2 uppercase tracking-wider">
+                            <i class="fas fa-wand-magic-sparkles animate-pulse"></i> AI Study Co-pilot
+                        </h4>
+                        
+                        <!-- Chat Message History Logs -->
+                        <div id="aiChatHistory" class="flex-1 overflow-y-auto mb-3 space-y-3 pr-1 text-xs scrollbar-thin">
+                            <div class="bg-indigo-950/50 border border-indigo-900/50 p-3 rounded-2xl text-slate-300 leading-relaxed">
+                                <span class="font-bold text-indigo-400 block mb-1">🤖 AI Study Buddy:</span>
+                                Welcome to your personal study hub! 📚 Ask me any question regarding this module, check code snippets, or ask to review chapters.
+                            </div>
+                        </div>
+
+                        <!-- Chat Message Inputs -->
+                        <div class="flex gap-2">
+                            <input id="aiChatInput" type="text" placeholder="Ask a study query..." onkeydown="if(event.key === 'Enter') sendAiChatMessage()"
+                                class="flex-1 p-3 bg-slate-750 border border-slate-700 rounded-xl text-xs text-white outline-none focus:ring-1 focus:ring-indigo-500 placeholder-slate-500 font-medium">
+                            <button onclick="sendAiChatMessage()" id="sendAiChatBtn"
+                                class="bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl transition active:scale-95 flex items-center justify-center">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+            <!-- Course Catalog -->
+            <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-book-bookmark text-blue-500 mr-2"></i>
+                    Course Directory
+                </h3>
+                <div id="courseList" class="space-y-4">
+                    <div class="animate-pulse flex space-x-4">
+                        <div class="flex-1 space-y-4 py-1">
+                            <div class="h-4 bg-slate-200 rounded w-3/4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee assigned training progress -->
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                    <i class="fas fa-graduation-cap text-indigo-500 mr-2"></i>
+                    My Learning Modules
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-4">
+                                <th class="pb-4">Assigned Module</th>
+                                <th class="pb-4">Status</th>
+                                <th class="pb-4">Progress Bar</th>
+                                <th class="pb-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="progressBody" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Exam Modal -->
+    <div id="quizModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-white rounded-[2rem] shadow-2xl p-8 max-w-lg w-full mx-4 border border-slate-100 relative overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-indigo-500 to-blue-500"></div>
+            <button onclick="closeExamPortal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            
+            <div class="mb-6">
+                <span class="bg-indigo-50 text-indigo-700 text-[10px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider">
+                    <i class="fas fa-shield-halved mr-1"></i> LMS AI Assessment
+                </span>
+                <h3 class="text-xl font-black text-slate-800 mt-2" id="quizCourseTitle">AI Certification Exam</h3>
+                <p class="text-slate-400 text-xs mt-1">Answer all 3 questions correctly to achieve compliance certification.</p>
+            </div>
+            
+            <!-- Active Question Area -->
+            <div id="quizContent" class="space-y-6">
+                <!-- Dynamically populated question card -->
+            </div>
+            
+            <!-- Navigation Center -->
+            <div class="flex justify-between items-center mt-8 pt-4 border-t border-slate-150">
+                <span class="text-xs text-slate-400 font-bold" id="quizQIndexText">Question 1 of 3</span>
+                <button onclick="submitQuizAnswer()" id="quizNextBtn"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl text-xs transition active:scale-95 flex items-center gap-1.5 shadow-md shadow-indigo-100">
+                    Submit Answer <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Digital Certificate Celebration Modal -->
+    <div id="certificateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md hidden transition-all duration-300">
+        <div class="bg-white rounded-[2.5rem] shadow-2xl p-8 max-w-2xl w-full mx-4 border-8 border-double border-amber-350 relative overflow-hidden animate-in fade-in zoom-in duration-300 text-center">
+            <!-- Decorative background corners -->
+            <div class="absolute top-0 left-0 w-16 h-16 border-t-4 border-l-4 border-amber-400 m-4 rounded-tl-xl opacity-30"></div>
+            <div class="absolute top-0 right-0 w-16 h-16 border-t-4 border-r-4 border-amber-400 m-4 rounded-tr-xl opacity-30"></div>
+            <div class="absolute bottom-0 left-0 w-16 h-16 border-b-4 border-l-4 border-amber-400 m-4 rounded-bl-xl opacity-30"></div>
+            <div class="absolute bottom-0 right-0 w-16 h-16 border-b-4 border-r-4 border-amber-400 m-4 rounded-br-xl opacity-30"></div>
+            
+            <div class="flex flex-col items-center justify-center gap-2 mb-6">
+                <div class="w-16 h-16 rounded-full bg-amber-50 flex items-center justify-center border-4 border-amber-200">
+                    <i class="fas fa-award text-amber-500 text-3xl animate-bounce"></i>
+                </div>
+                <span class="text-[10px] font-black uppercase text-amber-600 tracking-widest mt-1">SmartHR Compliance Registry</span>
+            </div>
+            
+            <h2 class="text-3xl font-black text-slate-800 tracking-tight">Syllabus Certificate of Mastery</h2>
+            <p class="text-xs text-slate-400 mt-2 font-medium">This is officially awarded in recognition of outstanding capability</p>
+            
+            <div class="my-8 py-4 border-y border-slate-100 flex flex-col items-center">
+                <span class="text-xs text-slate-400 uppercase font-bold tracking-wide">To Employee Profile:</span>
+                <h3 class="text-2xl font-extrabold text-indigo-900 mt-1" id="certEmployeeName">Alex Mercer</h3>
+                
+                <span class="text-xs text-slate-400 uppercase font-bold tracking-wide mt-6">For Verified Competence In:</span>
+                <h4 class="text-xl font-bold text-slate-800 mt-1" id="certCourseName">Kotlin Fundamentals</h4>
+            </div>
+            
+            <div class="flex justify-between items-center text-left text-[10px] text-slate-400 font-bold uppercase mt-6 max-w-md mx-auto w-full">
+                <div>
+                   <div>Verification ID:</div>
+                   <div class="text-slate-600 font-mono text-[9px] mt-0.5" id="certVerificationId">SHR-AI-LMS-45892</div>
+                </div>
+                <div class="text-right">
+                   <div>Verified By:</div>
+                   <div class="text-indigo-600 mt-0.5">SmartHR LMS AI Engine</div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex gap-3 max-w-sm mx-auto">
+                <button onclick="closeCertificate()"
+                    class="flex-1 bg-slate-100 hover:bg-slate-255 text-slate-650 font-bold py-3.5 rounded-xl text-xs transition">
+                    Close Registry
+                </button>
+                <button onclick="window.print()"
+                    class="flex-1 bg-amber-500 hover:bg-amber-600 text-white font-bold py-3.5 rounded-xl text-xs transition shadow-md shadow-amber-100 flex items-center justify-center gap-1.5">
+                    <i class="fas fa-print"></i> Print Certificate
+                </button>
+            </div>
+        </div>
+
+    <script>
+        let loggedInEmpId = null;
+        let coursesList = [];
+        let myProgressList = [];
+        let activeCourseObject = null;
+        let activeProgressObject = null;
+        let loggedInEmpName = '';
+        let currentQuizQuestions = [];
+        let currentQuestionIndex = 0;
+        let selectedAnswers = [];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Authentication check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    document.getElementById('userRoleBadge').innerText = `${user.role} Portal`;
+                    return fetch('/api/employees/me');
+                })
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error("No employee record");
+                })
+                .then(emp => {
+                    loggedInEmpId = emp.id;
+                    loggedInEmpName = emp.fullName;
+                    document.getElementById('userWelcome').innerText = `Welcome ${emp.fullName}, track your courses and expand your skills.`;
+                    loadCourses();
+                    loadMyProgress();
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('progressBody').innerHTML = `
+                        <tr><td colspan="4" class="py-6 text-center text-rose-500 font-bold bg-rose-50">
+                            Failed to verify employee session. Please contact HR.
+                        </td></tr>`;
+                });
+        });
+
+        async function loadCourses() {
+            try {
+                const res = await fetch('/api/lms/courses');
+                coursesList = await res.json();
+                
+                const container = document.getElementById('courseList');
+                if (!coursesList || coursesList.length === 0) {
+                    container.innerHTML = `<div class="p-6 text-center text-slate-400 italic bg-slate-50 border rounded-2xl">No training courses listed in directory.</div>`;
+                    return;
+                }
+
+                container.innerHTML = coursesList.map(c => `
+                    <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-blue-200 transition-all flex flex-col justify-between gap-4">
+                        <div>
+                            <div class="font-bold text-slate-800 text-sm">${c.courseName || 'Unnamed Course'}</div>
+                            <div class="text-xs text-slate-500 mt-1">${c.description || 'No description provided.'}</div>
+                            <div class="text-[10px] text-slate-400 font-bold uppercase mt-2 tracking-wide">
+                                <i class="fas fa-folder mr-1"></i> ${c.category || 'Tech'} • <i class="fas fa-clock mr-1"></i> ${c.duration || '2 hours'}
+                            </div>
+                        </div>
+                        <button onclick="selfEnroll(${c.id})" 
+                            class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-4 rounded-lg transition active:scale-95 text-center">
+                            Start Module
+                        </button>
+                    </div>
+                `).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('courseList').innerHTML = `<div class="p-6 text-center text-rose-500 font-bold bg-rose-50">Failed to load courses.</div>`;
+            }
+        }
+
+        async function selfEnroll(courseId) {
+            if (!loggedInEmpId) return;
+            try {
+                const payload = {
+                    employee: { id: loggedInEmpId },
+                    course: { id: courseId }
+                };
+
+                const res = await fetch('/api/lms/assign', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (res.ok) {
+                    alert("Module enrolled! Start watching the training videos below.");
+                    loadMyProgress();
+                } else {
+                    alert("Module already assigned or error enrolling.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("Enrollment connection error.");
+            }
+        }
+
+        async function loadMyProgress() {
+            if (!loggedInEmpId) return;
+            try {
+                let progressData = [];
+                // Secure endpoint try
+                const res = await fetch(`/api/lms/progress/employee/${loggedInEmpId}`);
+                if (res.ok) {
+                    progressData = await res.json();
+                } else {
+                    // Fallback filtering
+                    console.warn("Secure LMS progress endpoint returned status " + res.status + ". Using client filter fallback.");
+                    const allRes = await fetch('/api/lms/progress');
+                    if (!allRes.ok) throw new Error("Server error");
+                    const allData = await allRes.json();
+                    progressData = allData.filter(p => p.employee && p.employee.id === loggedInEmpId);
+                }
+
+                myProgressList = progressData;
+
+                const tbody = document.getElementById('progressBody');
+                if (!progressData || progressData.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="py-10 text-center text-slate-400 italic">No assigned courses. Enroll from the course directory!</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = progressData.map(p => {
+                    const cName = p.course ? (p.course.courseName || 'Unknown') : 'Unknown';
+                    const safeName = cName.replace(/'/g, "\\'");
+                    const status = p.status || 'Assigned';
+                    const certifiedBadge = p.aiCertified ? `
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 text-[9px] font-black rounded-md border uppercase tracking-wider bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-amber-400 ml-2 shadow-[0_0_12px_rgba(245,158,11,0.45)] animate-pulse">
+                            ⭐ AI Certified
+                        </span>
+                    ` : '';
+
+                    return `
+                        <tr class="border-b last:border-0 hover:bg-slate-50 transition duration-150">
+                            <td class="py-4">
+                                <div class="font-bold text-slate-800 flex items-center">
+                                    <span>${cName}</span>
+                                    ${certifiedBadge}
+                                </div>
+                                <div class="text-[10px] text-slate-400 mt-0.5">Category: ${p.course ? p.course.category : 'General'}</div>
+                            </td>
+                            <td class="py-4">
+                                <span class="px-2.5 py-1 text-[9px] font-black rounded-lg border uppercase tracking-wider ${
+                                    status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-blue-50 text-blue-700 border-blue-100'
+                                }">
+                                    ${status}
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <div class="w-full max-w-[120px]">
+                                    <div class="flex justify-between mb-1 items-center">
+                                        <span class="text-[9px] font-bold text-slate-500">${p.completionPercentage}%</span>
+                                    </div>
+                                    <div class="w-full bg-slate-100 rounded-full h-1.5">
+                                        <div class="bg-blue-600 h-1.5 rounded-full transition-all duration-500" style="width: ${p.completionPercentage}%"></div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-4 text-right">
+                                <button onclick="playCourseVideo(${p.id}, '${safeName}', ${p.completionPercentage})" 
+                                    class="bg-emerald-50 hover:bg-emerald-100 text-emerald-600 px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ml-auto animate-pulse">
+                                    <i class="fas fa-play"></i> Watch Course
+                                </button>
+                            </td>
+                        </tr>`;
+                }).join('');
+            } catch (err) {
+                console.error(err);
+                document.getElementById('progressBody').innerHTML = `<tr><td colspan="4" class="py-6 text-center text-rose-500 bg-rose-50">Error fetching learning progress.</td></tr>`;
+            }
+        }
+
+        // --- Video Tracking Logic ---
+        let activeProgressId = null;
+        let highestWatchedPercentage = 0;
+        let lastSavedPercentage = -1;
+
+        function playCourseVideo(progressId, courseName, currentProgress) {
+            document.getElementById('videoSection').classList.remove('hidden');
+            document.getElementById('playingCourseName').innerText = courseName;
+
+            activeProgressId = progressId;
+            highestWatchedPercentage = currentProgress || 0;
+            lastSavedPercentage = highestWatchedPercentage;
+
+            activeProgressObject = myProgressList.find(p => p.id === progressId);
+            if (activeProgressObject) {
+                activeCourseObject = activeProgressObject.course;
+            }
+
+            updateVisualProgress(highestWatchedPercentage);
+
+            // Curriculum Syllabus Chapters Render
+            const chaptersContainer = document.getElementById('playingCourseChapters');
+            if (activeCourseObject && activeCourseObject.chapters) {
+                const chapterLines = activeCourseObject.chapters.split('\n').filter(line => line.trim().length > 0);
+                chaptersContainer.innerHTML = chapterLines.map(ch => `
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60 flex items-center gap-2.5 transition hover:bg-slate-700">
+                        <i class="fas fa-play-circle text-blue-400"></i>
+                        <span class="font-medium">${escapeHtml(ch)}</span>
+                    </div>
+                `).join('');
+            } else {
+                chaptersContainer.innerHTML = `<div class="italic text-slate-500">No structured syllabus logged for this course.</div>`;
+            }
+
+            // Reset AI Study Co-pilot chat logs
+            document.getElementById('aiChatHistory').innerHTML = `
+                <div class="bg-indigo-950/50 border border-indigo-900/50 p-3 rounded-2xl text-slate-350 leading-relaxed mb-3">
+                    <span class="font-bold text-indigo-400 block mb-1">🤖 AI Study Buddy:</span>
+                    Welcome to your personal study hub! 📚 Ask me any question regarding this module, check code snippets, or ask to review chapters.
+                </div>
+            `;
+            document.getElementById('aiChatInput').value = '';
+
+            // Toggle Exam Center buttons
+            toggleExamButtons();
+
+            const video = document.getElementById('courseVideo');
+            video.currentTime = 0;
+            video.play().catch(e => console.log('Auto-play prevented'));
+
+            document.getElementById('videoSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function toggleExamButtons() {
+            const takeExamBtn = document.getElementById('takeExamBtn');
+            const viewCertBtn = document.getElementById('viewCertBtn');
+            if (activeProgressObject && activeProgressObject.aiCertified) {
+                takeExamBtn.classList.add('hidden');
+                viewCertBtn.classList.remove('hidden');
+            } else {
+                takeExamBtn.classList.remove('hidden');
+                viewCertBtn.classList.add('hidden');
+            }
+        }
+
+        function closeVideo() {
+            const video = document.getElementById('courseVideo');
+            video.pause();
+            document.getElementById('videoSection').classList.add('hidden');
+            activeProgressId = null;
+            activeCourseObject = null;
+            activeProgressObject = null;
+        }
+
+        function trackVideoProgress(videoElement) {
+            if (!activeProgressId) return;
+
+            const duration = videoElement.duration;
+            const currentTime = videoElement.currentTime;
+
+            if (duration > 0) {
+                const pct = Math.floor((currentTime / duration) * 100);
+                if (pct > highestWatchedPercentage) {
+                    highestWatchedPercentage = pct;
+                    updateVisualProgress(highestWatchedPercentage);
+
+                    if (highestWatchedPercentage - lastSavedPercentage >= 10 || pct === 100) {
+                        lastSavedPercentage = highestWatchedPercentage;
+                        saveVideoProgress(activeProgressId, highestWatchedPercentage);
+                    }
+                }
+            }
+        }
+
+        function updateVisualProgress(pct) {
+            document.getElementById('videoProgressText').innerText = pct + '%';
+            document.getElementById('videoProgressBar').style.width = pct + '%';
+        }
+
+        async function saveVideoProgress(id, pct) {
+            let status = pct >= 100 ? 'Completed' : 'In Progress';
+            const payload = { completionPercentage: pct, status: status };
+
+            try {
+                const res = await fetch(`/api/lms/progress/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    // update active objects
+                    if (activeProgressId === id) {
+                        activeProgressObject = updated;
+                        if (activeProgressObject) activeCourseObject = activeProgressObject.course;
+                        toggleExamButtons();
+                    }
+                    loadMyProgress(); // refresh background progress list
+                }
+            } catch (err) {
+                console.error("Progress save failed", err);
+            }
+        }
+
+        // --- AI Study Co-pilot Chat Logic ---
+        async function sendAiChatMessage() {
+            const input = document.getElementById('aiChatInput');
+            const msg = input.value.trim();
+            if (!msg || !activeCourseObject) return;
+
+            input.value = '';
+            const chatHistory = document.getElementById('aiChatHistory');
+
+            // Append User Query to Log
+            const userDiv = document.createElement('div');
+            userDiv.className = "bg-slate-700/50 p-3 rounded-2xl text-slate-200 leading-relaxed mb-3";
+            userDiv.innerHTML = `<span class="font-bold text-blue-400 block mb-0.5">👤 You:</span> ${escapeHtml(msg)}`;
+            chatHistory.appendChild(userDiv);
+
+            // Append Typing Indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = "aiChatTyping";
+            typingDiv.className = "bg-indigo-950/30 border border-indigo-900/30 p-3 rounded-2xl text-indigo-400 italic mb-3 flex items-center gap-2";
+            typingDiv.innerHTML = `<i class="fas fa-circle-notch animate-spin"></i> <span>AI Study Buddy is thinking...</span>`;
+            chatHistory.appendChild(typingDiv);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+            try {
+                const res = await fetch('/api/lms/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        courseId: activeCourseObject.id,
+                        message: msg
+                    })
+                });
+
+                if (!res.ok) throw new Error("Chat connection failed");
+                const data = await res.json();
+
+                // Remove typing indicator
+                const typingEl = document.getElementById('aiChatTyping');
+                if (typingEl) typingEl.remove();
+
+                // Append AI Response
+                const aiDiv = document.createElement('div');
+                aiDiv.className = "bg-indigo-950/50 border border-indigo-900/50 p-3 rounded-2xl text-slate-350 leading-relaxed mb-3";
+                
+                // Parse markdown content with marked.js
+                const renderedHtml = marked.parse(data.response || '');
+                aiDiv.innerHTML = `<span class="font-bold text-indigo-400 block mb-1">🤖 AI Study Buddy:</span> ${renderedHtml}`;
+                chatHistory.appendChild(aiDiv);
+            } catch (err) {
+                console.error(err);
+                const typingEl = document.getElementById('aiChatTyping');
+                if (typingEl) typingEl.remove();
+
+                const errDiv = document.createElement('div');
+                errDiv.className = "bg-rose-950/40 border border-rose-900/40 p-3 rounded-2xl text-rose-350 leading-relaxed mb-3";
+                errDiv.innerHTML = `<span class="font-bold text-rose-400 block mb-0.5">⚠️ Error:</span> AI Co-pilot is temporarily offline. Please try again shortly.`;
+                chatHistory.appendChild(errDiv);
+            }
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // --- AI Certification MCQ Assessment Portal ---
+        async function openExamPortal() {
+            if (!activeCourseObject || !activeProgressId) return;
+
+            document.getElementById('quizModal').classList.remove('hidden');
+            document.getElementById('quizCourseTitle').innerText = activeCourseObject.courseName;
+
+            const content = document.getElementById('quizContent');
+            content.innerHTML = `
+                <div class="py-12 flex flex-col items-center justify-center gap-3 text-indigo-600">
+                    <i class="fas fa-circle-notch animate-spin text-4xl"></i>
+                    <span class="text-xs font-bold text-slate-500">AI is curating customized practice exam questions...</span>
+                </div>
+            `;
+
+            try {
+                const res = await fetch(`/api/lms/ai/generate-quiz/${activeCourseObject.id}`);
+                if (!res.ok) throw new Error("Could not curate quiz questions");
+                currentQuizQuestions = await res.json();
+                currentQuestionIndex = 0;
+                selectedAnswers = new Array(currentQuizQuestions.length).fill(null);
+
+                renderQuizQuestion();
+            } catch (err) {
+                console.error(err);
+                content.innerHTML = `
+                    <div class="py-6 text-center text-rose-500 font-bold bg-rose-50 rounded-2xl border border-rose-100">
+                        Failed to generate custom assessment questions. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        function closeExamPortal() {
+            document.getElementById('quizModal').classList.add('hidden');
+        }
+
+        function renderQuizQuestion() {
+            if (!currentQuizQuestions || currentQuizQuestions.length === 0) return;
+
+            const q = currentQuizQuestions[currentQuestionIndex];
+            const content = document.getElementById('quizContent');
+            const selectedIdx = selectedAnswers[currentQuestionIndex];
+
+            const optionsHtml = q.options.map((opt, oIdx) => {
+                const isSelected = selectedIdx === oIdx;
+                return `
+                    <div onclick="selectQuizOption(${oIdx})" 
+                        class="p-4 rounded-xl border-2 transition-all cursor-pointer flex items-center justify-between ${
+                            isSelected 
+                                ? 'border-indigo-600 bg-indigo-50/60 shadow-md shadow-indigo-100/50' 
+                                : 'border-slate-200 hover:border-indigo-300 hover:bg-slate-50'
+                        }">
+                        <span class="text-xs font-semibold ${isSelected ? 'text-indigo-900' : 'text-slate-700'}">${escapeHtml(opt)}</span>
+                        <div class="w-5 h-5 rounded-full border flex items-center justify-center ${
+                            isSelected ? 'border-indigo-600 bg-indigo-600 text-white' : 'border-slate-300'
+                        }">
+                            ${isSelected ? '<i class="fas fa-check text-[10px]"></i>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            content.innerHTML = `
+                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 mb-6">
+                    <h4 class="font-extrabold text-sm text-slate-800 leading-relaxed">${escapeHtml(q.question)}</h4>
+                </div>
+                <div class="space-y-3">
+                    ${optionsHtml}
+                </div>
+            `;
+
+            document.getElementById('quizQIndexText').innerText = `Question ${currentQuestionIndex + 1} of ${currentQuizQuestions.length}`;
+            
+            const nextBtn = document.getElementById('quizNextBtn');
+            if (currentQuestionIndex === currentQuizQuestions.length - 1) {
+                nextBtn.innerHTML = `Finish & Grade <i class="fas fa-check-double ml-1.5"></i>`;
+            } else {
+                nextBtn.innerHTML = `Next Question <i class="fas fa-arrow-right ml-1.5"></i>`;
+            }
+        }
+
+        function selectQuizOption(index) {
+            selectedAnswers[currentQuestionIndex] = index;
+            renderQuizQuestion();
+        }
+
+        async function submitQuizAnswer() {
+            if (selectedAnswers[currentQuestionIndex] === null) {
+                alert("Please select an answer before proceeding.");
+                return;
+            }
+
+            if (currentQuestionIndex < currentQuizQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuizQuestion();
+            } else {
+                // Grade MCQ Quiz
+                let correctCount = 0;
+                currentQuizQuestions.forEach((q, idx) => {
+                    if (selectedAnswers[idx] === q.correctAnswer) {
+                        correctCount++;
+                    }
+                });
+
+                const score = Math.round((correctCount / currentQuizQuestions.length) * 100);
+
+                try {
+                    const nextBtn = document.getElementById('quizNextBtn');
+                    nextBtn.disabled = true;
+                    nextBtn.innerHTML = `<i class="fas fa-circle-notch animate-spin"></i> Submitting...`;
+
+                    const res = await fetch(`/api/lms/ai/submit-quiz/${activeProgressId}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ score: score })
+                    });
+
+                    if (!res.ok) throw new Error("Failed to submit score");
+                    
+                    // Reload client progress lists
+                    await loadMyProgress();
+
+                    // Find and update active progress object in memory
+                    activeProgressObject = myProgressList.find(p => p.id === activeProgressId);
+                    if (activeProgressObject) {
+                        activeCourseObject = activeProgressObject.course;
+                    }
+
+                    closeExamPortal();
+
+                    if (score >= 100) {
+                        triggerConfettiCelebration();
+                        viewMyCertificate();
+                    } else {
+                        alert(`You scored ${score}%. You need a perfect score of 100% to qualify for the AI compliance certificate. Feel free to review the materials and try again!`);
+                    }
+
+                    toggleExamButtons();
+                } catch (err) {
+                    console.error(err);
+                    alert("Score submission error. Please try again.");
+                } finally {
+                    const nextBtn = document.getElementById('quizNextBtn');
+                    nextBtn.disabled = false;
+                }
+            }
+        }
+
+        // --- Celebration Certificate & Confetti Effects ---
+        function triggerConfettiCelebration() {
+            var duration = 4 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 6,
+                    angle: 60,
+                    spread: 60,
+                    origin: { x: 0 }
+                });
+                confetti({
+                    particleCount: 6,
+                    angle: 120,
+                    spread: 60,
+                    origin: { x: 1 }
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        function viewMyCertificate() {
+            if (!activeCourseObject || !activeProgressId) return;
+
+            document.getElementById('certEmployeeName').innerText = loggedInEmpName || 'Employee';
+            document.getElementById('certCourseName').innerText = activeCourseObject.courseName || 'Compliance Course';
+            document.getElementById('certVerificationId').innerText = `SHR-AI-LMS-${activeCourseObject.id}-${activeProgressId}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+            document.getElementById('certificateModal').classList.remove('hidden');
+
+            confetti({
+                particleCount: 120,
+                spread: 80,
+                origin: { y: 0.6 }
+            });
+        }
+
+        function closeCertificate() {
+            document.getElementById('certificateModal').classList.add('hidden');
+        }
+
+        // Helper function for security HTML escaping
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+
+</html>

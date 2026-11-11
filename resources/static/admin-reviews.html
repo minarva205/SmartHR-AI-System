@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Performance Console | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+
+        /* AI Chat Panel */
+        #aiChatPanel {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(20px);
+            opacity: 0;
+            pointer-events: none;
+        }
+        #aiChatPanel.open {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        .chat-bubble-ai {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border-left: 3px solid #6366f1;
+        }
+        .chat-bubble-user {
+            background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+            border-right: 3px solid #3b82f6;
+        }
+        .ai-typing span {
+            display: inline-block;
+            width: 7px; height: 7px;
+            margin: 0 2px;
+            background: #6366f1;
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+        .ai-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .ai-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce {
+            0%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+        }
+
+        /* AI Insight Modal */
+        #aiInsightModal { backdrop-filter: blur(6px); }
+        .insight-tag {
+            display: inline-flex; align-items: center;
+            font-size: 10px; font-weight: 700;
+            padding: 3px 10px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+
+        /* Stat card hover */
+        .stat-card {
+            transition: all 0.25s ease;
+        }
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+        }
+
+        /* Generate button pulse */
+        @keyframes pulse-ring {
+            0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+        }
+        .pulse-btn { animation: pulse-ring 2.5s infinite; }
+
+        /* Chat FAB */
+        #chatFab {
+            background: linear-gradient(135deg, #6366f1, #818cf8);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.45);
+            transition: all 0.25s ease;
+        }
+        #chatFab:hover {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.55);
+        }
+
+        /* Progress bars */
+        .progress-bar {
+            height: 6px; border-radius: 99px;
+            background: #e2e8f0; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 99px;
+            transition: width 1s ease;
+        }
+
+        /* Markdown formatting */
+        .ai-text strong { font-weight: 700; color: #1e293b; }
+        .ai-text { white-space: pre-wrap; line-height: 1.7; }
+    </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800">
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+        <div>
+            <a href="admin-dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold mb-2 transition-all group">
+                <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                Back to Admin Dashboard
+            </a>
+            <h1 class="text-3xl font-black text-slate-800 tracking-tight">Admin Performance Console</h1>
+            <p class="text-slate-500 text-sm mt-0.5">Submit evaluations, track company-wide ratings, and manage performance reviews</p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fas fa-robot text-[10px]"></i> AI-Powered
+            </span>
+            <span class="text-xs bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full font-bold uppercase tracking-wider">
+                Admin Access
+            </span>
+        </div>
+    </header>
+
+    <!-- ✨ AI Analytics Banner -->
+    <div id="aiAnalyticsBanner" class="mb-8">
+        <div class="flex items-center gap-2 mb-3">
+            <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
+                <i class="fas fa-brain text-white text-xs"></i>
+            </div>
+            <h2 class="text-sm font-black text-slate-600 uppercase tracking-widest">AI Performance Intelligence Dashboard</h2>
+        </div>
+        <div id="analyticsGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <!-- Loaded dynamically -->
+            <div class="col-span-2 md:col-span-4 lg:col-span-6 bg-white rounded-2xl p-6 flex items-center justify-center border border-slate-100">
+                <div class="animate-spin w-5 h-5 border-2 border-indigo-500 rounded-full border-t-transparent mr-3"></div>
+                <span class="text-slate-400 text-sm">Loading AI analytics...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+        <!-- Submit Evaluation Form -->
+        <div class="lg:col-span-2 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+            <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                <i class="fas fa-edit text-blue-500 mr-2"></i>
+                Log Evaluation
+            </h3>
+            <form id="evaluationForm" onsubmit="submitEvaluation(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2">Select Employee *</label>
+                    <select id="empSelect" required onchange="updateSelectedEmpName()"
+                        class="w-full p-3.5 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all font-semibold">
+                        <option value="">Select Staff...</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Tech (1-5) *</label>
+                        <input type="number" id="techRate" required min="1" max="5" value="5"
+                            class="w-full p-3 bg-slate-50 border rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Soft (1-5) *</label>
+                        <input type="number" id="softRate" required min="1" max="5" value="5"
+                            class="w-full p-3 bg-slate-50 border rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase mb-2">Attn (1-5) *</label>
+                        <input type="number" id="attnRate" required min="1" max="5" value="5"
+                            class="w-full p-3 bg-slate-50 border rounded-xl text-sm text-center outline-none focus:ring-2 focus:ring-blue-500 transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="block text-xs font-bold text-slate-400 uppercase">Manager Feedback Comments *</label>
+                        <button type="button" id="aiGenerateBtn" onclick="aiGenerateFeedback()"
+                            class="flex items-center gap-1.5 text-[10px] font-black bg-indigo-50 hover:bg-indigo-100 text-indigo-700 px-3 py-1.5 rounded-lg transition-all border border-indigo-100 pulse-btn">
+                            <i class="fas fa-magic text-[9px]"></i> AI Generate
+                        </button>
+                    </div>
+                    <textarea id="feedback" required placeholder="Write detailed feedback, or click ✨ AI Generate above..."
+                        class="w-full p-4 bg-slate-50 border rounded-xl h-28 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none"></textarea>
+                    <div id="aiGeneratingState" class="hidden items-center gap-2 mt-1">
+                        <div class="animate-spin w-3 h-3 border-2 border-indigo-400 rounded-full border-t-transparent"></div>
+                        <span class="text-[11px] text-indigo-500 font-semibold">AI is generating personalized feedback...</span>
+                    </div>
+                </div>
+
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-md shadow-blue-100">
+                    Disburse Evaluation
+                </button>
+            </form>
+        </div>
+
+        <!-- Master Evaluation List -->
+        <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <h3 class="text-xl font-bold mb-6 text-slate-700 flex items-center">
+                <i class="fas fa-history text-emerald-500 mr-2"></i>
+                Master Review Ledger
+            </h3>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-slate-400 text-xs uppercase border-b pb-4">
+                            <th class="pb-4">Employee</th>
+                            <th class="pb-4">Score</th>
+                            <th class="pb-4">Status</th>
+                            <th class="pb-4">Date</th>
+                            <th class="pb-4 text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reviewTable" class="text-sm"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─────────────────────────────── MODALS ─────────────────────────────── -->
+
+<!-- Review Details Modal -->
+<div id="detailsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 relative">
+        <button onclick="closeDetailsModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-lg transition">
+            <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-2xl font-bold mb-1 text-slate-800">Evaluation Details</h3>
+        <p class="text-xs text-slate-400 mb-6" id="modalDate">Logged Period: --</p>
+
+        <div class="space-y-4 text-sm mb-6">
+            <div class="flex justify-between items-center pb-2 border-b">
+                <span class="text-slate-400">Employee Name:</span>
+                <strong class="text-slate-800" id="modalEmpName">--</strong>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400">Technical Rating:</span>
+                <strong class="text-slate-700 font-mono" id="modalTech">0 / 5</strong>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400">Soft Skills Rating:</span>
+                <strong class="text-slate-700 font-mono" id="modalSoft">0 / 5</strong>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400">Attendance Rating:</span>
+                <strong class="text-slate-700 font-mono" id="modalAttn">0 / 5</strong>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t text-indigo-600 font-bold">
+                <span>Overall Score:</span>
+                <span class="text-lg font-black font-mono" id="modalScore">0.0 / 5.0</span>
+            </div>
+        </div>
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-100 relative mb-2">
+            <i class="fas fa-quote-left absolute top-3 left-3 text-slate-200 text-lg"></i>
+            <p class="text-xs text-slate-600 italic leading-relaxed pt-2 pl-3" id="modalFeedback">--</p>
+        </div>
+    </div>
+</div>
+
+<!-- ✨ AI Insight Modal -->
+<div id="aiInsightModal" class="fixed inset-0 bg-slate-900/60 hidden z-50 items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 relative max-h-[90vh] overflow-y-auto">
+        <button onclick="closeInsightModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition">
+            <i class="fas fa-times text-sm"></i>
+        </button>
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-5">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                <i class="fas fa-brain text-white text-sm"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-black text-slate-800">AI Performance Insight</h3>
+                <p class="text-xs text-slate-400" id="insightEmployeeLabel">Analyzing...</p>
+            </div>
+        </div>
+
+        <div id="insightLoading" class="flex flex-col items-center py-8 gap-3">
+            <div class="w-10 h-10 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
+            <p class="text-slate-400 text-sm">AI is analyzing performance data...</p>
+        </div>
+
+        <div id="insightContent" class="hidden space-y-4">
+            <!-- Overall Score -->
+            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl p-4 border border-indigo-100 text-center">
+                <div class="text-3xl font-black text-indigo-700 font-mono" id="insightScore">0.0</div>
+                <div class="text-xs text-indigo-400 font-bold uppercase tracking-wider">Overall Score / 5.0</div>
+                <div id="insightTier" class="mt-2 text-sm font-bold text-slate-700"></div>
+            </div>
+
+            <!-- Skill Bars -->
+            <div class="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Skill Breakdown</div>
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-600">💻 Technical</span>
+                        <span class="text-indigo-600 font-black" id="bar-tech">0/5</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-indigo-500" id="fill-tech" style="width:0%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-600">🤝 Soft Skills</span>
+                        <span class="text-blue-600 font-black" id="bar-soft">0/5</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-blue-500" id="fill-soft" style="width:0%"></div></div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs font-semibold mb-1.5">
+                        <span class="text-slate-600">⏰ Attendance</span>
+                        <span class="text-emerald-600 font-black" id="bar-attn">0/5</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill bg-emerald-500" id="fill-attn" style="width:0%"></div></div>
+                </div>
+            </div>
+
+            <!-- Strengths -->
+            <div id="strengthsSection">
+                <div class="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2">✅ Key Strengths</div>
+                <div id="strengthsList" class="space-y-1.5"></div>
+            </div>
+
+            <!-- Gaps -->
+            <div id="gapsSection">
+                <div class="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-2">⚠️ Development Gaps</div>
+                <div id="gapsList" class="space-y-1.5"></div>
+            </div>
+
+            <!-- Actions -->
+            <div>
+                <div class="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">📋 Recommended Actions</div>
+                <div id="actionsList" class="space-y-1.5"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ─────────────────── AI CHAT PANEL (floating) ─────────────────── -->
+<div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+    <!-- Chat Panel -->
+    <div id="aiChatPanel" class="w-80 md:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col overflow-hidden" style="height:520px;">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <div class="flex-1">
+                <div class="font-black text-white text-sm">PerformanceBot AI</div>
+                <div class="text-indigo-200 text-[10px]">HR Performance Intelligence Advisor</div>
+            </div>
+            <button onclick="closeChatPanel()" class="text-white/60 hover:text-white transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="chatMessages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50/50">
+            <div class="chat-bubble-ai rounded-2xl rounded-tl-sm p-3.5 text-xs text-slate-700 leading-relaxed">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <i class="fas fa-robot text-indigo-500 text-[10px]"></i>
+                    <span class="font-black text-indigo-600 text-[10px] uppercase tracking-wider">PerformanceBot AI</span>
+                </div>
+                👋 Hello! I am <strong>PerformanceBot AI</strong> — your intelligent HR performance analytics advisor.<br><br>
+                Try asking:<br>
+                • <em>"Who are the top performers?"</em><br>
+                • <em>"Who needs a PIP?"</em><br>
+                • <em>"Company performance summary"</em><br>
+                • <em>"Who should be promoted?"</em>
+            </div>
+        </div>
+
+        <!-- Input -->
+        <div class="p-3 border-t border-slate-100 bg-white flex gap-2">
+            <input id="chatInput" type="text" placeholder="Ask PerformanceBot AI..."
+                class="flex-1 px-4 py-2.5 bg-slate-50 rounded-xl text-xs border border-slate-100 outline-none focus:ring-2 focus:ring-indigo-400 transition-all"
+                onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()"
+                class="w-9 h-9 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl flex items-center justify-center transition-all active:scale-90">
+                <i class="fas fa-paper-plane text-xs"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- FAB -->
+    <button id="chatFab" onclick="toggleChatPanel()"
+        class="w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold text-lg">
+        <i class="fas fa-robot" id="fabIcon"></i>
+    </button>
+</div>
+
+<script>
+    let selectedEmpName = '';
+    let chatOpen = false;
+
+    // ─── Auth & init ───
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch('/api/current-user')
+            .then(res => { if (res.ok) return res.json(); window.location.href = 'login.html'; })
+            .then(user => {
+                if (user.role !== 'ADMIN') { alert('Access Denied.'); window.location.href = 'index.html'; return; }
+                initConsole();
+            })
+            .catch(() => window.location.href = 'login.html');
+    });
+
+    async function initConsole() {
+        try {
+            const [eRes] = await Promise.all([fetch('/api/employees/all')]);
+            const emps = await eRes.json();
+            const select = document.getElementById('empSelect');
+            select.innerHTML = '<option value="">Select Staff...</option>' +
+                emps.map(e => `<option value="${e.id}" data-name="${e.fullName}">${e.fullName} (ID: ${e.id})</option>`).join('');
+            loadReviews();
+            loadAiAnalytics();
+        } catch (err) { console.error("Initialization error", err); }
+    }
+
+    function updateSelectedEmpName() {
+        const sel = document.getElementById('empSelect');
+        const opt = sel.options[sel.selectedIndex];
+        selectedEmpName = opt ? (opt.getAttribute('data-name') || '') : '';
+    }
+
+    // ─── AI Analytics Banner ───
+    async function loadAiAnalytics() {
+        try {
+            const res = await fetch('/api/reviews/ai-analytics');
+            if (!res.ok) { document.getElementById('analyticsGrid').innerHTML = '<div class="col-span-full text-slate-400 text-sm text-center py-4">No analytics data yet.</div>'; return; }
+            const d = await res.json();
+            const healthColor = d.healthScore >= 80 ? 'emerald' : d.healthScore >= 60 ? 'blue' : d.healthScore >= 40 ? 'amber' : 'rose';
+
+            document.getElementById('analyticsGrid').innerHTML = `
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="text-2xl font-black text-indigo-600 font-mono">${d.avgOverall || '–'}</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mt-1">Avg Score / 5.0</div>
+                    <div class="mt-2 progress-bar"><div class="progress-fill bg-indigo-500" style="width:${((d.avgOverall||0)/5)*100}%"></div></div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="text-2xl font-black text-${healthColor}-600 font-mono">${d.healthScore || 0}%</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mt-1">Health Index</div>
+                    <div class="mt-2 progress-bar"><div class="progress-fill bg-${healthColor}-500" style="width:${d.healthScore||0}%"></div></div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="text-2xl font-black text-amber-500 font-mono">${d.total || 0}</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mt-1">Total Evaluations</div>
+                    <div class="flex gap-1 mt-2 flex-wrap">
+                        <span class="bg-emerald-50 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full">🏆 ${d.elite} Elite</span>
+                        <span class="bg-blue-50 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded-full">⭐ ${d.high} High</span>
+                    </div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-100 shadow-sm">
+                    <div class="text-2xl font-black text-rose-500 font-mono">${d.needsSupport || 0}</div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mt-1">Needs Support</div>
+                    <div class="mt-1.5 text-[10px] text-rose-400 font-semibold">${d.needsSupport > 0 ? '⚠️ PIP recommended' : '✅ All clear'}</div>
+                </div>
+                <div class="stat-card bg-white rounded-2xl p-5 border border-slate-100 shadow-sm col-span-2">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-3">Skill Averages</div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 w-20 shrink-0">💻 Technical</span>
+                            <div class="flex-1 progress-bar"><div class="progress-fill bg-indigo-400" style="width:${((d.avgTech||0)/5)*100}%"></div></div>
+                            <span class="font-black text-slate-600 w-6">${d.avgTech}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 w-20 shrink-0">🤝 Soft Skills</span>
+                            <div class="flex-1 progress-bar"><div class="progress-fill bg-blue-400" style="width:${((d.avgSoft||0)/5)*100}%"></div></div>
+                            <span class="font-black text-slate-600 w-6">${d.avgSoft}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                            <span class="text-slate-500 w-20 shrink-0">⏰ Attendance</span>
+                            <div class="flex-1 progress-bar"><div class="progress-fill bg-emerald-400" style="width:${((d.avgAttn||0)/5)*100}%"></div></div>
+                            <span class="font-black text-slate-600 w-6">${d.avgAttn}</span>
+                        </div>
+                    </div>
+                    ${d.weakestSkill ? `<div class="mt-3 text-[10px] text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-100 font-semibold">⚠️ Weakest Area: <strong>${d.weakestSkill}</strong> — recommend targeted training.</div>` : ''}
+                </div>`;
+        } catch (e) {
+            document.getElementById('analyticsGrid').innerHTML = '<div class="col-span-full text-slate-400 text-sm text-center py-4">Unable to load AI analytics.</div>';
+        }
+    }
+
+    // ─── Load Review Table ───
+    async function loadReviews() {
+        try {
+            const rRes = await fetch('/api/reviews/all');
+            const reviews = await rRes.json();
+            const tbody = document.getElementById('reviewTable');
+
+            if (!reviews || reviews.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400 italic">No reviews logged in ledger.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = reviews.map(r => {
+                const empName = r.employee ? r.employee.fullName : 'System Error Entry';
+                const empDesig = r.employee ? r.employee.designation : 'N/A';
+                const score = r.overallScore || 0.0;
+                const jsonStr = encodeURIComponent(JSON.stringify(r));
+                const pillCls = score >= 4.0 ? 'bg-green-50 text-green-700 border-green-100' : score >= 3.0 ? 'bg-blue-50 text-blue-700 border-blue-100' : 'bg-amber-50 text-amber-700 border-amber-100';
+                const pillTxt = score >= 4.0 ? 'Top Talent' : score >= 3.0 ? 'Stable' : 'Needs Work';
+
+                return `
+                <tr class="border-b last:border-0 hover:bg-slate-50 transition duration-150">
+                    <td class="py-4">
+                        <div class="font-bold text-slate-800">${empName}</div>
+                        <div class="text-[10px] text-slate-400 uppercase font-bold tracking-wider">${empDesig}</div>
+                    </td>
+                    <td class="py-4 font-mono font-black text-blue-600">${score.toFixed(1)}</td>
+                    <td class="py-4">
+                        <span class="px-2.5 py-1 text-[9px] font-black rounded-lg border uppercase tracking-wider ${pillCls}">${pillTxt}</span>
+                    </td>
+                    <td class="py-4 text-slate-400 font-semibold text-xs whitespace-nowrap">${r.reviewDate || 'Recent'}</td>
+                    <td class="py-4 text-right whitespace-nowrap space-x-1">
+                        <button onclick="openInsightModal(${r.id}, '${empName}')" title="AI Insight"
+                            class="text-indigo-500 hover:text-indigo-700 hover:bg-indigo-50 transition p-1.5 rounded-lg" >
+                            <i class="fas fa-brain text-xs"></i>
+                        </button>
+                        <button onclick="openDetailsModal('${jsonStr}')" title="View Details"
+                            class="text-blue-600 hover:text-blue-800 hover:bg-blue-50 transition p-1.5 rounded-lg">
+                            <i class="fas fa-eye text-xs"></i>
+                        </button>
+                        <button onclick="deleteReview(${r.id})" title="Delete"
+                            class="text-slate-300 hover:text-rose-600 hover:bg-rose-50 transition p-1.5 rounded-lg">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        } catch (err) {
+            document.getElementById('reviewTable').innerHTML = `<tr><td colspan="5" class="py-6 text-center text-rose-500 font-bold">Connection failure loading reviews.</td></tr>`;
+        }
+    }
+
+    // ─── AI Auto-Generate Feedback ───
+    async function aiGenerateFeedback() {
+        const empId = document.getElementById('empSelect').value;
+        if (!empId) { alert('Please select an employee first.'); return; }
+
+        const tech = parseInt(document.getElementById('techRate').value) || 5;
+        const soft = parseInt(document.getElementById('softRate').value) || 5;
+        const attn = parseInt(document.getElementById('attnRate').value) || 5;
+
+        document.getElementById('aiGenerateBtn').disabled = true;
+        document.getElementById('aiGeneratingState').classList.remove('hidden');
+        document.getElementById('aiGeneratingState').classList.add('flex');
+        document.getElementById('feedback').value = '';
+
+        try {
+            const res = await fetch('/api/reviews/ai-generate-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ employeeName: selectedEmpName || 'The employee', technicalRating: tech, softSkillsRating: soft, attendanceRating: attn })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                document.getElementById('feedback').value = data.feedback || '';
+            } else {
+                alert('AI generation failed. Please try again.');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Connection error generating AI feedback.');
+        } finally {
+            document.getElementById('aiGenerateBtn').disabled = false;
+            document.getElementById('aiGeneratingState').classList.add('hidden');
+            document.getElementById('aiGeneratingState').classList.remove('flex');
+        }
+    }
+
+    // ─── Submit Evaluation ───
+    async function submitEvaluation(event) {
+        event.preventDefault();
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true; btn.innerText = 'Submitting...';
+
+        const payload = {
+            employee: { id: parseInt(document.getElementById('empSelect').value) },
+            technicalRating: parseInt(document.getElementById('techRate').value),
+            softSkillsRating: parseInt(document.getElementById('softRate').value),
+            attendanceRating: parseInt(document.getElementById('attnRate').value),
+            managerFeedback: document.getElementById('feedback').value,
+            reviewDate: new Date().toISOString().split('T')[0]
+        };
+
+        try {
+            const res = await fetch('/api/reviews/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (res.ok) {
+                alert('Performance evaluation submitted!');
+                document.getElementById('evaluationForm').reset();
+                document.getElementById('techRate').value = 5;
+                document.getElementById('softRate').value = 5;
+                document.getElementById('attnRate').value = 5;
+                selectedEmpName = '';
+                loadReviews();
+                loadAiAnalytics();
+            } else { alert('Failed to submit review.'); }
+        } catch (e) { alert('Connection error.'); }
+        finally { btn.disabled = false; btn.innerText = 'Disburse Evaluation'; }
+    }
+
+    // ─── Delete ───
+    async function deleteReview(id) {
+        if (!confirm('Delete this review?')) return;
+        try {
+            const res = await fetch(`/api/reviews/delete/${id}`, { method: 'DELETE' });
+            if (res.ok) { loadReviews(); loadAiAnalytics(); }
+            else alert('Failed to delete.');
+        } catch (e) { alert('Connection error.'); }
+    }
+
+    // ─── Details Modal ───
+    function openDetailsModal(jsonStr) {
+        try {
+            const r = JSON.parse(decodeURIComponent(jsonStr));
+            document.getElementById('modalEmpName').innerText = r.employee ? r.employee.fullName : 'Employee';
+            document.getElementById('modalDate').innerText = `Logged Period: ${r.reviewDate || 'Recent'}`;
+            document.getElementById('modalTech').innerText = `${r.technicalRating} / 5`;
+            document.getElementById('modalSoft').innerText = `${r.softSkillsRating} / 5`;
+            document.getElementById('modalAttn').innerText = `${r.attendanceRating} / 5`;
+            document.getElementById('modalScore').innerText = `${(r.overallScore || 0.0).toFixed(1)} / 5.0`;
+            document.getElementById('modalFeedback').innerText = r.managerFeedback || 'No feedback logged.';
+            const m = document.getElementById('detailsModal');
+            m.classList.remove('hidden'); m.classList.add('flex');
+        } catch (e) { console.error(e); }
+    }
+    function closeDetailsModal() {
+        const m = document.getElementById('detailsModal');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    // ─── AI Insight Modal ───
+    async function openInsightModal(reviewId, empName) {
+        const modal = document.getElementById('aiInsightModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        document.getElementById('insightEmployeeLabel').innerText = `Generating insight for ${empName}...`;
+        document.getElementById('insightLoading').classList.remove('hidden');
+        document.getElementById('insightContent').classList.add('hidden');
+
+        try {
+            const res = await fetch(`/api/reviews/ai-insight/${reviewId}`);
+            if (!res.ok) throw new Error('AI insight failed');
+            const d = await res.json();
+
+            document.getElementById('insightEmployeeLabel').innerText = d.reviewDate ? `Evaluation: ${d.reviewDate}` : 'Latest Evaluation';
+            document.getElementById('insightScore').innerText = (d.overall || 0).toFixed(1);
+            document.getElementById('insightTier').innerHTML = `${d.tierIcon || ''} <strong>${d.tier || ''}</strong>`;
+
+            // Skill bars
+            document.getElementById('bar-tech').innerText = `${d.tech}/5`;
+            document.getElementById('fill-tech').style.width = `${(d.tech / 5) * 100}%`;
+            document.getElementById('bar-soft').innerText = `${d.soft}/5`;
+            document.getElementById('fill-soft').style.width = `${(d.soft / 5) * 100}%`;
+            document.getElementById('bar-attn').innerText = `${d.attn}/5`;
+            document.getElementById('fill-attn').style.width = `${(d.attn / 5) * 100}%`;
+
+            // Strengths
+            const sl = document.getElementById('strengthsList');
+            if (d.strengths && d.strengths.length) {
+                sl.innerHTML = d.strengths.map(s => `<div class="flex items-start gap-2 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2 text-xs text-emerald-700 font-semibold"><i class="fas fa-check-circle text-emerald-400 mt-0.5 shrink-0"></i>${s}</div>`).join('');
+            } else {
+                sl.innerHTML = '<div class="text-xs text-slate-400 italic">No outstanding strengths identified in this cycle.</div>';
+            }
+
+            // Gaps
+            const gl = document.getElementById('gapsList');
+            if (d.gaps && d.gaps.length) {
+                gl.innerHTML = d.gaps.map(g => `<div class="flex items-start gap-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 text-xs text-amber-700 font-semibold"><i class="fas fa-exclamation-triangle text-amber-400 mt-0.5 shrink-0"></i>${g}</div>`).join('');
+                document.getElementById('gapsSection').classList.remove('hidden');
+            } else {
+                document.getElementById('gapsSection').classList.add('hidden');
+            }
+
+            // Actions
+            const al = document.getElementById('actionsList');
+            al.innerHTML = (d.actions || []).map(a => `<div class="flex items-start gap-2 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2 text-xs text-blue-700 font-semibold"><i class="fas fa-arrow-right text-blue-400 mt-0.5 shrink-0"></i>${a}</div>`).join('');
+
+            document.getElementById('insightLoading').classList.add('hidden');
+            document.getElementById('insightContent').classList.remove('hidden');
+        } catch (e) {
+            document.getElementById('insightEmployeeLabel').innerText = 'Failed to load insight';
+            document.getElementById('insightLoading').innerHTML = '<p class="text-rose-500 text-sm font-bold">Could not generate AI insight. Try again.</p>';
+        }
+    }
+    function closeInsightModal() {
+        const m = document.getElementById('aiInsightModal');
+        m.classList.add('hidden'); m.classList.remove('flex');
+    }
+
+    // ─── Chat Panel ───
+    function toggleChatPanel() {
+        chatOpen = !chatOpen;
+        const panel = document.getElementById('aiChatPanel');
+        const icon = document.getElementById('fabIcon');
+        if (chatOpen) {
+            panel.classList.add('open');
+            icon.className = 'fas fa-times';
+        } else {
+            panel.classList.remove('open');
+            icon.className = 'fas fa-robot';
+        }
+    }
+    function closeChatPanel() {
+        chatOpen = false;
+        document.getElementById('aiChatPanel').classList.remove('open');
+        document.getElementById('fabIcon').className = 'fas fa-robot';
+    }
+
+    function appendMessage(text, isUser) {
+        const msgs = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        const formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n/g, '<br>');
+        if (isUser) {
+            div.className = 'chat-bubble-user rounded-2xl rounded-tr-sm p-3.5 text-xs text-slate-700 leading-relaxed ml-6 ai-text';
+            div.innerHTML = formatted;
+        } else {
+            div.className = 'chat-bubble-ai rounded-2xl rounded-tl-sm p-3.5 text-xs text-slate-700 leading-relaxed mr-6';
+            div.innerHTML = `<div class="flex items-center gap-2 mb-1.5"><i class="fas fa-robot text-indigo-500 text-[10px]"></i><span class="font-black text-indigo-600 text-[10px] uppercase tracking-wider">PerformanceBot AI</span></div>${formatted}`;
+        }
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+        return div;
+    }
+
+    function showTyping() {
+        const msgs = document.getElementById('chatMessages');
+        const div = document.createElement('div');
+        div.id = 'typingIndicator';
+        div.className = 'chat-bubble-ai rounded-2xl rounded-tl-sm p-3.5 mr-6';
+        div.innerHTML = '<div class="ai-typing"><span></span><span></span><span></span></div>';
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+    }
+    function removeTyping() { const t = document.getElementById('typingIndicator'); if (t) t.remove(); }
+
+    async function sendChatMessage() {
+        const input = document.getElementById('chatInput');
+        const msg = input.value.trim();
+        if (!msg) return;
+        input.value = '';
+        appendMessage(msg, true);
+        showTyping();
+
+        try {
+            const res = await fetch('/api/reviews/ai-assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            removeTyping();
+            if (res.ok) {
+                const data = await res.json();
+                appendMessage(data.response || 'No response received.', false);
+            } else {
+                appendMessage('Sorry, I encountered an issue. Please try again.', false);
+            }
+        } catch (e) {
+            removeTyping();
+            appendMessage('Connection error. Please check the server.', false);
+        }
+    }
+</script>
+</body>
+</html>

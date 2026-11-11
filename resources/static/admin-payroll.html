@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Payroll Management | SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body class="bg-slate-50 font-sans text-slate-800">
+    <div class="max-w-7xl mx-auto px-6 py-8">
+        <div class="mb-8 flex justify-between items-center">
+            <a href="admin-dashboard.html" class="inline-flex items-center text-blue-600 hover:text-blue-800 font-bold transition-all group">
+                <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                Back to Admin Dashboard
+            </a>
+            <h1 class="text-3xl font-black text-slate-800">Admin Payroll System</h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 h-fit">
+                <h3 class="font-bold mb-4 text-slate-700">Generate Salary</h3>
+                <div class="space-y-4">
+                    <select id="empDropdown" class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                        <option value="">Select Employee</option>
+                    </select>
+                    <input type="text" id="salaryMonth" placeholder="e.g. May 2026"
+                        class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="number" id="presentDays" placeholder="Total Present Days"
+                        class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="number" id="deductionsAmt" placeholder="Deductions"
+                        class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <input type="number" id="bonusAmt" placeholder="Bonus"
+                        class="w-full p-3 bg-slate-50 border rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all">
+                    <button onclick="calculateAndSubmitSalary()"
+                        class="w-full bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-md shadow-blue-200">
+                        Calculate & Disburse
+                    </button>
+                </div>
+            </div>
+
+            <!-- AI Payroll Intelligence Card -->
+            <div class="bg-gradient-to-br from-slate-900 to-indigo-950 text-white p-5 rounded-[2rem] shadow-lg border border-indigo-900/40 mt-6">
+                <div class="flex items-center gap-2.5 mb-4">
+                    <div class="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center animate-pulse">
+                        <i class="fas fa-brain text-indigo-400 text-xs"></i>
+                    </div>
+                    <div>
+                        <p class="font-bold text-sm text-white">AI Payroll Intelligence</p>
+                        <p class="text-[10px] text-indigo-300">SmartHR AI™ Engine</p>
+                    </div>
+                </div>
+                <div class="space-y-3 text-[11px]">
+                    <div class="flex justify-between items-center py-1.5 border-b border-indigo-900/50">
+                        <span class="text-slate-300">Payroll Cost vs Budget</span>
+                        <span class="font-bold text-emerald-400">92% Efficient</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-indigo-900/50">
+                        <span class="text-slate-300">Avg Bonus Paid (Q2)</span>
+                        <span class="font-bold text-amber-400">₹4,200 / head</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5 border-b border-indigo-900/50">
+                        <span class="text-slate-300">High Deduction Outliers</span>
+                        <span class="font-bold text-rose-400">3 Detected</span>
+                    </div>
+                    <div class="flex justify-between items-center py-1.5">
+                        <span class="text-slate-300">Next Payroll Due</span>
+                        <span class="font-bold text-indigo-300">June 1, 2026</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-3 bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <h3 class="font-bold mb-6 text-slate-700"><i class="fas fa-history mr-2 text-blue-500"></i>Master Payroll Ledger</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="text-slate-400 text-xs uppercase border-b pb-4">
+                                <th class="pb-4">Employee Name</th>
+                                <th class="pb-4">Month</th>
+                                <th class="pb-4">Net Salary Amount</th>
+                                <th class="pb-4">AI Risk Score</th>
+                                <th class="pb-4">Status</th>
+                                <th class="pb-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="payrollTable" class="text-sm"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoice/Slip Details Modal -->
+    <div id="invoiceModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-50 items-center justify-center">
+        <div class="bg-white p-8 rounded-3xl max-w-lg w-full shadow-2xl border border-slate-100 relative">
+            <button onclick="closeInvoiceModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-lg transition">
+                <i class="fas fa-times"></i>
+            </button>
+            <div id="slipTemplate" class="p-4 font-mono text-xs text-slate-800">
+                <div class="text-center border-b pb-4 mb-6">
+                    <h2 class="text-2xl font-black tracking-widest text-slate-800">SMARTHR AI ENTERPRISE</h2>
+                    <p class="text-[10px] text-slate-400 mt-1">Official Digital E-Payslip Corporate System Document</p>
+                </div>
+                <div id="slipContent" class="space-y-4"></div>
+            </div>
+            <div class="mt-6 flex justify-end gap-3">
+                <button onclick="downloadPayslipPDF()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider inline-flex items-center gap-2 transition active:scale-95 shadow-md">
+                    <i class="fas fa-file-pdf"></i> Download PDF
+                </button>
+                <button onclick="closeInvoiceModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-4 py-2 rounded-xl text-xs uppercase tracking-wider transition">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let activePayrollData = null;
+
+        document.addEventListener("DOMContentLoaded", function() {
+            // Secure Session Role Authentication Check
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN') {
+                        alert('Access Denied. Admins only.');
+                        window.location.href = 'index.html';
+                        return;
+                    }
+                    loadEmployees();
+                    fetchPayrollLedger();
+                })
+                .catch(err => {
+                    console.error("Auth check failed:", err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        async function loadEmployees() {
+            try {
+                const res = await fetch('/api/employees/all');
+                const employees = await res.json();
+                const dropdown = document.getElementById('empDropdown');
+                dropdown.innerHTML = '<option value="">Select Employee</option>';
+                employees.forEach(emp => {
+                    dropdown.innerHTML += `<option value="${emp.id}">${emp.fullName} (ID: ${emp.id})</option>`;
+                });
+            } catch (err) { console.error("Dropdown load failure", err); }
+        }
+
+        async function calculateAndSubmitSalary() {
+            const empId = document.getElementById('empDropdown').value;
+            const month = document.getElementById('salaryMonth').value;
+            const days = parseInt(document.getElementById('presentDays').value) || 0;
+            const deductions = parseFloat(document.getElementById('deductionsAmt').value) || 0;
+            const bonus = parseFloat(document.getElementById('bonusAmt').value) || 0;
+
+            if (!empId || !month) {
+                alert("Please pick an employee and month!");
+                return;
+            }
+
+            try {
+                const empRes = await fetch(`/api/employees/${empId}`);
+                const employee = await empRes.json();
+
+                const baseSalary = employee.baseSalary || 30000;
+                const calculatedBase = (baseSalary / 30) * days;
+                const netSalary = calculatedBase + bonus - deductions;
+
+                // STRICT PAIRING RELATION MAPPING
+                const payrollPayload = {
+                    employee: { id: parseInt(empId) },
+                    salaryMonth: month,
+                    totalPresentDays: days,
+                    calculatedSalary: calculatedBase,
+                    bonus: bonus,
+                    deductions: deductions,
+                    netSalary: netSalary,
+                    paymentStatus: "PAID",
+                    paymentDate: new Date().toISOString().split('T')[0]
+                };
+
+                const saveRes = await fetch('/api/payroll/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payrollPayload)
+                });
+
+                if (saveRes.ok) {
+                    alert(`Salary processed successfully for ${employee.fullName}!`);
+                    fetchPayrollLedger();
+                    // Clear inputs
+                    document.getElementById('empDropdown').value = '';
+                    document.getElementById('salaryMonth').value = '';
+                    document.getElementById('presentDays').value = '';
+                    document.getElementById('deductionsAmt').value = '';
+                    document.getElementById('bonusAmt').value = '';
+                } else {
+                    alert("Failed to save payroll record.");
+                }
+            } catch (err) { 
+                console.error(err);
+                alert("An error occurred while processing salary.");
+            }
+        }
+
+        async function fetchPayrollLedger() {
+            try {
+                const res = await fetch('/api/payroll/all');
+                const payrolls = await res.json();
+                const tbody = document.getElementById('payrollTable');
+                tbody.innerHTML = '';
+                
+                if (!payrolls || payrolls.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400 italic">No payroll entries processed yet.</td></tr>`;
+                    return;
+                }
+
+                payrolls.forEach(p => {
+                    const empName = p.employee ? p.employee.fullName : 'System Error Entry';
+                    const jsonStr = encodeURIComponent(JSON.stringify(p));
+
+                    // Client-side AI payroll risk scoring
+                    const net = p.netSalary || 0;
+                    const deductions = p.deductions || 0;
+                    const bonus = p.bonus || 0;
+                    const days = p.totalPresentDays || 0;
+                    let riskLabel = 'Low Risk';
+                    let riskColor = 'text-emerald-600 bg-emerald-50 border-emerald-200';
+                    let riskTip = 'All clear';
+
+                    if (deductions > net * 0.3) {
+                        riskLabel = 'High Deduction';
+                        riskColor = 'text-rose-600 bg-rose-50 border-rose-200';
+                        riskTip = 'Deductions exceed 30% of net';
+                    } else if (days < 15) {
+                        riskLabel = 'Low Attendance';
+                        riskColor = 'text-amber-600 bg-amber-50 border-amber-200';
+                        riskTip = 'Present days below threshold';
+                    } else if (bonus > net * 0.5) {
+                        riskLabel = 'Bonus Anomaly';
+                        riskColor = 'text-purple-600 bg-purple-50 border-purple-200';
+                        riskTip = 'Bonus unusually high';
+                    }
+
+                    tbody.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50 transition-colors">
+                            <td class="py-3 font-bold text-slate-800">${empName}</td>
+                            <td class="py-3 text-slate-600">${p.salaryMonth || 'N/A'}</td>
+                            <td class="py-3 font-mono text-blue-600 font-bold">₹${(net).toFixed(2)}</td>
+                            <td class="py-3">
+                                <span class="px-2 py-0.5 rounded-full border text-[9px] font-bold ${riskColor} inline-flex items-center gap-1" title="${riskTip}">
+                                    <i class="fas fa-brain text-[8px]"></i> ${riskLabel}
+                                </span>
+                            </td>
+                            <td class="py-3"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-xs font-bold">${p.paymentStatus || 'PAID'}</span></td>
+                            <td class="py-3 text-right whitespace-nowrap space-x-2">
+                                <button onclick="openInvoiceModal('${jsonStr}')" class="text-blue-600 hover:text-blue-800 transition p-1" title="View Payslip"><i class="fas fa-eye"></i></button>
+                                <button onclick="deletePayroll(${p.id})" class="text-rose-600 hover:text-rose-800 transition p-1" title="Delete Log"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>`;
+                });
+            } catch (err) { 
+                console.error("Failed to load payroll list", err);
+                document.getElementById('payrollTable').innerHTML = `<tr><td colspan="5" class="py-4 text-center text-rose-500 font-bold">Failed to load ledger records.</td></tr>`;
+            }
+        }
+
+        async function deletePayroll(id) {
+            if (!confirm("Are you sure you want to delete this payroll record?")) return;
+            try {
+                const res = await fetch(`/api/payroll/delete/${id}`, {
+                    method: 'DELETE'
+                });
+                if (res.ok) {
+                    alert("Payroll record deleted successfully.");
+                    fetchPayrollLedger();
+                } else {
+                    alert("Failed to delete payroll record.");
+                }
+            } catch (err) {
+                console.error("Delete error", err);
+                alert("Connection error occurred while deleting.");
+            }
+        }
+
+        function openInvoiceModal(payrollJsonStr) {
+            try {
+                const p = JSON.parse(decodeURIComponent(payrollJsonStr));
+                activePayrollData = p;
+                
+                const empName = p.employee ? p.employee.fullName : 'Employee';
+                const empId = p.employee ? p.employee.id : 'N/A';
+                
+                const container = document.getElementById('slipContent');
+                container.innerHTML = `
+                    <div class="grid grid-cols-2 gap-4 border-b pb-4 text-slate-600">
+                        <div><strong>Employee Name:</strong> ${empName}</div>
+                        <div><strong>Employee ID Token:</strong> EMP-${empId}</div>
+                        <div><strong>Salary Period:</strong> ${p.salaryMonth || 'N/A'}</div>
+                        <div><strong>Status:</strong> ${p.paymentStatus || 'Pending'}</div>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <div class="flex justify-between"><span>Base Gross Allocation Earned:</span> <span class="font-mono">₹${(p.calculatedSalary || 0).toFixed(2)}</span></div>
+                        <div class="flex justify-between text-emerald-600"><span>Performance Bonus:</span> <span class="font-mono">+₹${(p.bonus || 0).toFixed(2)}</span></div>
+                        <div class="flex justify-between text-rose-600"><span>Statutory Reductions:</span> <span class="font-mono">-₹${(p.deductions || 0).toFixed(2)}</span></div>
+                        <div class="flex justify-between border-t pt-3 text-base font-black text-blue-600">
+                            <span>NET REMUNERATION DISBURSED:</span> <span class="font-mono">₹${(p.netSalary || 0).toFixed(2)}</span>
+                        </div>
+                    </div>`;
+                
+                const modal = document.getElementById('invoiceModal');
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } catch (err) {
+                console.error("Failed to render invoice details:", err);
+            }
+        }
+
+        function closeInvoiceModal() {
+            const modal = document.getElementById('invoiceModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            activePayrollData = null;
+        }
+
+        function downloadPayslipPDF() {
+            if (!activePayrollData) return;
+            const p = activePayrollData;
+            const empName = p.employee ? p.employee.fullName : 'Employee';
+            const element = document.getElementById('slipTemplate');
+            
+            try {
+                html2pdf().from(element).set({
+                    margin: 0.5,
+                    filename: `Payslip_${empName.replace(/\s+/g, '_')}_${p.salaryMonth}.pdf`,
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                }).save();
+            } catch (err) {
+                console.error("PDF Generation Error:", err);
+                alert("Failed to generate PDF. Please try again.");
+            }
+        }
+    </script>
+</body>
+
+</html>

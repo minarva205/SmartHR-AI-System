@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Reviews & NPS Dashboard - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;850&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='admin-dashboard.html'">
+                <div class="w-10 h-10 bg-gradient-to-tr from-emerald-600 to-teal-600 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-md">
+                    S
+                </div>
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-emerald-600 cursor-pointer text-lg" title="Security Settings" onclick="window.location.href='admin-security.html'"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="admin-dashboard.html" class="text-slate-500 hover:text-emerald-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-5xl mx-auto px-4 py-12">
+        <!-- Page Header -->
+        <div class="flex items-center space-x-4 mb-12">
+            <div class="w-12 h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-xl shadow-sm">
+                <i class="fas fa-comments-dollar"></i>
+            </div>
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <h1 class="text-3xl font-bold text-slate-800">Client Reviews & NPS Dashboard</h1>
+                    <span class="bg-violet-100 text-violet-700 px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1"><i class="fas fa-robot"></i> AI Moderated</span>
+                </div>
+                <p class="text-slate-500">Monitor external client NPS rankings, adoption stats, and manage employee feedback approval queues</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Corporate Feedback and Queue -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Testimonial Approval Queue -->
+                <div class="bg-white border border-slate-100 p-6 rounded-3xl shadow-sm space-y-4">
+                    <h2 class="text-base font-bold text-slate-800 flex items-center">
+                        <i class="fas fa-hourglass-half text-amber-500 mr-2.5"></i> Pending Testimonials Approval Queue
+                    </h2>
+                    
+                    <!-- Submitted Review item -->
+                    <div id="pendingReviewItem" class="border border-slate-100 p-4 rounded-2xl bg-slate-50/50 space-y-3 relative overflow-hidden">
+                        <div class="absolute right-0 top-0 bg-emerald-100 text-emerald-700 text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded-bl-lg flex items-center gap-1">
+                            <i class="fas fa-sparkles"></i> AI: Positive Tone
+                        </div>
+                        <div class="flex justify-between items-start pt-2">
+                            <div>
+                                <h4 class="font-bold text-slate-850 text-xs">Rohit Sen</h4>
+                                <span class="text-slate-400 text-[10px] block">Customer Support Agent</span>
+                            </div>
+                            <span class="text-amber-400 text-[10px]"><i class="fas fa-star text-[8px]"></i> 5.0 Rating</span>
+                        </div>
+                        <p class="text-slate-600 text-xs italic">"SmartHR has made leave booking so much easier for our department! Fully recommended."</p>
+                        <div class="flex justify-end space-x-2 pt-2 border-t border-slate-100">
+                            <button onclick="approveReview()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] px-3.5 py-1.5 rounded-lg transition shadow-sm">Approve</button>
+                            <button onclick="rejectReview()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-[10px] px-3.5 py-1.5 rounded-lg transition">Reject</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Quote 1 -->
+                <div class="bg-white border border-slate-100 p-6 rounded-3xl shadow-sm space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">C</div>
+                        <div>
+                            <h4 class="font-bold text-slate-850 text-sm">Chandra Shekhar</h4>
+                            <span class="text-slate-400 text-xs block">HR Director, Apex Global</span>
+                        </div>
+                    </div>
+                    <p class="text-slate-550 text-sm italic">"Implementing SmartHR AI across our 500+ employees drastically cut manual time off processing. The payroll tools have saved our finance team over 15 hours each month!"</p>
+                </div>
+            </div>
+
+            <!-- Right Column: NPS Rankings & Adoption Stats -->
+            <div class="space-y-6">
+                <!-- NPS and Adoption Stats -->
+                <div class="bg-white rounded-3xl border border-slate-100 p-6 shadow-sm">
+                    <h2 class="text-base font-bold text-slate-800 mb-6 flex items-center">
+                        <i class="fas fa-chart-line text-emerald-500 mr-2.5"></i> Platform Performance Rating
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                <span>Net Promoter Score (NPS)</span>
+                                <span class="text-slate-700">94.2%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded-full" style="width: 94%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                <span>Team Activation Rate</span>
+                                <span class="text-slate-700">89.4%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                <div class="bg-teal-500 h-full rounded-full" style="width: 89%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Sentiment Engine Widget -->
+                <div class="bg-gradient-to-br from-violet-900 to-indigo-900 rounded-3xl border border-violet-500/30 p-6 shadow-lg shadow-violet-500/20 relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 w-24 h-24 bg-violet-500/20 rounded-full blur-2xl"></div>
+                    <h2 class="text-base font-bold text-violet-100 mb-6 flex items-center relative z-10">
+                        <i class="fas fa-brain text-violet-400 mr-2.5"></i> AI Sentiment Engine
+                    </h2>
+                    
+                    <div class="space-y-4 relative z-10">
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-violet-300 mb-1">
+                                <span>Positive Mentions</span>
+                                <span class="text-white">82%</span>
+                            </div>
+                            <div class="w-full bg-violet-950/50 h-2 rounded-full overflow-hidden">
+                                <div class="bg-emerald-400 h-full rounded-full" style="width: 82%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs font-bold text-violet-300 mb-1">
+                                <span>Negative / At-Risk</span>
+                                <span class="text-white">5%</span>
+                            </div>
+                            <div class="w-full bg-violet-950/50 h-2 rounded-full overflow-hidden">
+                                <div class="bg-rose-400 h-full rounded-full" style="width: 5%"></div>
+                            </div>
+                        </div>
+                        <p class="text-[10px] text-violet-300/80 mt-4 italic">The AI engine currently scans all internal chat logs, helpdesk tickets, and survey feedback to construct this aggregate sentiment score.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role !== 'ADMIN' && user.role !== 'HR') {
+                        alert("Access Restricted. Redirecting to employee feedback portal.");
+                        window.location.href = 'testimonials.html';
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        function approveReview() {
+            alert("Feedback Approved: Selected testimonial was pushed live to the employee feed.");
+            document.getElementById('pendingReviewItem').style.display = 'none';
+        }
+
+        function rejectReview() {
+            alert("Feedback Rejected: Selected testimonial has been archived.");
+            document.getElementById('pendingReviewItem').style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>

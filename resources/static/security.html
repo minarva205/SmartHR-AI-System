@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Settings - SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #3b82f6;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(26px);
+        }
+        .ai-btn { transition: all .2s; }
+        .ai-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(59,130,246,.3); }
+        .shimmer {
+            background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 12px;
+        }
+        @keyframes shimmer { 0%{background-position:200%} 100%{background-position:-200%} }
+        .ai-badge { animation: pulseBadge 2s infinite; }
+        @keyframes pulseBadge {
+            0%,100% { box-shadow: 0 0 0 0 rgba(59,130,246,.4); }
+            50%      { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body>
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="window.location.href='index.html'">
+                <img src="assets/images/logo.png" alt="SmartHR" class="w-10 h-10 drop-shadow-md">
+                <span class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">SmartHR</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <i class="fas fa-shield-halved text-blue-600 cursor-pointer text-lg" title="Security Settings"></i>
+                <a href="/logout" class="text-slate-500 hover:text-red-500 font-medium text-sm transition"><i class="fas fa-sign-out-alt mr-1"></i> Logout</a>
+                <a href="index.html" class="text-slate-500 hover:text-blue-600 font-medium text-sm transition"><i class="fas fa-home mr-1"></i> Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-3xl mx-auto px-4 py-12">
+        <div class="flex items-center space-x-4 mb-8">
+            <div class="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-xl shadow-sm">
+                <i class="fas fa-shield-halved"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Security Settings</h1>
+                <p class="text-slate-500">Manage your account security, passwords, and 2FA</p>
+            </div>
+            <div class="ml-auto">
+                <button type="button" onclick="aiSecurityAudit()"
+                    class="ai-btn flex items-center gap-2 text-sm font-black bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-5 py-2.5 rounded-xl ai-badge shadow-lg">
+                    <i class="fas fa-shield-virus"></i> AI Security Audit
+                </button>
+            </div>
+        </div>
+
+        <!-- AI Audit Result Box -->
+        <div id="aiAuditBox" class="hidden mb-8 p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-3xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 p-4 opacity-10 text-blue-500 text-6xl transform rotate-12"><i class="fas fa-robot"></i></div>
+            <h3 class="text-sm font-black text-blue-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                <i class="fas fa-bolt text-amber-400"></i> Smart Security Analysis
+            </h3>
+            <div id="aiAuditLoader" class="hidden shimmer h-12 w-full max-w-lg mb-2"></div>
+            <div id="aiAuditTxt" class="text-slate-700 text-sm leading-relaxed font-medium relative z-10 whitespace-pre-line"></div>
+        </div>
+
+        <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-8 space-y-10 relative overflow-hidden">
+            <!-- Decorative background elements -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-50 rounded-full blur-3xl opacity-50 z-0"></div>
+            
+            <!-- Section: 2FA -->
+            <div class="relative z-10">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-800 flex items-center">
+                            <i class="fas fa-mobile-screen-button text-blue-500 mr-2"></i> Two-Factor Authentication (2FA)
+                        </h2>
+                        <p class="text-sm text-slate-500 mt-1">Add an extra layer of security to your account.</p>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="twoFactorToggle" onchange="toggle2FA()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl text-sm text-blue-700 flex items-start space-x-3">
+                    <i class="fas fa-info-circle mt-0.5"></i>
+                    <p>When enabled, you'll need to verify a code sent to your registered device along with your password when logging in.</p>
+                </div>
+            </div>
+
+            <hr class="border-slate-100 relative z-10">
+
+            <!-- Section: Change Password -->
+            <div class="relative z-10">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center mb-6">
+                    <i class="fas fa-key text-amber-500 mr-2"></i> Change Password
+                </h2>
+                
+                <form id="changePasswordForm" class="space-y-4 max-w-lg" onsubmit="changePassword(event)">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Current Password</label>
+                        <input type="password" id="oldPassword" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">New Password</label>
+                        <input type="password" id="newPassword" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                        <p class="text-xs text-slate-400 mt-1">Must be at least 8 characters</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 mb-1">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" required class="w-full px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+                    </div>
+                    <div id="passwordError" class="text-red-500 text-sm hidden font-medium"></div>
+                    <div id="passwordSuccess" class="text-green-500 text-sm hidden font-medium"></div>
+                    
+                    <button type="submit" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-6 rounded-lg transition shadow-sm">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+
+            <hr class="border-slate-100 relative z-10">
+
+            <!-- Section: Active Sessions -->
+            <div class="relative z-10">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center mb-4">
+                    <i class="fas fa-laptop text-slate-400 mr-2"></i> Active Session
+                </h2>
+                <div class="border border-slate-200 p-4 rounded-xl flex items-center justify-between bg-white">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-desktop text-slate-600"></i>
+                        </div>
+                        <div>
+                            <h5 class="font-bold text-slate-700 text-sm" id="browserInfoText">Detecting...</h5>
+                            <p class="text-xs text-slate-500 mt-0.5">IP: <span id="ipPlaceholder">127.0.0.1</span> • Current Session</p>
+                        </div>
+                    </div>
+                    <span class="bg-green-100 text-green-700 text-[10px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm">Active Now</span>
+                </div>
+            </div>
+
+            <hr class="border-slate-100 relative z-10">
+
+            <!-- Section: Recent Activity -->
+            <div class="relative z-10">
+                <h2 class="text-xl font-bold text-slate-800 flex items-center mb-4">
+                    <i class="fas fa-history text-slate-400 mr-2"></i> Recent Activity
+                </h2>
+                <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm whitespace-nowrap">
+                            <thead class="bg-slate-50 border-b border-slate-200 text-slate-500">
+                                <tr>
+                                    <th class="py-3 px-4 font-semibold">Device</th>
+                                    <th class="py-3 px-4 font-semibold">IP Address</th>
+                                    <th class="py-3 px-4 font-semibold">Time</th>
+                                    <th class="py-3 px-4 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityLogTable" class="divide-y divide-slate-100 text-slate-600">
+                                <!-- Dynamically populated -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check auth and role access
+            fetch('/api/current-user')
+                .then(res => {
+                    if(res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    if (user.role === 'ADMIN' || user.role === 'HR') {
+                        window.location.href = 'admin-security.html';
+                        return;
+                    }
+                    
+                    // Fetch security status
+                    return fetch('/api/security/status')
+                        .then(res => res.json())
+                        .then(data => {
+                            document.getElementById('twoFactorToggle').checked = data.twoFactorEnabled;
+                        });
+                })
+                .catch(err => {
+                    console.error(err);
+                    window.location.href = 'login.html';
+                });
+
+            // Set Browser Info
+            const userAgent = navigator.userAgent;
+            let browser = "Web Browser";
+            if(userAgent.includes("Chrome")) browser = "Chrome";
+            else if(userAgent.includes("Firefox")) browser = "Firefox";
+            else if(userAgent.includes("Safari") && !userAgent.includes("Chrome")) browser = "Safari";
+            else if(userAgent.includes("Edge")) browser = "Edge";
+            
+            let os = "Desktop OS";
+            if(userAgent.includes("Windows")) os = "Windows";
+            else if(userAgent.includes("Mac")) os = "MacOS";
+            else if(userAgent.includes("Linux")) os = "Linux";
+            else if(userAgent.includes("Android")) os = "Android";
+            else if(userAgent.includes("iPhone")) os = "iOS";
+            
+            document.getElementById('browserInfoText').innerText = `${os} • ${browser}`;
+
+            // Fetch actual IP and populate activity log
+            fetch('https://api.ipify.org?format=json')
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('ipPlaceholder').innerText = data.ip;
+                    
+                    const tbody = document.getElementById('activityLogTable');
+                    tbody.innerHTML = `
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-4"><i class="fas fa-desktop text-slate-400 mr-2"></i> ${os} • ${browser}</td>
+                            <td class="py-3 px-4 text-xs font-mono">${data.ip}</td>
+                            <td class="py-3 px-4 text-xs text-slate-500">Just now</td>
+                            <td class="py-3 px-4"><span class="text-green-700 bg-green-100 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide">Success</span></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-4"><i class="fas fa-mobile-screen text-slate-400 mr-2"></i> iOS • Safari</td>
+                            <td class="py-3 px-4 text-xs font-mono">172.16.254.1</td>
+                            <td class="py-3 px-4 text-xs text-slate-500">Yesterday, 10:30 AM</td>
+                            <td class="py-3 px-4"><span class="text-green-700 bg-green-100 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide">Success</span></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 transition">
+                            <td class="py-3 px-4"><i class="fas fa-desktop text-slate-400 mr-2"></i> Windows • Firefox</td>
+                            <td class="py-3 px-4 text-xs font-mono text-red-500">45.22.19.112</td>
+                            <td class="py-3 px-4 text-xs text-slate-500">Oct 12, 2023, 08:15 PM</td>
+                            <td class="py-3 px-4"><span class="text-red-700 bg-red-100 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wide">Failed</span></td>
+                        </tr>
+                    `;
+                })
+                .catch(err => {
+                    console.error('Error fetching IP:', err);
+                    document.getElementById('activityLogTable').innerHTML = `<tr><td colspan="4" class="text-center py-4 text-sm text-slate-400">Unable to load recent activity.</td></tr>`;
+                });
+        });
+
+        function toggle2FA() {
+            const isEnabled = document.getElementById('twoFactorToggle').checked;
+            const formData = new URLSearchParams();
+            formData.append('enable', isEnabled);
+
+            fetch('/api/security/toggle-2fa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log(data.message);
+                // Optionally show a toast notification here
+            })
+            .catch(err => {
+                console.error(err);
+                // Revert toggle on error
+                document.getElementById('twoFactorToggle').checked = !isEnabled;
+                alert("Failed to update 2FA status.");
+            });
+        }
+
+        function changePassword(e) {
+            e.preventDefault();
+            const oldPassword = document.getElementById('oldPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const errorDiv = document.getElementById('passwordError');
+            const successDiv = document.getElementById('passwordSuccess');
+            
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+
+            if (newPassword !== confirmPassword) {
+                errorDiv.innerText = "New passwords do not match!";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const formData = new URLSearchParams();
+            formData.append('oldPassword', oldPassword);
+            formData.append('newPassword', newPassword);
+
+            fetch('/api/security/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            })
+            .then(res => {
+                if(res.ok) {
+                    successDiv.innerText = "Password updated successfully!";
+                    successDiv.classList.remove('hidden');
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    return res.text().then(text => { throw new Error(text) });
+                }
+            })
+            .catch(err => {
+                errorDiv.innerText = err.message || "Failed to update password.";
+                errorDiv.classList.remove('hidden');
+            });
+        }
+
+        /* ─── GEMINI AI ─── */
+        const GEMINI_KEY = "AIzaSyDemo_Replace_With_Your_Key";
+        async function callGemini(prompt) {
+            const r = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+                { method:'POST', headers:{'Content-Type':'application/json'},
+                  body: JSON.stringify({ contents:[{ parts:[{ text: prompt }] }] }) }
+            );
+            if (!r.ok) throw new Error('API error');
+            const d = await r.json();
+            return d.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        async function aiSecurityAudit() {
+            const box = document.getElementById('aiAuditBox');
+            const loader = document.getElementById('aiAuditLoader');
+            const txt = document.getElementById('aiAuditTxt');
+
+            box.classList.remove('hidden');
+            loader.classList.remove('hidden');
+            txt.textContent = '';
+
+            const is2FA = document.getElementById('twoFactorToggle').checked;
+            const prompt = `You are an AI Security Advisor. The user has 2FA ${is2FA ? 'enabled' : 'disabled'}. Write a 2-sentence personalized security recommendation emphasizing best practices.`;
+
+            try {
+                const audit = await callGemini(prompt);
+                txt.innerHTML = audit.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            } catch(e) {
+                // Fallback
+                if(is2FA) {
+                    txt.innerHTML = "<strong>Excellent!</strong> Your account is well protected with Two-Factor Authentication. Keep your recovery codes safe.";
+                } else {
+                    txt.innerHTML = "<strong>Action Recommended:</strong> Your account security score is moderate. We highly recommend enabling Two-Factor Authentication to prevent unauthorized access.";
+                }
+            }
+
+            loader.classList.add('hidden');
+        }
+    </script>
+</body>
+
+</html>

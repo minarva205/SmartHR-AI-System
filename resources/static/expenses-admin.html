@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Claims AI — HR Admin | SmartHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: radial-gradient(circle at 12% 18%, #0d1224 0%, #090d1a 90%); }
+        .glass { background: rgba(30,41,59,.7); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.08); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        input,select,textarea { background: rgba(15,23,42,.6) !important; border: 1px solid rgba(255,255,255,.1) !important; color: #f8fafc !important; }
+        input:focus,select:focus,textarea:focus { border-color: #6366f1 !important; outline: none !important; }
+        .ai-badge-auto    { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+        .ai-badge-flag    { background: rgba(239,68,68,.15);  color: #f87171; border: 1px solid rgba(239,68,68,.3); }
+        .ai-badge-manual  { background: rgba(245,158,11,.15); color: #fbbf24; border: 1px solid rgba(245,158,11,.3); }
+        .status-pending   { background: rgba(245,158,11,.15); color: #fbbf24; }
+        .status-approved  { background: rgba(16,185,129,.15); color: #34d399; }
+        .status-rejected  { background: rgba(239,68,68,.15);  color: #f87171; }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen">
+<div class="max-w-7xl mx-auto px-6 py-8">
+
+    <!-- Header -->
+    <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
+        <div>
+            <a href="admin-dashboard.html" class="inline-flex items-center text-indigo-400 hover:text-indigo-300 font-bold mb-2 group transition-all">
+                <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Back to Admin Dashboard
+            </a>
+            <h1 class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-400 to-violet-300">
+                Expense Claims AI — HR Console
+            </h1>
+            <p class="text-slate-400 text-sm mt-1">AI-powered OCR receipt scanning, policy auditing & reimbursement approval workflow.</p>
+        </div>
+        <span class="text-xs bg-indigo-600 text-white px-4 py-2 rounded-full font-black uppercase tracking-wider flex items-center shrink-0">
+            <i class="fas fa-shield-halved mr-2"></i> HR Administrator
+        </span>
+    </header>
+
+    <!-- KPI Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-10">
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Total Claims</p>
+            <p class="text-4xl font-black text-indigo-400" id="kpiTotal">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Pending Review</p>
+            <p class="text-4xl font-black text-amber-400" id="kpiPending">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">AI Flagged 🚨</p>
+            <p class="text-4xl font-black text-red-400" id="kpiFlagged">0</p>
+        </div>
+        <div class="glass p-5 rounded-2xl text-center">
+            <p class="text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">Approved Payout</p>
+            <p class="text-3xl font-black text-emerald-400">₹<span id="kpiAmount">0</span></p>
+        </div>
+    </div>
+
+    <!-- Main Split -->
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+        <!-- Claims Ledger (3/5) -->
+        <div class="lg:col-span-3 space-y-6">
+
+            <!-- Filters -->
+            <div class="glass p-6 rounded-3xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <h2 class="text-lg font-black text-slate-100 flex items-center"><i class="fas fa-receipt text-indigo-400 mr-3"></i>Claims Ledger</h2>
+                    <div class="flex gap-2">
+                        <select id="fStatus" onchange="loadClaims()" class="px-3 py-2 rounded-xl text-xs font-bold">
+                            <option value="ALL">All Status</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="APPROVED">Approved</option>
+                            <option value="REJECTED">Rejected</option>
+                        </select>
+                        <select id="fAudit" onchange="loadClaims()" class="px-3 py-2 rounded-xl text-xs font-bold">
+                            <option value="ALL">All AI Status</option>
+                            <option value="AUTO_APPROVED">Auto-Approved</option>
+                            <option value="MANUAL_REVIEW">Manual Review</option>
+                            <option value="FLAGGED_HIGH_RISK">Flagged Risk</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="claimsList" class="space-y-4 max-h-[600px] overflow-y-auto pr-1 scrollbar-hide">
+                    <p class="text-slate-500 italic text-sm">Loading claims ledger…</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chatbot (2/5) -->
+        <div class="lg:col-span-2">
+            <div class="glass rounded-3xl h-[720px] flex flex-col">
+                <!-- Chat Header -->
+                <div class="p-5 border-b border-slate-700 bg-gradient-to-r from-indigo-950/50 to-purple-950/40 rounded-t-3xl flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center shadow-lg text-white">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div>
+                        <p class="font-black text-sm text-slate-100">Expense AI Advisor</p>
+                        <p class="text-[10px] text-indigo-400 font-bold uppercase tracking-wider flex items-center">
+                            <span class="w-2 h-2 bg-indigo-400 rounded-full mr-1.5 animate-ping inline-block"></span>Policy Auditor
+                        </p>
+                    </div>
+                </div>
+                <!-- Messages -->
+                <div id="chatMessages" class="flex-1 p-5 space-y-4 text-xs overflow-y-auto scrollbar-hide">
+                    <div class="flex items-start gap-3">
+                        <div class="w-7 h-7 rounded-full bg-indigo-950 border border-indigo-700 text-indigo-400 flex items-center justify-center text-xs shrink-0"><i class="fas fa-robot"></i></div>
+                        <div class="glass rounded-2xl p-3.5 text-slate-300 leading-relaxed max-w-[85%]">
+                            Hello! I'm your <strong>Expense AI Advisor</strong>. I can help you:<br><br>
+                            • <em>"Show me all flagged claims"</em><br>
+                            • <em>"How many are pending?"</em><br>
+                            • <em>"What are the policy limits?"</em><br>
+                            • <em>"Draft a review email"</em>
+                        </div>
+                    </div>
+                </div>
+                <!-- Input -->
+                <div class="p-4 border-t border-slate-700 rounded-b-3xl">
+                    <form onsubmit="sendChat(event)" class="flex gap-2">
+                        <input type="text" id="chatInput" placeholder="Ask about claims, policy caps, flagged receipts…"
+                            class="flex-1 px-4 py-2.5 rounded-xl text-xs font-medium">
+                        <button type="submit" class="bg-gradient-to-tr from-indigo-600 to-violet-500 hover:opacity-90 text-white px-4 py-2.5 rounded-xl transition">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Detail Modal -->
+<div id="modal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeModal()"></div>
+    <div class="absolute inset-y-0 right-0 max-w-md w-full bg-slate-900 border-l border-white/10 rounded-l-3xl overflow-y-auto shadow-2xl">
+        <div class="p-7 border-b border-slate-800 flex justify-between items-center">
+            <h3 class="font-black text-slate-100 text-lg">AI Audit Report</h3>
+            <button onclick="closeModal()" class="text-slate-400 hover:text-red-400 transition"><i class="fas fa-times text-xl"></i></button>
+        </div>
+        <div id="modalContent" class="p-7 space-y-6 text-xs text-slate-300"></div>
+    </div>
+</div>
+
+<script>
+let allClaims = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetch('/api/current-user').then(r => r.ok ? r.json() : Promise.reject())
+        .then(u => { if (u.role !== 'ADMIN') { alert('Admins only.'); location.href='index.html'; } else { init(); } })
+        .catch(() => location.href = 'login.html');
+});
+
+async function init() { await loadStats(); await loadClaims(); }
+
+async function loadStats() {
+    const r = await fetch('/api/expenses/stats');
+    if (!r.ok) return;
+    const s = await r.json();
+    document.getElementById('kpiTotal').innerText   = s.total;
+    document.getElementById('kpiPending').innerText = s.pending;
+    document.getElementById('kpiFlagged').innerText = s.flagged;
+    document.getElementById('kpiAmount').innerText  = Number(s.totalApprovedAmount).toLocaleString('en-IN');
+}
+
+async function loadClaims() {
+    const r = await fetch('/api/expenses/admin/all');
+    if (!r.ok) return;
+    allClaims = await r.json();
+
+    const fS = document.getElementById('fStatus').value;
+    const fA = document.getElementById('fAudit').value;
+    let data  = allClaims.filter(c =>
+        (fS === 'ALL' || c.status === fS) &&
+        (fA === 'ALL' || c.aiAuditStatus === fA));
+
+    const el = document.getElementById('claimsList');
+    if (!data.length) { el.innerHTML = `<p class="text-slate-500 italic text-sm text-center py-10">No matching claims.</p>`; return; }
+
+    el.innerHTML = data.map(c => {
+        const aiClass = c.aiAuditStatus === 'AUTO_APPROVED' ? 'ai-badge-auto' :
+                        c.aiAuditStatus === 'FLAGGED_HIGH_RISK' ? 'ai-badge-flag' : 'ai-badge-manual';
+        const aiLabel = c.aiAuditStatus === 'AUTO_APPROVED' ? '✅ Auto-Approved' :
+                        c.aiAuditStatus === 'FLAGGED_HIGH_RISK' ? '🚨 Flagged Risk' : '⚠️ Manual Review';
+        const stClass = `status-${c.status.toLowerCase()}`;
+        const stIcon  = c.status === 'APPROVED' ? 'fa-check' : c.status === 'REJECTED' ? 'fa-times' : 'fa-clock';
+        const date    = c.submittedDate ? new Date(c.submittedDate).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+
+        return `<div class="glass p-5 rounded-2xl hover:border-indigo-500/40 transition">
+            <div class="flex justify-between items-start mb-3">
+                <div>
+                    <p class="font-black text-slate-100 text-sm">${c.employeeName}</p>
+                    <p class="text-[10px] text-slate-400 uppercase tracking-wider mt-0.5">${c.category} • ${date}</p>
+                </div>
+                <p class="font-black text-indigo-300 text-lg">₹${Number(c.amount).toLocaleString('en-IN')}</p>
+            </div>
+            <p class="text-slate-400 text-xs mb-3 leading-relaxed">${c.description}</p>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${aiClass}">${aiLabel}</span>
+                <span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${stClass}"><i class="fas ${stIcon} mr-1"></i>${c.status}</span>
+                ${c.ocrConfidence ? `<span class="px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider bg-slate-800 text-slate-400 border border-slate-700">OCR ${c.ocrConfidence}%</span>` : ''}
+            </div>
+            <div class="flex flex-wrap gap-2 pt-3 border-t border-white/5">
+                <button onclick="openModal(${c.id})" class="px-3 py-1.5 bg-indigo-950/60 text-indigo-400 border border-indigo-800/30 hover:bg-indigo-900/40 rounded-xl text-[10px] font-black uppercase transition">
+                    <i class="fas fa-brain mr-1"></i> AI Report
+                </button>
+                ${c.status === 'PENDING' ? `
+                <button onclick="updateStatus(${c.id},'APPROVED')" class="px-3 py-1.5 bg-emerald-950/60 text-emerald-400 border border-emerald-800/30 hover:bg-emerald-900/40 rounded-xl text-[10px] font-black uppercase transition">
+                    <i class="fas fa-check mr-1"></i> Approve
+                </button>
+                <button onclick="updateStatus(${c.id},'REJECTED')" class="px-3 py-1.5 bg-red-950/60 text-red-400 border border-red-800/30 hover:bg-red-900/40 rounded-xl text-[10px] font-black uppercase transition">
+                    <i class="fas fa-times mr-1"></i> Reject
+                </button>` : ''}
+                <button onclick="deleteClaim(${c.id})" class="ml-auto text-slate-500 hover:text-red-400 px-2 py-1.5 transition text-xs"><i class="fas fa-trash-alt"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function updateStatus(id, status) {
+    const r = await fetch(`/api/expenses/admin/${id}/status`, {
+        method: 'PUT', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status})
+    });
+    if (r.ok) { loadStats(); loadClaims(); }
+}
+
+async function deleteClaim(id) {
+    if (!confirm('Delete this claim?')) return;
+    await fetch(`/api/expenses/admin/${id}`, {method:'DELETE'});
+    loadStats(); loadClaims();
+}
+
+function openModal(id) {
+    const c = allClaims.find(x => x.id === id);
+    if (!c) return;
+    const aiClass = c.aiAuditStatus === 'AUTO_APPROVED' ? 'text-emerald-400' :
+                    c.aiAuditStatus === 'FLAGGED_HIGH_RISK' ? 'text-red-400' : 'text-amber-400';
+    document.getElementById('modalContent').innerHTML = `
+        <div class="glass rounded-2xl p-5 space-y-3">
+            <p class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Claimant</p>
+            <p class="font-bold text-slate-100">${c.employeeName}</p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <div><p class="text-[8px] font-black uppercase text-slate-500">Category</p><p class="font-bold mt-1">${c.category}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">Amount</p><p class="font-bold mt-1">₹${Number(c.amount).toLocaleString('en-IN')}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">HR Status</p><p class="font-bold mt-1">${c.status}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">Submitted</p><p class="font-bold mt-1">${c.submittedDate || '—'}</p></div>
+            </div>
+        </div>
+        <div class="glass rounded-2xl p-5 space-y-3">
+            <p class="text-[9px] font-black uppercase text-slate-400 tracking-widest flex items-center"><i class="fas fa-eye mr-2 text-indigo-400"></i>OCR Scan Results</p>
+            <div class="grid grid-cols-2 gap-3">
+                <div><p class="text-[8px] font-black uppercase text-slate-500">Merchant</p><p class="font-bold mt-1">${c.ocrMerchant || '—'}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">OCR Amount</p><p class="font-bold mt-1">₹${c.ocrAmount || '—'}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">OCR Date</p><p class="font-bold mt-1">${c.ocrDate || '—'}</p></div>
+                <div><p class="text-[8px] font-black uppercase text-slate-500">Confidence</p><p class="font-bold mt-1">${c.ocrConfidence}%</p></div>
+            </div>
+        </div>
+        <div class="space-y-2">
+            <p class="font-black text-slate-100 text-sm flex items-center"><i class="fas fa-brain text-indigo-400 mr-2 animate-pulse"></i> AI Policy Audit</p>
+            <span class="inline-block px-3 py-1 rounded-lg text-xs font-black uppercase ${aiClass} bg-slate-800 border border-slate-700">${c.aiAuditStatus}</span>
+            <div class="glass rounded-2xl p-4 leading-relaxed">${c.aiAuditReason || '—'}</div>
+        </div>`;
+    document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+async function sendChat(e) {
+    e.preventDefault();
+    const inp = document.getElementById('chatInput');
+    const msg = inp.value.trim(); if (!msg) return;
+    inp.value = '';
+    appendMsg(msg, true);
+    const r = await fetch('/api/expenses/ai-advisor', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:msg})});
+    const d = await r.json();
+    appendMsg(d.response, false);
+}
+
+function appendMsg(text, isUser) {
+    const box = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'flex items-start gap-3' + (isUser ? ' justify-end' : '');
+    const fmt = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    div.innerHTML = isUser
+        ? `<div class="bg-gradient-to-tr from-indigo-600 to-violet-500 text-white rounded-2xl p-3.5 max-w-[85%] leading-relaxed">${fmt}</div>`
+        : `<div class="w-7 h-7 rounded-full bg-indigo-950 border border-indigo-700 text-indigo-400 flex items-center justify-center text-xs shrink-0"><i class="fas fa-robot"></i></div>
+           <div class="glass rounded-2xl p-3.5 text-slate-300 leading-relaxed max-w-[85%]">${fmt}</div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+</script>
+</body>
+</html>

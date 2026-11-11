@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartHR AI - Java & AI Powered HCM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+
+        .ai-glow {
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+        }
+
+        .tab-btn {
+            padding: 10px 24px;
+            border-radius: 999px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+        }
+
+        .tab-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        /* --- Distinctive HR Admin Theme --- */
+        body.hr-theme .hero-gradient {
+            background: linear-gradient(135deg, #111827 0%, #7f1d1d 100%);
+            /* Deep Red/Black Gradient */
+        }
+
+        body.hr-theme #logoWrapper span.bg-gradient-to-r {
+            background-image: linear-gradient(to right, #e11d48, #9f1239);
+            /* Red Gradient for Logo */
+        }
+
+        body.hr-theme h2.decoration-blue-500 {
+            text-decoration-color: #e11d48 !important;
+        }
+
+        body.hr-theme #heroContent .text-blue-400 {
+            color: #fda4af !important;
+        }
+
+        body.hr-theme .bg-blue-500 {
+            background-color: #e11d48 !important;
+        }
+
+        body.hr-theme .hover\:bg-blue-600:hover {
+            background-color: #be123c !important;
+        }
+
+        body.hr-theme .bg-blue-50 {
+            background-color: #fff1f2 !important;
+            /* Light Red Background */
+        }
+
+        body.hr-theme .border-blue-100 {
+            border-color: #ffe4e6 !important;
+        }
+
+        body.hr-theme .text-blue-600 {
+            color: #e11d48 !important;
+        }
+
+        body.hr-theme .text-blue-500 {
+            color: #f43f5e !important;
+        }
+
+        body.hr-theme .bg-blue-100 {
+            background-color: #ffe4e6 !important;
+        }
+
+        body.hr-theme nav .text-blue-600 {
+            color: #e11d48 !important;
+        }
+
+        body.hr-theme nav .bg-blue-600 {
+            background-color: #e11d48 !important;
+        }
+
+        body.hr-theme nav .hover\:bg-blue-700:hover {
+            background-color: #be123c !important;
+        }
+
+        /* --- Employee Theme Defaults (Blue/Teal vibes) --- */
+        body.employee-theme .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #0f766e 100%);
+            /* Teal/Dark Gradient */
+        }
+
+        body.employee-theme #logoWrapper span.bg-gradient-to-r {
+            background-image: linear-gradient(to right, #0ea5e9, #14b8a6);
+            /* Teal Gradient for Logo */
+        }
+
+        body.employee-theme .bg-blue-500 {
+            background-color: #0ea5e9 !important;
+        }
+
+        body.employee-theme .hover\:bg-blue-600:hover {
+            background-color: #0284c7 !important;
+        }
+
+        body.employee-theme .text-blue-400 {
+            color: #7dd3fc !important;
+        }
+
+        /* Animations for Public Landing Page */
+        @keyframes blob {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
+            }
+
+            100% {
+                transform: translate(0px, 0px) scale(1);
+            }
+        }
+
+        .animate-blob {
+            animation: blob 7s infinite;
+        }
+
+        .animation-delay-2000 {
+            animation-delay: 2s;
+        }
+
+        .animation-delay-4000 {
+            animation-delay: 4s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+        }
+
+        /* --- Custom Google Translate Styles --- */
+        .goog-te-banner-frame.skiptranslate,
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+
+        body {
+            top: 0px !important;
+        }
+
+        .goog-te-gadget {
+            color: transparent !important;
+            font-size: 0px !important;
+        }
+
+        .goog-te-gadget .goog-te-combo {
+            color: #475569 !important;
+            background-color: transparent !important;
+            border: none !important;
+            font-size: 14px !important;
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 500 !important;
+            outline: none !important;
+            cursor: pointer !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        .goog-te-gadget .goog-te-combo:focus {
+            outline: none !important;
+        }
+
+        .goog-logo-link {
+            display: none !important;
+        }
+
+        .goog-te-gadget img {
+            display: none !important;
+        }
+
+        /* Hide translation tooltips on hover */
+        #goog-gt-tt,
+        .goog-te-balloon-frame {
+            display: none !important;
+        }
+
+        .goog-text-highlight {
+            background-color: transparent !important;
+            box-shadow: none !important;
+        }
+    </style>
+    <link rel="stylesheet" href="assets/css/global-impressive.css">
+</head>
+
+<body class="bg-slate-50">
+
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div id="logoWrapper" class="flex items-center space-x-3">
+                <img id="logoImg" src="assets/images/logo.png" alt="SmartHR AI" class="w-12 h-12 drop-shadow-lg">
+                <div class="flex flex-col">
+                    <span id="displayCompanyName"
+                        class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 leading-tight">
+                        SmartHR AI
+                    </span>
+                </div>
+            </div>
+
+            <div class="hidden lg:flex items-center space-x-8">
+                <a href="#" class="text-slate-600 hover:text-blue-600 font-medium">Home</a>
+                <a href="/about" class="text-slate-600 hover:text-blue-600 font-medium">About Us</a>
+
+                <div class="relative group">
+                    <input type="text" id="navbarSearchInput" placeholder="AI Smart Search..."
+                        onclick="openAiSearchModal(event)" readonly
+                        class="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:ring-2 focus:ring-blue-500 w-64 transition-all cursor-pointer">
+                    <i class="fas fa-search absolute left-4 top-3 text-slate-400"></i>
+                </div>
+
+                <div
+                    class="relative flex items-center space-x-2 text-sm font-medium text-slate-600 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
+                    <i class="fas fa-globe text-indigo-600"></i>
+                    <div id="google_translate_element" class="scale-90 origin-left"></div>
+                </div>
+
+                <div id="authActions" class="flex items-center space-x-4">
+                    <a href="login.html"
+                        class="text-blue-600 font-semibold px-4 py-2 hover:bg-blue-50 rounded-lg">Login</a>
+                    <a href="signup.html"
+                        class="bg-blue-600 text-white px-6 py-2.5 rounded-full font-bold hover:bg-blue-700 shadow-md">Sign
+                        Up</a>
+                    <i class="fas fa-shield-halved text-slate-400 cursor-pointer hover:text-blue-600 transition text-lg"
+                        title="Security Settings" onclick="window.location.href='security.html'"></i>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <header class="hero-gradient text-white py-24 px-4 text-center relative overflow-hidden">
+        <div id="heroContent" class="max-w-4xl mx-auto relative z-10 fade-in-up">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 leading-tight">AI Powered <span
+                    class="text-blue-400 text-shadow">HR Management System</span></h1>
+            <p class="text-xl text-slate-300 mb-10">Modern Java architecture meets Predictive AI for the ultimate
+                workplace efficiency.</p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <a href="signup.html"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-10 py-4 rounded-xl font-bold text-lg shadow-[0_0_20px_rgba(59,130,246,0.6)] transition-all inline-block hover:scale-105 active:scale-95">
+                    Get Started Now
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Public Marketing Section (Hidden after login) -->
+    <div id="publicMarketingArea" class="py-24 relative overflow-hidden bg-white" style="display: none;">
+        <!-- Animated Background Blobs -->
+        <div
+            class="absolute top-0 left-10 w-72 h-72 bg-blue-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob">
+        </div>
+        <div
+            class="absolute top-0 right-10 w-72 h-72 bg-indigo-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-2000">
+        </div>
+        <div
+            class="absolute -bottom-8 left-1/2 w-72 h-72 bg-pink-300 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-blob animation-delay-4000">
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-20 fade-in-up" style="animation-delay: 0.1s;">
+                <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-6 tracking-tight">Transform Your <span
+                        class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Workplace</span>
+                </h2>
+                <p class="text-slate-500 text-lg md:text-xl max-w-3xl mx-auto">Experience the future of HR with
+                    predictive analytics, seamless operations, and an intuitive experience that your employees will
+                    love.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <!-- Card 1 -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-slate-100 fade-in-up group"
+                    style="animation-delay: 0.2s;">
+                    <div
+                        class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-brain text-3xl text-blue-600 animate-pulse"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">AI Predictions</h3>
+                    <p class="text-slate-500 leading-relaxed">Stop turnover before it happens. Our integrated AI
+                        analyzes attendance and behavior patterns to suggest powerful retention strategies.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-slate-100 fade-in-up group"
+                    style="animation-delay: 0.3s;">
+                    <div
+                        class="w-16 h-16 bg-indigo-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-bolt text-3xl text-indigo-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Automated Core HR</h3>
+                    <p class="text-slate-500 leading-relaxed">Generate payrolls, track leaves, and process attendance
+                        automatically. Eliminate manual data entry with our secure Java backend.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-white/80 backdrop-blur-lg rounded-3xl p-10 shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-3 border border-slate-100 fade-in-up group"
+                    style="animation-delay: 0.4s;">
+                    <div
+                        class="w-16 h-16 bg-pink-50 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-users text-3xl text-pink-600"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-4">Seamless Experience</h3>
+                    <p class="text-slate-500 leading-relaxed">Give your employees a consumer-grade application.
+                        Everything from learning management to feedback, centralized in one secure portal.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="dashboardTabsSection" class="pt-10 max-w-7xl mx-auto px-4 hidden">
+        <div class="flex justify-center space-x-4 mb-4">
+            <button id="btnEmployeeView" class="tab-btn active" onclick="switchView('EMPLOYEE')">
+                <i class="fas fa-user mr-2"></i> Employee View
+            </button>
+            <button id="btnHrView" class="tab-btn hidden" onclick="switchView('HR')">
+                <i class="fas fa-crown mr-2"></i> HR Admin View
+            </button>
+        </div>
+
+        <!-- Security & System Notice -->
+        <div
+            class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between max-w-3xl mx-auto mt-6 shadow-sm">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-4">
+                    <i class="fas fa-shield-check text-blue-600 text-lg"></i>
+                </div>
+                <div>
+                    <h4 class="text-slate-800 font-bold text-sm">Secure Enterprise Environment</h4>
+                    <p class="text-slate-500 text-xs">Role-based access is active. Data is encrypted.</p>
+                </div>
+            </div>
+            <div
+                class="text-xs text-blue-500 font-mono font-semibold bg-white px-2 py-1 rounded border border-blue-200">
+                SYS: OPTIMAL</div>
+        </div>
+    </section>
+
+    <!-- The modules section container, hidden by default from public visitors -->
+    <div id="dynamicModulesArea" style="display: none;">
+        <section id="modules" class="py-20 max-w-7xl mx-auto px-4">
+            <h2
+                class="text-3xl font-bold text-center text-slate-800 mb-16 underline decoration-blue-500 decoration-4 underline-offset-8">
+                Core HR Modules</h2>
+            <div id="coreModulesGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Original content -->
+                <div onclick="window.open('employee-directory.html', '_blank')"
+                    class="feature-card bg-white p-8 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:border-blue-400">
+                    <div
+                        class="w-12 h-12 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mb-6 text-xl">
+                        <i class="fas fa-id-badge"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-3">Employee Directory</h3>
+                    <p class="text-slate-500 text-sm">Centralized database for all staff profiles.</p>
+                </div>
+
+                <div onclick="window.open('attendance.html', '_blank')"
+                    class="feature-card bg-white p-8 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:border-green-400">
+                    <div
+                        class="w-12 h-12 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mb-6 text-xl">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-3">Attendance Tracker</h3>
+                    <p class="text-slate-500 text-sm">Biometric & Facial Recognition support.</p>
+                </div>
+                <div onclick="window.open('leave-management.html', '_blank')"
+                    class="feature-card bg-white p-8 rounded-2xl border border-slate-100 shadow-sm cursor-pointer hover:border-orange-400">
+                    <div
+                        class="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center mb-6 text-xl">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3 class="font-bold text-lg mb-3">Leave Management</h3>
+                    <p class="text-slate-500 text-sm">Smart application & approval workflows.</p>
+                </div>
+                <a href="payroll.html"
+                    class="feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block">
+                    <div
+                        class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 text-xl">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Payroll & Slips</h3>
+                    <p class="text-slate-500 text-sm">Manage employee salaries and download PDF slips.</p>
+                </a>
+                <a href="recruitment.html"
+                    class="feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block transition hover:shadow-xl group">
+                    <div
+                        class="w-14 h-14 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 text-xl group-hover:rotate-12 transition">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Recruitment ATS</h3>
+                    <p class="text-slate-500 text-sm">Post job openings, manage applications, and hire top talent.</p>
+                    <div class="mt-6 text-emerald-600 font-bold text-xs uppercase tracking-widest">
+                        Manage Hiring <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                </a>
+                <a href="reviews.html"
+                    class="feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block transition-all hover:shadow-xl group">
+                    <div
+                        class="w-14 h-14 bg-indigo-100 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Performance Reviews</h3>
+                    <p class="text-slate-500 text-sm">Evaluate employee skills, track ratings, and provide manager
+                        feedback.</p>
+                    <div class="mt-6 flex items-center text-indigo-600 font-bold text-xs uppercase tracking-widest">
+                        Open Reviews <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+                    </div>
+                </a>
+                <a href="lms.html"
+                    class="feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block transition-all hover:shadow-xl group">
+                    <div
+                        class="w-14 h-14 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-6 text-xl group-hover:scale-110 transition-transform">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-slate-800">Training & LMS</h3>
+                    <p class="text-slate-500 text-sm">Assign courses, track learning progress and skill up your team.
+                    </p>
+                    <div class="mt-6 flex items-center text-purple-600 font-bold text-xs uppercase tracking-widest">
+                        Explore Learning <i class="fas fa-chevron-right ml-2 text-[10px]"></i>
+                    </div>
+                </a>
+                <a href="tasks.html"
+                    class="feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block">
+                    <div
+                        class="w-14 h-14 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-6 text-xl">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Project Tasks</h3>
+                    <p class="text-slate-500 text-sm">Assign daily tasks and monitor project progress.</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="py-20 bg-blue-50" id="engagementSection">
+            <div class="max-w-7xl mx-auto px-4 text-center">
+                <h2 class="text-3xl font-bold mb-12 text-slate-800">Self-Service & Engagement</h2>
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                    <div onclick="location.href='profile.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i
+                            class="fas fa-user-circle text-2xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2 inline-block"></i>
+                        <p
+                            class="text-xs font-bold uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                            My Profile</p>
+                    </div>
+                    <div onclick="location.href='announcements.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i class="fas fa-bullhorn text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Announcements</p>
+                    </div>
+                    <div onclick="location.href='feedback.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i
+                            class="fas fa-comment-dots text-2xl text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mb-2 inline-block"></i>
+                        <p
+                            class="text-xs font-bold uppercase text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+                            Feedback</p>
+                    </div>
+                    <div onclick="location.href='events.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i class="fas fa-cake-candles text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Events</p>
+                    </div>
+                    <div onclick="location.href='leaderboard.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i class="fas fa-trophy text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Leaderboard</p>
+                    </div>
+                    <div onclick="location.href='holidays.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i class="fas fa-calendar-day text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Holidays</p>
+                    </div>
+                    <div onclick="location.href='feed.html'"
+                        class="p-4 bg-white rounded-xl shadow-sm cursor-pointer hover:shadow-md transition">
+                        <i class="fas fa-hashtag text-2xl text-blue-500 mb-2"></i>
+                        <p class="text-xs font-bold uppercase">Feed</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- AI Features Section (Visible to Public and Logged In users) -->
+    <section class="bg-slate-900 py-20 px-4" id="aiSection">
+        <div class="max-w-7xl mx-auto">
+            <h2 class="text-3xl font-bold text-white text-center mb-16">Smart AI Intelligence</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <a href="churn.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4">
+                            <i class="fas fa-brain mr-2"></i> Predictive Churn
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">
+                            AI analyzes patterns to predict potential resignations before they happen.
+                        </p>
+                        <div class="flex justify-end">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">View Analysis
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="resume-parser.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4"><i class="fas fa-magic mr-2"></i> Smart Resume
+                            Parser</h3>
+                        <p class="text-slate-400 text-sm mb-4">Automatically extract skills and experience from
+                            thousands of resumes in seconds.</p>
+                        <div class="flex justify-end mt-4">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Open Workspace
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="sentiment.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4"><i class="fas fa-face-smile mr-2"></i>
+                            Sentiment Analysis</h3>
+                        <p class="text-slate-400 text-sm mb-4">AI scans internal feedback to gauge company morale and
+                            satisfaction levels.</p>
+                        <div class="flex justify-end mt-4">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">View Analysis
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="scheduling.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4"><i class="fas fa-calendar-check mr-2"></i> AI
+                            Auto-Scheduling</h3>
+                        <p class="text-slate-400 text-sm mb-4">Interview slots automatically matched with interviewer
+                            availability.</p>
+                        <div class="flex justify-end mt-4">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Open Workspace
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="alerts.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4"><i class="fas fa-bell mr-2"></i> Smart Alerts
+                        </h3>
+                        <p class="text-slate-400 text-sm mb-4">Predictive notifications for upcoming deadlines and
+                            compliance needs.</p>
+                        <div class="flex justify-end mt-4">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Open Workspace
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+                <a href="expenses.html" class="block transition-transform hover:scale-[1.02] active:scale-95">
+                    <div class="bg-slate-800 p-8 rounded-3xl border border-slate-700 ai-glow h-full cursor-pointer">
+                        <h3 class="text-blue-400 font-bold text-xl mb-4"><i class="fas fa-receipt mr-2"></i> Expense
+                            Claims AI</h3>
+                        <p class="text-slate-400 text-sm mb-4">OCR tech reads receipt photos and auto-fills expense
+                            forms.</p>
+                        <div class="flex justify-end mt-4">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">Open Workspace
+                                →</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 pt-16 pb-8 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-12 text-slate-400">
+            <div>
+                <h4 class="text-white font-bold mb-6">Security & Admin</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="helpdesk.html" class="hover:text-blue-400 transition"><i
+                                class="fas fa-headset mr-2"></i> Help Desk (31)</a></li>
+                    <li><a href="policies.html" class="hover:text-blue-400 transition"><i
+                                class="fas fa-file-contract mr-2"></i> Policy Docs (32)</a></li>
+                    <li><a href="security.html" class="hover:text-blue-400 transition"><i class="fas fa-lock mr-2"></i>
+                            Security 2FA (33)</a></li>
+                    <li><a href="integration.html" class="hover:text-blue-400 transition"><i
+                                class="fas fa-code-branch mr-2"></i> Integration Center (34)</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6">Apps & Mobile</h4>
+                <div class="flex flex-col space-y-3 text-sm">
+                    <a href="download-app.html" class="hover:text-blue-400">Download iOS App (35)</a>
+                    <a href="download-app.html" class="hover:text-blue-400">Download Android App (35)</a>
+                    <a href="analytics.html" class="hover:text-blue-400">My Analytics (36)</a>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6">Support</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="privacy.html" class="hover:text-blue-400 transition">Privacy Policy (37)</a></li>
+                    <li><a href="terms.html" class="hover:text-blue-400 transition">Terms of Service (38)</a></li>
+                    <li><a href="faq.html" class="hover:text-blue-400 transition">FAQ Section (39)</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-6">Connect</h4>
+                <p class="text-xs mb-4"><a href="testimonials.html"
+                        class="hover:text-blue-400 underline transition">What our users say (40):</a></p>
+                <div class="bg-slate-800 p-4 rounded-lg italic text-xs border-l-4 border-blue-500 cursor-pointer"
+                    onclick="window.location.href='testimonials.html'">
+                    "This AI system changed how we manage our 500+ employees!" - HR Director
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto px-4 mt-16 pt-8 border-t border-slate-800 text-center text-xs">
+            © 2026 SmartHR AI. Built for Developers. Powered by Java & AI.
+        </div>
+    </footer>
+
+    <!-- Interactive HR Buddy Panel -->
+    <div class="fixed bottom-8 right-8 z-[60] flex flex-col items-end">
+        <!-- Chat Panel (Hidden by default) -->
+        <div id="hrBuddyPanel"
+            class="hidden w-96 h-[500px] mb-4 bg-slate-900/95 backdrop-blur-xl border border-slate-700/60 rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 transform translate-y-4 scale-95 origin-bottom-right">
+            <!-- Header -->
+            <div class="p-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white flex justify-between items-center">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center"><i
+                            class="fas fa-robot text-sm"></i></div>
+                    <div>
+                        <p class="font-bold text-xs">SmartHR AI Buddy</p>
+                        <p class="text-[9px] opacity-75">Active Employee Assistant</p>
+                    </div>
+                </div>
+                <button onclick="toggleHrBuddy()" class="text-white/80 hover:text-white transition"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <!-- Messages -->
+            <div id="hrBuddyMessages" class="flex-1 p-4 overflow-y-auto space-y-3.5 text-xs text-slate-300">
+                <div class="flex gap-2">
+                    <div
+                        class="w-6 h-6 rounded-full bg-blue-900/60 border border-blue-700/30 flex items-center justify-center shrink-0">
+                        <i class="fas fa-robot text-[10px] text-blue-400"></i></div>
+                    <div class="bg-slate-800/80 rounded-2xl p-3 leading-relaxed max-w-[80%]">
+                        Hi! 😊 I'm your employee <strong>HR Buddy</strong>. Ask me anything about leaves, payroll, LMS,
+                        or IT tickets!
+                    </div>
+                </div>
+            </div>
+            <!-- Input -->
+            <div class="p-3 border-t border-slate-800">
+                <form id="hrBuddyForm" onsubmit="sendBuddyChat(event)" class="flex gap-2">
+                    <input type="text" id="hrBuddyInput" placeholder="Type a message..." required
+                        class="flex-1 bg-slate-950 border border-slate-800 text-white text-xs px-3.5 py-2 rounded-xl focus:outline-none focus:border-blue-500">
+                    <button type="submit"
+                        class="bg-blue-600 hover:bg-blue-500 text-white w-9 h-9 rounded-xl flex items-center justify-center transition shrink-0"><i
+                            class="fas fa-paper-plane text-xs"></i></button>
+                </form>
+            </div>
+        </div>
+
+        <!-- FAB Button -->
+        <div onclick="toggleHrBuddy()"
+            class="bg-blue-600 w-16 h-16 rounded-full flex items-center justify-center text-white shadow-2xl cursor-pointer hover:scale-110 transition active:scale-95 group relative">
+            <i class="fas fa-robot text-2xl"></i>
+            <span
+                class="absolute right-20 bg-white text-slate-800 px-4 py-2 rounded-lg text-sm font-bold shadow-lg opacity-0 group-hover:opacity-100 transition whitespace-nowrap pointer-events-none">Hi!
+                I'm HR Buddy</span>
+        </div>
+    </div>
+
+    <script>
+        function toggleHrBuddy() {
+            const panel = document.getElementById('hrBuddyPanel');
+            if (panel.classList.contains('hidden')) {
+                panel.classList.remove('hidden');
+                setTimeout(() => {
+                    panel.classList.remove('translate-y-4', 'scale-95', 'opacity-0');
+                }, 10);
+            } else {
+                panel.classList.add('translate-y-4', 'scale-95', 'opacity-0');
+                setTimeout(() => {
+                    panel.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        async function sendBuddyChat(e) {
+            e.preventDefault();
+            const inp = document.getElementById('hrBuddyInput');
+            const msg = inp.value.trim();
+            if (!msg) return;
+            inp.value = '';
+
+            const container = document.getElementById('hrBuddyMessages');
+
+            // Append User msg
+            const uDiv = document.createElement('div');
+            uDiv.className = 'flex justify-end';
+            uDiv.innerHTML = `<div class="bg-blue-600 text-white rounded-2xl p-3 max-w-[80%] leading-relaxed">${msg}</div>`;
+            container.appendChild(uDiv);
+            container.scrollTop = container.scrollHeight;
+
+            // Fetch AI reply
+            const r = await fetch('/api/hr-buddy/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: msg })
+            });
+            const d = await r.json();
+            const fmt = d.response.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+
+            // Append Bot msg
+            const bDiv = document.createElement('div');
+            bDiv.className = 'flex gap-2';
+            bDiv.innerHTML = `
+                <div class="w-6 h-6 rounded-full bg-blue-900/60 border border-blue-700/30 flex items-center justify-center shrink-0"><i class="fas fa-robot text-[10px] text-blue-400"></i></div>
+                <div class="bg-slate-800/80 rounded-2xl p-3 leading-relaxed max-w-[80%]">${fmt}</div>
+            `;
+            container.appendChild(bDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+    </script>
+
+    <script src="assets/js/global_branding.js"></script>
+    <script src="assets/js/script.js"></script>
+    <script>
+        let currentUser = null;
+        let currentView = 'EMPLOYEE';
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    throw new Error('Not logged in');
+                })
+                .then(user => {
+                    currentUser = user;
+                    const authDiv = document.getElementById('authActions');
+                    const profilePic = user.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.fullName || 'User'));
+                    let adminHtml = '';
+
+                    if (user.role === 'ADMIN') {
+                        adminHtml = `<a href="admin-dashboard.html" class="text-red-600 font-bold mr-4 bg-red-50 px-3 py-1 rounded-lg"><i class="fas fa-cogs"></i> Admin Dashboard</a>`;
+                    }
+
+                    authDiv.innerHTML = `
+                        ${adminHtml}
+                        <div class="flex items-center space-x-2">
+                            <img src="${profilePic}" class="w-10 h-10 rounded-full border-2 border-blue-500 shadow-sm" alt="Profile">
+                            <div class="flex flex-col text-left">
+                                <span class="text-sm font-bold text-slate-800 leading-tight">${user.fullName || 'User'}</span>
+                                <span class="text-xs text-slate-500">${user.role}</span>
+                            </div>
+                        </div>
+                        <i class="fas fa-shield-halved text-slate-400 cursor-pointer hover:text-blue-600 transition text-lg ml-4" title="Security Settings" onclick="window.location.href='security.html'"></i>
+                        <a href="/logout" class="ml-4 text-slate-500 hover:text-red-500 transition font-semibold text-sm">Logout</a>
+                    `;
+
+                    // Update Hero Section for logged in user
+                    const heroContent = document.getElementById('heroContent');
+                    if (heroContent) {
+                        let dashboardText = "Employee Dashboard, manage tasks, and stay updated with company news";
+                        let buttonsHtml = `
+                                <a href="#dynamicModulesArea" class="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all inline-block">
+                                    View Dashboard
+                                </a>
+                                <a href="tasks.html" class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all inline-block border border-slate-600">
+                                    My Tasks
+                                </a>
+                        `;
+
+                        if (user.role === 'ADMIN') {
+                            dashboardText = "HR Admin Dashboard, manage employee records, recruitment, and system settings";
+                            buttonsHtml = `
+                                <a href="admin-dashboard.html" class="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all inline-block">
+                                    <i class="fas fa-cogs mr-2"></i>Admin Dashboard
+                                </a>
+                                <a href="#dynamicModulesArea" class="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold text-lg shadow-lg transition-all inline-block border border-slate-600">
+                                    Explore Modules
+                                </a>
+                            `;
+                        }
+
+                        heroContent.innerHTML = `
+                            <h1 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight">Welcome back, <span class="text-blue-400 text-shadow">${user.fullName.split(' ')[0]}!</span></h1>
+                            <p class="text-xl text-slate-300 mb-10">Access your ${dashboardText}.</p>
+                            <div class="flex flex-col md:flex-row justify-center gap-4">
+                                ${buttonsHtml}
+                            </div>
+                        `;
+                    } // ADDED MISSING CLOSING BRACE HERE
+
+                    // Hide the public marketing section
+                    document.getElementById('publicMarketingArea').style.display = 'none';
+
+                    // Unhide the system modules now that user is verified
+                    document.getElementById('dynamicModulesArea').style.display = 'block';
+
+                    // Enable Dashboard Tabs if ADMIN and apply distinct CSS themes
+                    document.getElementById('dashboardTabsSection').classList.remove('hidden');
+                    if (currentUser.role === 'ADMIN') {
+                        document.body.classList.add('hr-theme'); // Apply HR Red Theme
+                        document.body.classList.remove('employee-theme');
+
+                        document.getElementById('btnHrView').classList.remove('hidden');
+
+                        // Add Pending Approvals Card for HR specifically
+                        const grid = document.getElementById('coreModulesGrid');
+                        const hrCard = document.createElement('a');
+                        hrCard.href = 'admin-dashboard.html';
+                        hrCard.className = 'feature-card bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 block transition hover:shadow-xl group relative ring-2 ring-red-400';
+                        hrCard.innerHTML = `
+                            <div class="absolute -top-3 -right-3 bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">Action Needed</div>
+                            <div class="w-14 h-14 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-6 text-xl"><i class="fas fa-users-cog"></i></div>
+                            <h3 class="font-bold text-lg mb-2">Pending Approvals</h3>
+                            <p class="text-slate-500 text-sm">Approve new employees & leaves.</p>
+                        `;
+                        grid.insertBefore(hrCard, grid.firstChild);
+
+                        switchView('HR');
+                    } else {
+                        document.body.classList.add('employee-theme'); // Apply Employee Teal Theme
+                        document.body.classList.remove('hr-theme');
+
+                        switchView('EMPLOYEE');
+                    }
+                })
+                .catch(err => {
+                    console.log('User not logged in or error:', err);
+                    // Show marketing page if not logged in
+                    document.getElementById('publicMarketingArea').style.display = 'block';
+                });
+        });
+
+        function switchView(view) {
+            currentView = view;
+
+            const btnEmp = document.getElementById('btnEmployeeView');
+            const btnHr = document.getElementById('btnHrView');
+
+            if (view === 'EMPLOYEE') {
+                btnEmp.classList.add('active');
+                btnHr.classList.remove('active');
+            } else {
+                btnHr.classList.add('active');
+                btnEmp.classList.remove('active');
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,hi,bn,te,mr,ta,gu,ur,kn,or,pa,es,fr,de,zh-CN,ar,ru',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript"
+        src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <!-- AI Smart Search Modal (Employee View) -->
+    <div id="aiSearchModal"
+        class="fixed inset-0 z-[100] hidden items-start justify-center p-4 bg-slate-950/70 backdrop-blur-md overflow-y-auto transition-opacity duration-300">
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-3xl shadow-2xl p-6 md:p-8 mt-12 md:mt-24 transform transition-all duration-300 scale-95 opacity-0 flex flex-col gap-6"
+            id="aiSearchModalContent">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-2xl bg-blue-600/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                        <i class="fas fa-robot text-lg animate-bounce"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-white text-lg leading-tight">SmartHR AI Search</h3>
+                        <p class="text-[11px] text-slate-400">Search profiles, policies, leaves, and LMS courses
+                            instantly.</p>
+                    </div>
+                </div>
+                <button onclick="closeAiSearchModal()"
+                    class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Modal Search Input -->
+            <div class="relative">
+                <input type="text" id="modalSearchQuery"
+                    placeholder="Ask anything, e.g. 'how to apply for leave' or coworker name..."
+                    class="w-full bg-slate-950 border border-slate-800 text-white rounded-2xl pl-12 pr-16 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 placeholder-slate-500 transition-all"
+                    onkeydown="if(event.key === 'Enter') executeAiSearch()">
+                <i class="fas fa-search absolute left-4 top-5 text-slate-500 text-base"></i>
+                <button onclick="executeAiSearch()"
+                    class="absolute right-3 top-3 bg-blue-600 hover:bg-blue-500 text-white font-bold px-4 py-2 rounded-xl text-xs transition">
+                    Search
+                </button>
+            </div>
+
+            <!-- Suggestion Chips -->
+            <div class="flex flex-wrap gap-2 items-center">
+                <span class="text-xs text-slate-500 font-medium">Try asking:</span>
+                <button onclick="setSearchQuery('how to apply for leave')"
+                    class="text-xs px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900 text-slate-300 hover:border-blue-500/30 hover:bg-blue-950/20 hover:text-blue-400 transition">
+                    <i class="fas fa-calendar-alt mr-1"></i> leave policy
+                </button>
+                <button onclick="setSearchQuery('mandatory LMS courses')"
+                    class="text-xs px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900 text-slate-300 hover:border-blue-500/30 hover:bg-blue-950/20 hover:text-blue-400 transition">
+                    <i class="fas fa-graduation-cap mr-1"></i> LMS courses
+                </button>
+                <button onclick="setSearchQuery('download payslip')"
+                    class="text-xs px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900 text-slate-300 hover:border-blue-500/30 hover:bg-blue-950/20 hover:text-blue-400 transition">
+                    <i class="fas fa-file-invoice-dollar mr-1"></i> payslips
+                </button>
+                <button onclick="setSearchQuery('open ticket')"
+                    class="text-xs px-3.5 py-1.5 rounded-full border border-slate-800 bg-slate-900 text-slate-300 hover:border-blue-500/30 hover:bg-blue-950/20 hover:text-blue-400 transition">
+                    <i class="fas fa-headset mr-1"></i> support ticket
+                </button>
+            </div>
+
+            <!-- Loader State -->
+            <div id="searchLoader" class="hidden flex-col items-center justify-center py-12 gap-3 text-slate-400">
+                <i class="fas fa-circle-notch fa-spin text-3xl text-blue-500"></i>
+                <span class="text-xs">AI is scanning database and policy logs...</span>
+            </div>
+
+            <!-- Results Section -->
+            <div id="searchResults" class="hidden flex flex-col gap-6 overflow-y-auto max-h-[350px] pr-2">
+                <!-- AI Assistant Text Card -->
+                <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 flex flex-col gap-3">
+                    <div class="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-widest">
+                        <i class="fas fa-sparkles"></i> AI Assistant Guidance
+                    </div>
+                    <p id="searchAiResponse" class="text-slate-300 text-xs leading-relaxed"></p>
+                </div>
+
+                <!-- Action Links -->
+                <div id="searchActionsContainer" class="flex flex-col gap-3.5">
+                    <div class="text-xs font-semibold text-slate-400"><i class="fas fa-link mr-1.5"></i> Quick Actions
+                    </div>
+                    <div id="searchActionsList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Actions injected here -->
+                    </div>
+                </div>
+
+                <!-- Coworker Matches -->
+                <div id="searchCoworkersContainer" class="flex flex-col gap-3.5">
+                    <div class="text-xs font-semibold text-slate-400"><i class="fas fa-users mr-1.5"></i> Employee
+                        Directory Matching</div>
+                    <div id="searchCoworkersList" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <!-- Coworkers injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openAiSearchModal(e) {
+            if (e) e.preventDefault();
+            if (!currentUser) {
+                alert("Please log in first.");
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const modal = document.getElementById('aiSearchModal');
+            const content = document.getElementById('aiSearchModalContent');
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                content.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+
+            document.getElementById('modalSearchQuery').focus();
+        }
+
+        function closeAiSearchModal() {
+            const modal = document.getElementById('aiSearchModal');
+            const content = document.getElementById('aiSearchModalContent');
+
+            modal.classList.add('opacity-0');
+            content.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
+        function setSearchQuery(text) {
+            document.getElementById('modalSearchQuery').value = text;
+            executeAiSearch();
+        }
+
+        async function executeAiSearch() {
+            const queryInput = document.getElementById('modalSearchQuery');
+            const query = queryInput.value.trim();
+            if (!query) return;
+
+            const loader = document.getElementById('searchLoader');
+            const results = document.getElementById('searchResults');
+
+            loader.classList.remove('hidden');
+            results.classList.add('hidden');
+
+            try {
+                const res = await fetch('/api/search?q=' + encodeURIComponent(query));
+                if (!res.ok) throw new Error('Search request failed');
+                const data = await res.json();
+
+                // Set AI response
+                const aiResponseEl = document.getElementById('searchAiResponse');
+                aiResponseEl.innerHTML = formatMarkdown(data.aiResponse);
+
+                // Load Quick Actions
+                const actionsList = document.getElementById('searchActionsList');
+                const actionsContainer = document.getElementById('searchActionsContainer');
+                actionsList.innerHTML = '';
+                if (data.actions && data.actions.length > 0) {
+                    actionsContainer.classList.remove('hidden');
+                    data.actions.forEach(act => {
+                        const btn = document.createElement('a');
+                        btn.href = act.url;
+                        btn.className = `flex items-center justify-between p-4 border rounded-2xl transition hover:-translate-y-0.5 ${act.colorClasses || 'border-slate-800 bg-slate-900 hover:bg-slate-800 text-slate-300'}`;
+                        btn.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <i class="${act.icon || 'fas fa-arrow-right'} text-base"></i>
+                                <span class="font-bold text-xs">${act.label}</span>
+                            </div>
+                            <i class="fas fa-chevron-right text-[10px] opacity-75"></i>
+                        `;
+                        actionsList.appendChild(btn);
+                    });
+                } else {
+                    actionsContainer.classList.add('hidden');
+                }
+
+                // Load Coworker results
+                const coworkersList = document.getElementById('searchCoworkersList');
+                const coworkersContainer = document.getElementById('searchCoworkersContainer');
+                coworkersList.innerHTML = '';
+                if (data.employeeResults && data.employeeResults.length > 0) {
+                    coworkersContainer.classList.remove('hidden');
+                    data.employeeResults.forEach(emp => {
+                        const card = document.createElement('div');
+                        card.className = "bg-slate-900 border border-slate-850 rounded-2xl p-4 flex items-center gap-3";
+                        const pic = emp.profilePic ? `assets/images/${emp.profilePic}` : `https://ui-avatars.com/api/?background=random&name=${encodeURIComponent(emp.fullName)}`;
+                        card.innerHTML = `
+                            <img src="${pic}" class="w-10 h-10 rounded-full border border-slate-700 object-cover" onerror="this.src='https://ui-avatars.com/api/?background=random&name='+encodeURIComponent('${emp.fullName}')">
+                            <div class="flex-1 min-w-0 text-left">
+                                <h4 class="text-xs font-bold text-white truncate">${emp.fullName}</h4>
+                                <p class="text-[10px] text-blue-400 font-semibold truncate">${emp.designation || 'N/A'}</p>
+                                <p class="text-[9px] text-slate-500 truncate">${emp.department || 'N/A'} • ${emp.email || 'N/A'}</p>
+                            </div>
+                        `;
+                        coworkersList.appendChild(card);
+                    });
+                } else {
+                    coworkersContainer.classList.add('hidden');
+                }
+
+                // Display results
+                loader.classList.add('hidden');
+                results.classList.remove('hidden');
+
+            } catch (err) {
+                console.error(err);
+                loader.classList.add('hidden');
+                alert('Search failed. Check console or verify server status.');
+            }
+        }
+
+        function formatMarkdown(text) {
+            if (!text) return '';
+            return text
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // Close modal on backdrop click
+        document.getElementById('aiSearchModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeAiSearchModal();
+            }
+        });
+
+        // Close on Esc key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAiSearchModal();
+            }
+        });
+    </script>
+</body>
+
+</html>

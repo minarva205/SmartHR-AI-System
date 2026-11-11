@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Confidential Wellness Hub - SmartHR AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #115e59 100%);
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .ai-glow {
+            box-shadow: 0 0 25px rgba(20, 184, 166, 0.15);
+        }
+        .slider-thumb::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #14b8a6;
+            cursor: pointer;
+            box-shadow: 0 0 8px rgba(20, 184, 166, 0.5);
+            transition: all 0.2s;
+        }
+        .slider-thumb::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-slate-100 min-h-screen">
+
+    <!-- Sticky Navigation Bar -->
+    <nav class="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <a href="index.html" class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-teal-500 to-emerald-600 p-2 rounded-xl text-white shadow-lg">
+                        <i class="fas fa-heart text-xl animate-pulse"></i>
+                    </div>
+                    <span class="text-xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-emerald-400">
+                        SmartHR Wellness
+                    </span>
+                </a>
+            </div>
+
+            <div class="flex items-center space-x-6">
+                <a href="index.html" class="text-slate-400 hover:text-white font-semibold text-sm transition">
+                    <i class="fas fa-arrow-left mr-2"></i>My Dashboard
+                </a>
+                <span class="text-xs font-semibold px-3 py-1 bg-teal-500/10 border border-teal-500/20 text-teal-400 rounded-full flex items-center gap-1.5">
+                    <i class="fas fa-lock text-[10px]"></i> CONFIDENTIAL CHANNEL
+                </span>
+                <div id="userInfo" class="flex items-center space-x-3 border-l border-slate-800 pl-6">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Panel -->
+    <header class="py-12 px-4 text-center max-w-4xl mx-auto relative z-10">
+        <span class="text-xs font-bold uppercase tracking-wider text-teal-400 mb-2 block">Empowered by SmartHR AI</span>
+        <h1 class="text-3xl md:text-5xl font-black text-white tracking-tight leading-tight">
+            Confidential Wellness & <span class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">Engagement Hub</span>
+        </h1>
+        <p class="text-slate-400 mt-3 text-sm md:text-base">
+            Your telemetry and surveys are processed confidentially to optimize career health, evaluate burnout limits, and recommend wellness initiatives. <strong>No raw indices are shared with direct peers.</strong>
+        </p>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 pb-16 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Left Side: Survey Form -->
+        <div class="lg:col-span-7 space-y-6">
+            <div class="glass-card p-8 rounded-3xl ai-glow border border-teal-500/10">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+                    <div>
+                        <h2 class="text-lg font-black text-teal-300"><i class="fas fa-square-poll-horizontal mr-2"></i> Weekly Wellness Survey</h2>
+                        <p class="text-[10px] text-slate-500 mt-0.5">Confidential assessment (Update sliders periodically)</p>
+                    </div>
+                    <span class="text-[10px] text-teal-400 font-bold bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 rounded-md">
+                        AUTO-SAVED IN SECONDS
+                    </span>
+                </div>
+
+                <form id="wellnessForm" class="space-y-6" onsubmit="saveSurvey(event)">
+                    <!-- Sliders -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                                <i class="fas fa-face-laugh text-blue-400"></i> Job Satisfaction
+                            </label>
+                            <span id="valSatisfaction" class="text-xs font-black text-teal-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">4.0</span>
+                        </div>
+                        <input id="sliderSatisfaction" type="range" min="1" max="5" step="0.5" value="4" class="w-full slider-thumb bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer" oninput="updateVal('Satisfaction')">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>Dissatisfied</span>
+                            <span>Highly Satisfied</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                                <i class="fas fa-clock text-green-400"></i> Work-Life Harmony
+                            </label>
+                            <span id="valBalance" class="text-xs font-black text-teal-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">4.0</span>
+                        </div>
+                        <input id="sliderBalance" type="range" min="1" max="5" step="0.5" value="4" class="w-full slider-thumb bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer" oninput="updateVal('Balance')">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>Poor Balance</span>
+                            <span>Optimal Harmony</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                                <i class="fas fa-fire text-red-400"></i> Workplace Stress & Load
+                            </label>
+                            <span id="valStress" class="text-xs font-black text-teal-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">2.0</span>
+                        </div>
+                        <input id="sliderStress" type="range" min="1" max="5" step="0.5" value="2" class="w-full slider-thumb bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer" oninput="updateVal('Stress')">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>Calm / Managed</span>
+                            <span>Extreme Burnout Risk</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <label class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                                <i class="fas fa-arrow-trend-up text-indigo-400"></i> Growth Opportunities
+                            </label>
+                            <span id="valGrowth" class="text-xs font-black text-teal-400 bg-slate-800 px-2 py-0.5 rounded border border-slate-700">4.0</span>
+                        </div>
+                        <input id="sliderGrowth" type="range" min="1" max="5" step="0.5" value="4" class="w-full slider-thumb bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer" oninput="updateVal('Growth')">
+                        <div class="flex justify-between text-[10px] text-slate-500">
+                            <span>Stagnated</span>
+                            <span>Strong Career Promotion</span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-teal-500 to-emerald-600 hover:from-teal-400 hover:to-emerald-500 text-white rounded-xl text-xs font-black shadow-lg hover:shadow-teal-500/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                        <i class="fas fa-paper-plane"></i> Submit Survey Telemetry
+                    </button>
+                </form>
+            </div>
+
+            <!-- Dynamic Wellness feedback advice block -->
+            <div id="wellnessTipsBlock" class="glass-card p-6 rounded-3xl border border-slate-800">
+                <h3 class="font-bold text-sm text-slate-200 mb-3 flex items-center gap-2">
+                    <i class="fas fa-brain text-teal-400 animate-pulse"></i> Personalized Wellness Insights
+                </h3>
+                <div class="space-y-3 text-xs leading-relaxed text-slate-400" id="tipsBody">
+                    Loading your custom health indicators...
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side: Empathetic Chat Coach -->
+        <div class="lg:col-span-5 flex flex-col h-[650px] glass-card rounded-3xl overflow-hidden ai-glow border border-teal-500/10">
+            <!-- Chat Head -->
+            <div class="bg-gradient-to-r from-teal-600 to-emerald-600 p-4 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-white/20 p-2 rounded-xl"><i class="fas fa-heart-pulse text-lg"></i></div>
+                    <div>
+                        <h4 class="font-bold text-sm">Empathetic Wellness Coach</h4>
+                        <span class="text-[10px] text-teal-200 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span> Active Counseling Channel</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Content -->
+            <div id="chatBody" class="flex-1 p-5 overflow-y-auto space-y-4 text-xs scrollbar-hide">
+                <!-- Welcome Msg -->
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full bg-teal-600 flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">AI</div>
+                    <div class="bg-slate-800 p-3.5 rounded-2xl max-w-[85%] rounded-tl-none leading-relaxed border border-slate-700/40">
+                        Hello! I am your **Confidential Wellness Coach**. This is a completely secure channel designed to support you with stress management, work-life balance advice, career stagnation tips, and healthy ways to communicate challenges to your team. How can I help you feel better today?
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendation Quick Tags -->
+            <div class="p-2.5 border-t border-slate-800/80 bg-slate-900/40 flex gap-2 overflow-x-auto whitespace-nowrap text-[10px] scrollbar-hide">
+                <button onclick="sendQuickMessage('I am feeling highly stressed and burnt out')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-full border border-teal-500/10 font-bold transition">I feel burnt out</button>
+                <button onclick="sendQuickMessage('How can I talk to my manager about my career growth?')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-full border border-teal-500/10 font-bold transition">Manager career talk</button>
+                <button onclick="sendQuickMessage('Tips for work-life balance while working WFH')" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-full border border-teal-500/10 font-bold transition">WFH Balance tips</button>
+            </div>
+
+            <!-- Input area -->
+            <div class="p-3 bg-slate-900/60 border-t border-slate-800 flex gap-2">
+                <input id="chatInput" type="text" placeholder="Share how you are feeling confidentially..." class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 text-xs text-slate-200 focus:outline-none focus:ring-1 focus:ring-teal-500" onkeydown="if(event.key === 'Enter') sendMessage()">
+                <button onclick="sendMessage()" class="p-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Script Block -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 1. Verify User and Access level
+            fetch('/api/current-user')
+                .then(res => {
+                    if (res.ok) return res.json();
+                    window.location.href = 'login.html';
+                })
+                .then(user => {
+                    // Render User Info in nav
+                    const userInfo = document.getElementById('userInfo');
+                    const pic = user.profilePic || ('https://ui-avatars.com/api/?background=random&name=' + encodeURIComponent(user.fullName || 'User'));
+                    userInfo.innerHTML = `
+                        <img src="${pic}" class="w-9 h-9 rounded-full border border-slate-700 object-cover shadow-inner">
+                        <div class="hidden md:flex flex-col text-left">
+                            <span class="text-xs font-bold text-slate-200 leading-tight">${user.fullName}</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-wider">${user.role}</span>
+                        </div>
+                        <a href="/logout" class="text-slate-500 hover:text-red-400 text-xs font-bold ml-2 transition">Logout</a>
+                    `;
+
+                    // Load records
+                    loadMyWellness();
+                })
+                .catch(err => {
+                    console.error('Session validation error:', err);
+                    window.location.href = 'login.html';
+                });
+        });
+
+        // Fetch wellness indicators
+        function loadMyWellness() {
+            fetch('/api/churn/employee/my-record')
+                .then(res => res.json())
+                .then(r => {
+                    // Load slider positions
+                    document.getElementById('sliderSatisfaction').value = r.satisfactionScore;
+                    document.getElementById('sliderBalance').value = r.workLifeBalance;
+                    document.getElementById('sliderStress').value = r.stressLevel;
+                    document.getElementById('sliderGrowth').value = r.growthOpportunity;
+
+                    // Update UI text values
+                    document.getElementById('valSatisfaction').innerText = r.satisfactionScore.toFixed(1);
+                    document.getElementById('valBalance').innerText = r.workLifeBalance.toFixed(1);
+                    document.getElementById('valStress').innerText = r.stressLevel.toFixed(1);
+                    document.getElementById('valGrowth').innerText = r.growthOpportunity.toFixed(1);
+
+                    // Update Wellness Analysis recommendations block
+                    renderWellnessInsight(r);
+                });
+        }
+
+        // Live slider updates
+        function updateVal(type) {
+            let val = parseFloat(document.getElementById('slider' + type).value);
+            document.getElementById('val' + type).innerText = val.toFixed(1);
+        }
+
+        // Save survey parameters
+        function saveSurvey(e) {
+            e.preventDefault();
+            
+            const payload = {
+                satisfactionScore: parseFloat(document.getElementById('sliderSatisfaction').value),
+                workLifeBalance: parseFloat(document.getElementById('sliderBalance').value),
+                stressLevel: parseFloat(document.getElementById('sliderStress').value),
+                growthOpportunity: parseFloat(document.getElementById('sliderGrowth').value)
+            };
+
+            fetch('/api/churn/employee/survey', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payload)
+            })
+            .then(res => res.json())
+            .then(r => {
+                alert('Confidential Wellness survey telemetry saved successfully!');
+                renderWellnessInsight(r);
+            });
+        }
+
+        // Render advice
+        function renderWellnessInsight(r) {
+            const tips = document.getElementById('tipsBody');
+            let content = '';
+
+            let score = Math.round(r.riskScore);
+            let ratingColor = score > 70 ? 'text-red-400' : (score > 40 ? 'text-amber-400' : 'text-green-400');
+            let label = score > 70 ? 'High Burnout / Overstress Warning' : (score > 40 ? 'Moderate Work Pressure Detected' : 'Optimal Work Morale & Comfort');
+
+            content += `
+                <div class="p-4 bg-slate-800/40 border border-slate-700/60 rounded-2xl flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] text-slate-400 block font-semibold">Calculated Wellness Index</span>
+                        <strong class="${ratingColor} font-black text-sm">${label}</strong>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-500 block">Risk Matrix</span>
+                        <strong class="${ratingColor} text-base font-black">${100 - score}% Stable</strong>
+                    </div>
+                </div>
+                <div class="mt-4 space-y-2">
+                    <p class="font-bold text-slate-300">Confidential AI Advice:</p>
+            `;
+
+            if(score > 70) {
+                content += `
+                    <div class="flex items-start gap-2"><i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i> <span>Telemetry flags significant overstress levels. Prioritize taking small breaks throughout the work day.</span></div>
+                    <div class="flex items-start gap-2"><i class="fas fa-exclamation-triangle text-red-500 mt-0.5"></i> <span>Consider requesting flexible work-from-home or adjust project delivery deadlines with your lead.</span></div>
+                    <div class="flex items-start gap-2"><i class="fas fa-envelope-open-text text-teal-400 mt-0.5"></i> <span>Feel free to copy one of the manager templates in our AI Coach chat below to facilitate conversation.</span></div>
+                `;
+            } else if(score > 40) {
+                content += `
+                    <div class="flex items-start gap-2"><i class="fas fa-circle-exclamation text-amber-500 mt-0.5"></i> <span>Morale index is moderate. Ensure proper boundary setting between office hours and personal life.</span></div>
+                    <div class="flex items-start gap-2"><i class="fas fa-circle-exclamation text-amber-500 mt-0.5"></i> <span>Explore new skill training options in the LMS dashboard to refresh career growth.</span></div>
+                `;
+            } else {
+                content += `
+                    <div class="flex items-start gap-2"><i class="fas fa-check-circle text-green-500 mt-0.5"></i> <span>Excellent profile harmony! Current telemetry shows deep balance and positive work engagement.</span></div>
+                    <div class="flex items-start gap-2"><i class="fas fa-check-circle text-green-500 mt-0.5"></i> <span>Maintain communication channels and challenge yourself with visible team roles!</span></div>
+                `;
+            }
+
+            content += '</div>';
+            tips.innerHTML = content;
+        }
+
+        // Counselor Chat Controls
+        function sendQuickMessage(text) {
+            document.getElementById('chatInput').value = text;
+            sendMessage();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            input.value = '';
+            
+            // Append User Chat
+            appendMessage(text, 'user');
+
+            // POST to AI Assistant
+            fetch('/api/churn/ai-assistant', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: text})
+            })
+            .then(res => res.json())
+            .then(data => {
+                appendMessage(data.response, 'ai');
+            });
+        }
+
+        function appendMessage(text, sender) {
+            const body = document.getElementById('chatBody');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 " + (sender === 'user' ? "justify-end" : "");
+            
+            let bubbleColor = sender === 'user' ? "bg-teal-600 text-white rounded-tr-none shadow-md shadow-teal-500/5" : "bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700/40";
+            let avatar = sender === 'user' ? "ME" : "AI";
+            let avatarBg = sender === 'user' ? "bg-teal-500" : "bg-teal-700";
+
+            // Tiny simple markdown formatting check
+            let formattedText = text
+                .replace(/\n/g, '<br>')
+                .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+                .replace(/```([^`]+)```/g, '<pre class="bg-slate-900 p-2.5 rounded-lg font-mono text-[10px] mt-1 overflow-x-auto">$1</pre>')
+                .replace(/- (.*)/g, '<div class="flex items-start gap-1.5 mt-1">&bull; <span>$1</span></div>');
+
+            div.innerHTML = `
+                ${sender !== 'user' ? `<div class="w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${avatar}</div>` : ''}
+                <div class="${bubbleColor} p-3 rounded-2xl max-w-[80%] leading-relaxed">
+                    ${formattedText}
+                </div>
+                ${sender === 'user' ? `<div class="w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white flex-shrink-0 font-bold text-[9px]">${avatar}</div>` : ''}
+            `;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+    </script>
+</body>
+</html>
