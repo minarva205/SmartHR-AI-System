@@ -60,5 +60,3 @@ SmartHR AI is a web-based Human Resource Management System designed to make HR a
 ## Project Objective
 To simplify HR operations, reduce manual work, improve employee management and make workplace activities more efficient through intelligent technology.
 
-
-Note: Jo features abhi actual working condition mein nahi hain, unhe planned features ke roop mein rakho. Isse interview mein bhi tum confidently explain kar paogi. ❤️
